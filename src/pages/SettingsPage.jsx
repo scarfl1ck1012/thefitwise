@@ -413,6 +413,31 @@ export default function SettingsPage() {
               value={goal}
               onChange={setGoal}
             />
+
+            {/* Inline Save Button */}
+            {isDirty && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="pt-2"
+              >
+                <Button
+                  onClick={handleSave}
+                  disabled={updateProfile.isPending}
+                  className="w-full gap-2 shadow-sm"
+                >
+                  {saved ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" /> Saved!
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" /> Save Profile
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -576,40 +601,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* Floating Save Bar */}
-      <AnimatePresence>
-        {isDirty && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-lg border-t border-border"
-          >
-            <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
-              <p className="text-sm text-muted-foreground">
-                You have unsaved changes
-              </p>
-              <Button
-                onClick={handleSave}
-                disabled={updateProfile.isPending}
-                className="gap-2 shadow-lg"
-              >
-                {saved ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" /> Saved!
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" /> Save Profile
-                  </>
-                )}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

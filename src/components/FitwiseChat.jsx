@@ -1,130 +1,304 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-const RULES = [
-    {
-        patterns: [/hi|hello|hey|morning|evening/i],
-        response: "Hey there! 💪 I'm your Fitwise coach. Ask me about nutrition, workouts, skincare, or anything health-related!",
-    },
-    {
-        patterns: [/protein/i],
-        response: "Great question! Aim for 1.6-2.2g of protein per kg of body weight daily. Best sources: chicken breast, eggs, Greek yogurt, fish, lentils, whey protein. Spread intake across meals for optimal absorption.",
-    },
-    {
-        patterns: [/lose weight|weight loss|fat loss|cut/i],
-        response: "For sustainable weight loss: 1) Create a 300-500 calorie deficit 2) Eat high-protein foods to preserve muscle 3) Do resistance training 3x/week 4) Walk 8,000+ steps daily 5) Sleep 7-9 hours. Avoid crash diets!",
-    },
-    {
-        patterns: [/gain|bulk|muscle|mass/i],
-        response: "To build muscle: 1) Eat 300-500 cal surplus 2) Hit 1.8-2.2g protein/kg 3) Progressive overload in training 4) Train each muscle 2x/week 5) Sleep 8+ hours for recovery. Consistency > intensity!",
-    },
-    {
-        patterns: [/calorie|calories|tdee|bmr/i],
-        response: "Your calorie needs depend on age, gender, height, weight & activity. Go to Settings to fill in your profile — I'll calculate your TDEE automatically using the Mifflin-St Jeor equation!",
-    },
-    {
-        patterns: [/workout|exercise|train/i],
-        response: "Check the Workouts tab for structured plans! For beginners: 3 full-body sessions/week. Intermediate: Push/Pull/Legs split. Always warm up, focus on form, and progressively increase weight or reps.",
-    },
-    {
-        patterns: [/skin|skincare|acne|face|glow/i],
-        response: "Check the Face & Skincare tab for routines! Key tips: 1) Cleanse twice daily 2) Always wear SPF 30+ 3) Retinol at night for anti-aging 4) Stay hydrated 5) Change pillowcase weekly. Consistency matters more than expensive products!",
-    },
-    {
-        patterns: [/water|hydrat/i],
-        response: "Hydration is crucial! Aim for 2.5-3.5L water daily. More if you're active. Signs of dehydration: dark urine, fatigue, headaches. Tip: Start your day with a glass of water before coffee!",
-    },
-    {
-        patterns: [/sleep|rest|recovery/i],
-        response: "Sleep is when your body repairs and grows! Aim for 7-9 hours. Tips: 1) No screens 30min before bed 2) Keep room cool & dark 3) Same sleep schedule daily 4) No caffeine after 2pm 5) Magnesium before bed can help.",
-    },
-    {
-        patterns: [/stretch|flexibility|mobility/i],
-        response: "Stretching improves recovery and prevents injury. Dynamic stretches before workouts, static after. Hold each stretch 20-30 seconds. Focus on hips, hamstrings, shoulders, and thoracic spine.",
-    },
-    {
-        patterns: [/creatine|supplement/i],
-        response: "Evidence-backed supplements: 1) Creatine monohydrate (5g/day) - proven muscle/strength gains 2) Whey protein - convenient protein source 3) Vitamin D - if deficient 4) Omega-3 - anti-inflammatory. Skip fat burners and test boosters.",
-    },
-    {
-        patterns: [/meal prep|prep/i],
-        response: "Meal prep saves time! 1) Pick 3-4 proteins, 2-3 carb sources, lots of veggies 2) Cook in bulk on Sunday 3) Portion into containers 4) Store 3 days in fridge, rest in freezer. Simple = sustainable!",
-    },
-    {
-        patterns: [/thank|thanks/i],
-        response: "You're welcome! Keep pushing toward your goals. Remember, consistency beats perfection. 💪 I'm always here to help!",
-    },
-];
-function getResponse(input) {
-    const lower = input.toLowerCase();
-    for (const rule of RULES) {
-        if (rule.patterns.some((p) => p.test(lower))) {
-            return rule.response;
-        }
-    }
-    return "Great question! I'm your rule-based coach — I can help with protein intake, weight loss, muscle gain, workouts, skincare, sleep, supplements, and meal prep. Try asking about any of those topics! 🏋️";
+import ReactMarkdown from "react-markdown";
+
+import { useProfile } from "@/hooks/useProfile";
+import { useMeals } from "@/hooks/useMeals";
+import { useWorkouts } from "@/hooks/useWorkouts";
+import { getLocalDate } from "@/lib/utils";
+
+function getQuickPrompts() {
+  const hour = new Date().getHours();
+  if (hour < 11) {
+    return [
+      "Suggest a high-protein breakfast",
+      "How much water today?",
+      "Morning stretch routine",
+    ];
+  } else if (hour < 16) {
+    return ["Quick lunch ideas", "Afternoon energy boost", "Desk stretches"];
+  } else {
+    return [
+      "Did I hit my macros today?",
+      "Evening wind-down routine",
+      "Low-calorie snacks",
+    ];
+  }
 }
+
 export default function FitwiseChat() {
-    const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: "assistant", content: "Hey! 👋 I'm your Fitwise coach. Ask me about nutrition, workouts, skincare, or health tips!" },
-    ]);
-    const [input, setInput] = useState("");
-    const scrollRef = useRef(null);
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content:
+        "Hey! 👋 I'm your Fitwise coach. Ask me about nutrition, workouts, skincare, or health tips!",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const scrollRef = useRef(null);
+
+  const { profile } = useProfile();
+  const { totalCalories, totalProtein, totalCarbs, totalFat } = useMeals();
+  const { checkins } = useWorkouts();
+
+  // Scroll to bottom on new msg
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
+
+  const quickPrompts = useMemo(() => getQuickPrompts(), []);
+
+  const sendToLLM = async (userText) => {
+    const newMessages = [...messages, { role: "user", content: userText }];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+
+    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!geminiKey) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "**Oops!** API key is missing. Please add `VITE_GEMINI_API_KEY` to your `.env.local` file.",
+        },
+      ]);
+      setIsLoading(false);
+      return;
+    }
+
+    const today = getLocalDate();
+    const workoutsToday = checkins.filter((c) => c.logged_at === today).length;
+
+    const systemContext = `
+The user's global state is as follows:
+- Profile: ${profile ? JSON.stringify(profile) : "Not set"}
+- Logged Calories Today: ${totalCalories}
+- Logged Macros: Protein ${totalProtein}g, Carbs ${totalCarbs}g, Fat ${totalFat}g
+- Workouts Today: ${workoutsToday > 0 ? "Yes" : "No"}
+
+Context instructions:
+If the user asks about their progress today or if they hit their macros/calories, use this exact exact data. Calculate their goal based on their profile data (like daily_calories) and give them an accurate, customized answer. Do not hallucinate data. If they haven't logged anything, tell them to log their meals/workouts.
+`;
+
+    const SYSTEM_PROMPT = `You are the "Fitwise Coach", a highly supportive, concise, science-based fitness and nutrition assistant.
+Tone: Energetic, friendly, and highly encouraging, but absolutely no fluff. Keep answers short, scannable, and directly to the point. Give practical tips.
+Formatting: Use Markdown. Bold key terms, use bullet points for lists.
+Boundaries: You are not a doctor. If the user asks for medical advice regarding injuries, disease, or illness, politely decline and advise them to see a physician.
+Actionable: Always try to reference the app's features (e.g., "You can log that in your Meals tab!" or "Try searching for that in the Gym Exercises database!").
+${systemContext}
+`;
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: SYSTEM_PROMPT }],
+            },
+            contents: newMessages.map((m) => ({
+              role: m.role === "assistant" ? "model" : "user",
+              parts: [{ text: m.content }],
+            })),
+            generationConfig: {
+              temperature: 0.7,
+            },
+          }),
+        },
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantResponse = "";
+
+      // Add a placeholder message for the streaming text
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      setIsLoading(false);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ") && line !== "data: [DONE]") {
+            try {
+              const data = JSON.parse(line.slice(6));
+              const delta =
+                data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+              assistantResponse += delta;
+
+              setMessages((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1].content = assistantResponse;
+                return updated;
+              });
+            } catch (e) {
+              console.error("Error parsing stream chunk", e);
+            }
+          }
         }
-    }, [messages]);
-    const send = () => {
-        if (!input.trim())
-            return;
-        const userMsg = { role: "user", content: input };
-        const response = getResponse(input);
-        setMessages((prev) => [...prev, userMsg, { role: "assistant", content: response }]);
-        setInput("");
-    };
-    return (<>
+      }
+    } catch (e) {
+      console.error(e);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Sorry, I ran into an error connecting to my brain. Try again later!",
+        },
+      ]);
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
       {/* FAB */}
-      <motion.button onClick={() => setOpen(!open)} className="fixed bottom-6 right-6 z-50 gradient-primary p-4 rounded-full shadow-elevated" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-        {open ? <X className="h-5 w-5 text-primary-foreground"/> : <MessageCircle className="h-5 w-5 text-primary-foreground"/>}
+      <motion.button
+        onClick={() => setOpen(!open)}
+        className="fixed bottom-6 right-6 z-50 gradient-primary p-4 rounded-full shadow-elevated"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {open ? (
+          <X className="h-6 w-6 text-primary-foreground" />
+        ) : (
+          <MessageCircle className="h-6 w-6 text-primary-foreground" />
+        )}
       </motion.button>
 
       {/* Chat Window */}
       <AnimatePresence>
-        {open && (<motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.95 }} className="fixed bottom-20 right-6 z-50 w-80 sm:w-96 glass rounded-2xl shadow-elevated overflow-hidden">
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-24 right-6 z-50 w-[340px] sm:w-[400px] bg-card border border-border rounded-2xl shadow-elevated overflow-hidden flex flex-col"
+          >
             {/* Header */}
-            <div className="gradient-primary p-4">
-              <p className="text-primary-foreground font-bold text-sm">Fitwise Coach</p>
-              <p className="text-primary-foreground/80 text-xs">Ask me anything about health & fitness</p>
+            <div className="gradient-primary p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-primary-foreground font-bold text-sm">
+                    Fitwise Coach
+                  </p>
+                  <p className="text-primary-foreground/80 text-xs flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" /> AI Assistant
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="h-72 overflow-y-auto p-3 space-y-3 bg-background">
-              {messages.map((msg, i) => (<div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm ${msg.role === "user"
-                    ? "gradient-primary text-primary-foreground"
-                    : "bg-muted text-foreground"}`}>
-                    {msg.content}
+            <div
+              ref={scrollRef}
+              className="h-[360px] overflow-y-auto p-4 space-y-4 bg-background"
+            >
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm ${
+                      msg.role === "user"
+                        ? "bg-secondary text-secondary-foreground rounded-br-sm"
+                        : "border border-primary/20 bg-primary/5 text-foreground rounded-bl-sm"
+                    }`}
+                  >
+                    {msg.role === "assistant" ? (
+                      <div className="prose prose-sm dark:prose-invert prose-p:leading-relaxed prose-pre:bg-muted/50 w-full max-w-none break-words">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    )}
                   </div>
-                </div>))}
+                </div>
+              ))}
+
+              {/* Typing Indicator */}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="px-4 py-3 rounded-2xl border border-primary/20 bg-primary/5 text-muted-foreground w-16 flex justify-center items-center gap-1 rounded-bl-sm">
+                    <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce"></span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Input */}
+            {/* Input & Quick Actions */}
             <div className="p-3 border-t border-border bg-card">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                send();
-            }} className="flex gap-2">
-                <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask your coach..." className="flex-1 text-sm"/>
-                <Button type="submit" size="icon" className="shrink-0">
-                  <Send className="h-4 w-4"/>
+              {/* Quick Prompts */}
+              {messages.length < 3 && !isLoading && (
+                <div className="flex gap-2 overflow-x-auto pb-3 mb-1 -mx-2 px-2 scrollbar-hide">
+                  {quickPrompts.map((prompt, i) => (
+                    <button
+                      key={i}
+                      onClick={() => sendToLLM(prompt)}
+                      className="whitespace-nowrap px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors border border-border shrink-0"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (input.trim() && !isLoading) sendToLLM(input.trim());
+                }}
+                className="flex gap-2 items-end"
+              >
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask your coach..."
+                  className="flex-1 text-sm bg-muted/50 border-transparent focus-visible:ring-1 focus-visible:ring-primary"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="shrink-0 rounded-full"
+                  disabled={!input.trim() || isLoading}
+                >
+                  <Send className="h-4 w-4" />
                 </Button>
               </form>
             </div>
-          </motion.div>)}
+          </motion.div>
+        )}
       </AnimatePresence>
-    </>);
+    </>
+  );
 }
