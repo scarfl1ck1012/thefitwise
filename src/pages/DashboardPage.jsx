@@ -3,8 +3,7 @@ import { useMeals } from "@/hooks/useMeals";
 import { useUserStats } from "@/hooks/useUserStats";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { getDailyChallenges } from "@/lib/challenges";
-import { getWorkoutPlans } from "@/lib/workoutData";
-import { faceExercises } from "@/lib/workoutData";
+import { trendingArticles, popularRecipes } from "@/lib/dashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -13,17 +12,16 @@ import {
   Flame,
   Zap,
   Trophy,
-  Dumbbell,
   UtensilsCrossed,
   CheckCircle2,
-  Droplets,
-  Plus,
-  Sparkles,
   ChevronRight,
+  ChevronLeft,
+  ExternalLink,
+  X,
   Clock,
-  Play,
+  BookOpen,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -48,7 +46,7 @@ function getTimeOfDay() {
 
 const DONUT_COLORS = ["hsl(var(--primary))", "#3b82f6", "#f59e0b"];
 
-// ─── Mini Donut (Nutrition Card) ────────────────────────
+// ─── Mini Donut ─────────────────────────────────────────
 
 function MiniDonut({ protein, carbs, fat, calories, goal }) {
   const total = protein + carbs + fat;
@@ -106,10 +104,9 @@ function NextActionBanner({
 }) {
   const hour = new Date().getHours();
   const timeOfDay = getTimeOfDay();
-
-  let message = "";
-  let action = null;
-  let actionLabel = "";
+  let message = "",
+    action = null,
+    actionLabel = "";
 
   if (hour < 11 && totalCalories === 0) {
     message = `Good morning! Don't forget to log your ${timeOfDay}.`;
@@ -136,12 +133,8 @@ function NextActionBanner({
     actionLabel = "Log Meal";
   } else if (totalCalories >= calorieGoal * 0.9 && todayWorkouts > 0) {
     message = "You're crushing it today! Keep up the consistency.";
-    action = null;
-    actionLabel = "";
   } else {
     message = `Here's your daily overview. Stay on track with your ${profile?.goal || "fitness"} goal.`;
-    action = null;
-    actionLabel = "";
   }
 
   return (
@@ -151,7 +144,6 @@ function NextActionBanner({
       className="relative overflow-hidden rounded-xl border border-primary/20"
     >
       <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-primary/5" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/50" />
       <div className="relative p-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
@@ -171,15 +163,239 @@ function NextActionBanner({
   );
 }
 
+// ─── Recipe Modal ───────────────────────────────────────
+
+function RecipeModal({ recipe, onClose }) {
+  if (!recipe) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: "spring", damping: 25 }}
+        className="bg-card border border-border rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Hero Image */}
+        <div className="relative h-48 overflow-hidden rounded-t-2xl">
+          <img
+            src={recipe.image}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 flex items-center justify-center"
+          >
+            <X className="h-4 w-4 text-foreground" />
+          </button>
+          <div className="absolute bottom-3 left-4 right-4">
+            <h2 className="text-lg font-bold text-foreground">
+              {recipe.title}
+            </h2>
+            <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" /> {recipe.prepTime}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {/* Macro Breakdown */}
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              {
+                label: "Calories",
+                value: recipe.calories,
+                unit: "kcal",
+                color: "text-foreground",
+              },
+              {
+                label: "Protein",
+                value: recipe.protein,
+                unit: "g",
+                color: "text-primary",
+              },
+              {
+                label: "Carbs",
+                value: recipe.carbs,
+                unit: "g",
+                color: "text-blue-400",
+              },
+              {
+                label: "Fat",
+                value: recipe.fat,
+                unit: "g",
+                color: "text-amber-400",
+              },
+            ].map((m) => (
+              <div
+                key={m.label}
+                className="text-center p-2 rounded-lg bg-muted/50"
+              >
+                <p className={`text-lg font-bold ${m.color}`}>{m.value}</p>
+                <p className="text-[9px] text-muted-foreground">{m.unit}</p>
+                <p className="text-[9px] text-muted-foreground">{m.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Ingredients */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-2">
+              Ingredients
+            </h3>
+            <ul className="space-y-1">
+              {recipe.ingredients.map((ing, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-2 text-xs text-muted-foreground"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                  {ing}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Steps */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-2">
+              Preparation
+            </h3>
+            <ol className="space-y-2">
+              {recipe.steps.map((step, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-2.5 text-xs text-muted-foreground"
+                >
+                  <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="leading-relaxed">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Recipe Carousel ────────────────────────────────────
+
+function RecipeCarousel() {
+  const [index, setIndex] = useState(0);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const recipe = popularRecipes[index];
+
+  const next = () => setIndex((i) => (i + 1) % popularRecipes.length);
+  const prev = () =>
+    setIndex((i) => (i - 1 + popularRecipes.length) % popularRecipes.length);
+
+  return (
+    <>
+      <Card className="shadow-card overflow-hidden">
+        <CardContent className="p-0">
+          <div
+            className="relative group cursor-pointer"
+            onClick={() => setSelectedRecipe(recipe)}
+          >
+            <div className="h-44 overflow-hidden">
+              <motion.img
+                key={recipe.id}
+                src={recipe.image}
+                alt={recipe.title}
+                className="w-full h-full object-cover"
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+
+            {/* Nav arrows */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                prev();
+              }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronLeft className="h-4 w-4 text-foreground" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                next();
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronRight className="h-4 w-4 text-foreground" />
+            </button>
+
+            {/* Info overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <p className="text-sm font-semibold text-foreground">
+                {recipe.title}
+              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-[10px] text-primary font-medium">
+                  {recipe.calories} cal
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {recipe.protein}g P
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {recipe.carbs}g C
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {recipe.fat}g F
+                </span>
+              </div>
+            </div>
+
+            {/* Dots */}
+            <div className="absolute top-3 right-3 flex gap-1">
+              {popularRecipes.map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full ${i === index ? "bg-primary" : "bg-white/30"}`}
+                />
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AnimatePresence>
+        {selectedRecipe && (
+          <RecipeModal
+            recipe={selectedRecipe}
+            onClose={() => setSelectedRecipe(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
 // ─── Main Dashboard ─────────────────────────────────────
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { profile, isProfileComplete } = useProfile();
-  const { totalCalories, totalProtein, totalCarbs, totalFat, addMeal } =
-    useMeals();
+  const { totalCalories, totalProtein, totalCarbs, totalFat } = useMeals();
   const { stats, addXP } = useUserStats();
-  const { checkins, addCheckin } = useWorkouts();
+  const { checkins } = useWorkouts();
 
   const today = new Date().toISOString().split("T")[0];
   const challenges = getDailyChallenges(today, {
@@ -189,58 +405,16 @@ export default function DashboardPage() {
   });
 
   const [completedChallenges, setCompletedChallenges] = useState([]);
-  const [completedFaceEx, setCompletedFaceEx] = useState([]);
-  const [waterGlasses, setWaterGlasses] = useState(0);
-
   const calorieGoal = profile?.daily_calories || 2000;
   const todayWorkouts = checkins.filter((c) => c.logged_at === today).length;
 
-  // Get today's suggested workout
-  const dayIndex = new Date().getDay();
-  const workoutType = profile?.workout_preference || "home";
-  const plans = getWorkoutPlans(workoutType);
-  const todayPlan = plans[dayIndex % plans.length];
-
-  // Protein / Carbs / Fat goals
   const proteinGoal = Math.round((calorieGoal * 0.3) / 4);
   const carbsGoal = Math.round((calorieGoal * 0.45) / 4);
   const fatGoal = Math.round((calorieGoal * 0.25) / 9);
-
-  // XP
   const xp = stats?.xp || 0;
   const level = stats?.level || 1;
   const xpInLevel = xp % 500;
   const xpToNext = 500 - xpInLevel;
-
-  // Next incomplete face exercise
-  const nextFaceExercise = faceExercises.find(
-    (ex) => !completedFaceEx.includes(ex.name),
-  );
-
-  // Water
-  const waterMl = waterGlasses * 250;
-  const waterGoal = 2500; // ml
-
-  const handleAddWater = () => {
-    setWaterGlasses((g) => g + 1);
-    addMeal.mutate({
-      food_name: "Water",
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-      servings: 1,
-      sodium: 0,
-      potassium: 0,
-    });
-    toast.success("+250ml water logged!");
-  };
-
-  const handleCompleteFaceEx = (name) => {
-    setCompletedFaceEx((prev) => [...prev, name]);
-    addXP.mutate(5);
-    toast.success(`${name} done! +5 XP`);
-  };
 
   const completeChallenge = (id, xpVal) => {
     if (completedChallenges.includes(id)) return;
@@ -263,7 +437,7 @@ export default function DashboardPage() {
         </h1>
       </div>
 
-      {/* Profile Incomplete Banner */}
+      {/* Profile Incomplete */}
       {!isProfileComplete && (
         <motion.div {...fadeUp}>
           <Card className="border-accent/30 bg-accent/5">
@@ -286,7 +460,7 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* Next Best Action Banner */}
+      {/* Next Best Action */}
       <NextActionBanner
         totalCalories={totalCalories}
         calorieGoal={calorieGoal}
@@ -297,7 +471,7 @@ export default function DashboardPage() {
 
       {/* ─── Bento Grid ──────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        {/* Nutrition Card — spans 1 col */}
+        {/* Nutrition Card */}
         <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
           <Link to="/meals" className="block h-full">
             <Card className="shadow-card h-full hover:border-primary/20 transition-colors">
@@ -361,49 +535,12 @@ export default function DashboardPage() {
           </Link>
         </motion.div>
 
-        {/* Activity Card — spans 1 col */}
+        {/* Recipe Carousel (replaces Activity Card) */}
         <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-          <Card className="shadow-card h-full">
-            <CardContent className="p-4 flex flex-col h-full">
-              <div className="flex items-center gap-1.5 mb-3">
-                <Dumbbell className="h-3.5 w-3.5 text-info" />
-                <span className="text-xs font-medium text-muted-foreground">
-                  Activity
-                </span>
-              </div>
-              <div className="flex-1 flex flex-col justify-center">
-                {todayWorkouts > 0 ? (
-                  <div className="text-center">
-                    <CheckCircle2 className="h-8 w-8 text-success mx-auto mb-2" />
-                    <p className="text-sm font-medium text-foreground">
-                      {todayWorkouts} workout{todayWorkouts > 1 ? "s" : ""} done
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Great consistency
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      {todayPlan?.name || "Workout"}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mb-3 flex items-center justify-center gap-1">
-                      <Clock className="h-3 w-3" />{" "}
-                      {todayPlan?.duration || "30 min"}
-                    </p>
-                    <Link to="/workouts">
-                      <Button size="sm" className="gap-1.5 text-xs h-8 w-full">
-                        <Play className="h-3 w-3" /> Start Workout
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <RecipeCarousel />
         </motion.div>
 
-        {/* XP & Streak Card — spans full width on mobile, 1 col on lg */}
+        {/* XP & Streak Card */}
         <motion.div
           {...fadeUp}
           transition={{ delay: 0.15 }}
@@ -418,7 +555,6 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                {/* Streak */}
                 <div className="flex flex-col items-center gap-1">
                   <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
                     <Flame className="h-6 w-6 text-accent" />
@@ -430,7 +566,6 @@ export default function DashboardPage() {
                     day streak
                   </span>
                 </div>
-                {/* Level + XP bar */}
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-bold text-foreground">
@@ -440,12 +575,7 @@ export default function DashboardPage() {
                       {xp} XP
                     </span>
                   </div>
-                  <div className="relative">
-                    <Progress
-                      value={(xpInLevel / 500) * 100}
-                      className="h-2.5"
-                    />
-                  </div>
+                  <Progress value={(xpInLevel / 500) * 100} className="h-2.5" />
                   <p className="text-[10px] text-muted-foreground mt-1">
                     {xpToNext} XP to Level {level + 1}
                   </p>
@@ -456,126 +586,8 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
-      {/* ─── Quick-Log Widgets ────────────────────── */}
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground mb-3">
-          Quick Actions
-        </h2>
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-          {/* Water Tracker */}
-          <motion.div
-            {...fadeUp}
-            transition={{ delay: 0.2 }}
-            className="min-w-[170px]"
-          >
-            <Card className="shadow-card">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Droplets className="h-4 w-4 text-blue-400" />
-                  <span className="text-xs font-medium text-foreground">
-                    Water
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className="h-2 rounded-full bg-blue-400"
-                      animate={{
-                        width: `${Math.min((waterMl / waterGoal) * 100, 100)}%`,
-                      }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
-                    {waterMl}/{waterGoal}ml
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full text-xs h-7 gap-1"
-                  onClick={handleAddWater}
-                >
-                  <Plus className="h-3 w-3" /> 250ml
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Face Exercise Quick-Check */}
-          {nextFaceExercise && (
-            <motion.div
-              {...fadeUp}
-              transition={{ delay: 0.25 }}
-              className="min-w-[170px]"
-            >
-              <Card className="shadow-card">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-medium text-foreground">
-                      Face Exercise
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    {nextFaceExercise.image ? (
-                      <img
-                        src={nextFaceExercise.image}
-                        alt={nextFaceExercise.name}
-                        className="w-8 h-8 rounded object-cover"
-                      />
-                    ) : (
-                      <span className="text-lg">{nextFaceExercise.icon}</span>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">
-                        {nextFaceExercise.name}
-                      </p>
-                      <p className="text-[9px] text-muted-foreground">
-                        {nextFaceExercise.duration}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full text-xs h-7 gap-1"
-                    onClick={() => handleCompleteFaceEx(nextFaceExercise.name)}
-                  >
-                    <CheckCircle2 className="h-3 w-3" /> Done
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Quick Log Meal */}
-          <motion.div
-            {...fadeUp}
-            transition={{ delay: 0.3 }}
-            className="min-w-[170px]"
-          >
-            <Link to="/meals" className="block">
-              <Card className="shadow-card hover:border-primary/20 transition-colors h-full">
-                <CardContent className="p-3 flex flex-col items-center justify-center h-full gap-2">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <UtensilsCrossed className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="text-xs font-medium text-foreground">
-                    Log Meal
-                  </span>
-                  <span className="text-[9px] text-muted-foreground">
-                    Track your {getTimeOfDay()}
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-          </motion.div>
-        </div>
-      </div>
-
       {/* ─── Daily Challenges ─────────────────────── */}
-      <motion.div {...fadeUp} transition={{ delay: 0.35 }}>
+      <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
         <Card className="shadow-card">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -624,6 +636,49 @@ export default function DashboardPage() {
             })}
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* ─── Trending Fitness Articles ─────────────── */}
+      <motion.div {...fadeUp} transition={{ delay: 0.25 }}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-primary" /> Trending Articles
+          </h2>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          {trendingArticles.map((article) => (
+            <a
+              key={article.id}
+              href={article.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-w-[240px] shrink-0 group block"
+            >
+              <Card className="shadow-card overflow-hidden hover:border-primary/20 transition-all h-full">
+                <div className="h-28 overflow-hidden">
+                  <img
+                    src={article.thumbnail}
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[9px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                      {article.tag}
+                    </span>
+                  </div>
+                  <p className="text-xs font-medium text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                    {article.title}
+                  </p>
+                  <div className="flex items-center gap-1 mt-2 text-[10px] text-muted-foreground">
+                    <ExternalLink className="h-3 w-3" /> Read more
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          ))}
+        </div>
       </motion.div>
     </div>
   );
