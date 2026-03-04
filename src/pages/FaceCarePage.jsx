@@ -137,9 +137,19 @@ function ExerciseCard({
               <CompletionBurst active={showBurst} />
             </div>
 
-            {/* Exercise Icon placeholder */}
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-lg shrink-0">
-              {ex.icon || "🏋️"}
+            {/* Exercise Thumbnail */}
+            <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden shrink-0">
+              {ex.image ? (
+                <img
+                  src={ex.image}
+                  alt={ex.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="w-full h-full flex items-center justify-center text-lg">
+                  {ex.icon || "🏋️"}
+                </span>
+              )}
             </div>
 
             {/* Exercise Info */}
@@ -179,6 +189,27 @@ function ExerciseCard({
                 className="overflow-hidden"
               >
                 <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
+                  {/* Demonstration Image */}
+                  {ex.image && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className="rounded-lg overflow-hidden border border-border bg-muted/30"
+                    >
+                      <img
+                        src={ex.image}
+                        alt={`How to do ${ex.name}`}
+                        className="w-full h-48 object-contain"
+                      />
+                      <div className="px-3 py-1.5 bg-muted/50 border-t border-border">
+                        <p className="text-[10px] text-muted-foreground text-center">
+                          Visual guide -- {ex.name}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Target muscles */}
                   {ex.target && (
                     <div className="flex items-center gap-2">
