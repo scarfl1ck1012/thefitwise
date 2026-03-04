@@ -25,6 +25,7 @@ const navItems = [
   { to: "/meals", icon: UtensilsCrossed, label: "Meals" },
   { to: "/weight", icon: Weight, label: "Weight" },
   { to: "/workouts", icon: Activity, label: "Progress" },
+  { to: "/gym", icon: Dumbbell, label: "Gym" },
   { to: "/habits", icon: Trophy, label: "Habits & XP" },
   { to: "/face-care", icon: Sparkles, label: "Face & Skincare" },
   { to: "/settings", icon: Settings, label: "Settings" },
