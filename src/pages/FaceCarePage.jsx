@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { faceExercises, skincareRoutine } from "@/lib/workoutData";
+import { faceExercises } from "@/lib/workoutData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -16,8 +15,100 @@ import {
   Square,
   ChevronDown,
   Camera,
+  Check,
 } from "lucide-react";
 import LivePractice from "@/components/LivePractice";
+
+// --- Skincare Data ---
+const morningRoutine = [
+  {
+    id: "am-1",
+    step: 1,
+    title: "Cleanser",
+    desc: "Gentle face wash to remove dirt and oil",
+    tip: "Use lukewarm water, not hot",
+  },
+  {
+    id: "am-2",
+    step: 2,
+    title: "Toner",
+    desc: "Balance skin pH and prep for products",
+    tip: "Pat gently, don't rub",
+  },
+  {
+    id: "am-3",
+    step: 3,
+    title: "Vitamin C Serum",
+    desc: "Brightens skin and fights free radicals",
+    tip: "Apply before moisturizer",
+  },
+  {
+    id: "am-4",
+    step: 4,
+    title: "Moisturizer",
+    desc: "Hydrate and lock in previous products",
+    tip: "Apply while skin is still slightly damp",
+  },
+  {
+    id: "am-5",
+    step: 5,
+    title: "Sunscreen SPF 30+",
+    desc: "Protect from UV damage and aging",
+    tip: "Reapply every 2 hours if outdoors",
+  },
+  {
+    id: "am-6",
+    step: 6,
+    title: "Eye Cream",
+    desc: "Hydrate under-eye area, reduce dark circles",
+    tip: "Use ring finger, lightest pressure",
+  },
+  {
+    id: "am-7",
+    step: 7,
+    title: "Lip Balm with SPF",
+    desc: "Protect and moisturize lips",
+    tip: "Reapply throughout the day",
+  },
+];
+
+const eveningRoutine = [
+  {
+    id: "pm-1",
+    step: 1,
+    title: "Cleanser",
+    desc: "Gentle face wash to remove dirt and oil",
+    tip: "Use lukewarm water, not hot",
+  },
+  {
+    id: "pm-2",
+    step: 2,
+    title: "Toner",
+    desc: "Balance skin pH and prep for products",
+    tip: "Pat gently, don't rub",
+  },
+  {
+    id: "pm-3",
+    step: 3,
+    title: "Retinol / Retinoid",
+    desc: "Anti-aging, reduces acne and dark spots",
+    tip: "Start 2x/week, build tolerance",
+  },
+  {
+    id: "pm-4",
+    step: 4,
+    title: "Moisturizer",
+    desc: "Hydrate and lock in previous products",
+    tip: "Apply while skin is still slightly damp",
+  },
+  {
+    id: "pm-5",
+    step: 5,
+    title: "Eye Cream",
+    desc: "Hydrate under-eye area, reduce dark circles",
+    tip: "Use ring finger, lightest pressure",
+  },
+];
 
 // --- Exercise Timer Hook ---
 function useTimer(totalSeconds) {
@@ -330,8 +421,43 @@ function ExerciseCard({
   );
 }
 
+// --- Skincare Step Component ---
+function SkincareStepCard({ item, isDone, onToggle }) {
+  return (
+    <motion.div
+      layout
+      onClick={onToggle}
+      className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all border border-border/40 ${isDone ? "opacity-50 bg-background/50" : "bg-card/40 hover:bg-card/80"}`}
+    >
+      <div className="relative mt-1 shrink-0">
+        <div
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+            isDone
+              ? "bg-primary border-primary text-background"
+              : "border-muted-foreground/40 bg-transparent"
+          }`}
+        >
+          {isDone && <Check className="w-4 h-4" strokeWidth={3} />}
+        </div>
+      </div>
+      <div className="flex-1 space-y-1">
+        <h3
+          className={`text-sm font-bold ${isDone ? "text-muted-foreground" : "text-foreground"}`}
+        >
+          Step {item.step}: {item.title}
+        </h3>
+        <p className="text-xs text-muted-foreground">{item.desc}</p>
+        <p className="text-[10px] text-primary font-medium tracking-wide">
+          {item.tip}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
 // --- Main Page ---
 export default function FaceCarePage() {
+  const [activeTab, setActiveTab] = useState("skincare");
   const [completedExercises, setCompletedExercises] = useState([]);
   const [completedSkincare, setCompletedSkincare] = useState([]);
   const [expandedExercise, setExpandedExercise] = useState(null);
@@ -361,180 +487,159 @@ export default function FaceCarePage() {
     (completedExercises.length / faceExercises.length) * 100;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Face & Skincare</h1>
-      <p className="text-sm text-muted-foreground">
-        Improve your facial features with targeted exercises and build a
-        consistent skincare routine.
-      </p>
+    <div className="space-y-6 pb-20">
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Face & Skincare
+        </h1>
+        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+          Improve your facial features with targeted exercises and build a
+          consistent skincare routine.
+        </p>
+      </div>
 
-      <Tabs defaultValue="exercises">
-        <TabsList className="w-full">
-          <TabsTrigger value="exercises" className="flex-1 gap-2">
-            <Sparkles className="h-4 w-4" /> Face Exercises
-          </TabsTrigger>
-          <TabsTrigger value="skincare" className="flex-1 gap-2">
-            <Sun className="h-4 w-4" /> Skincare
-          </TabsTrigger>
-        </TabsList>
+      {/* Custom Segmented Control */}
+      <div className="flex p-1 bg-card rounded-full shadow-inner border border-border/50 max-w-sm mx-auto">
+        <button
+          className={`flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-medium rounded-full transition-all ${
+            activeTab === "exercises"
+              ? "bg-background shadow-md text-foreground"
+              : "text-muted-foreground hover:text-foreground/80"
+          }`}
+          onClick={() => setActiveTab("exercises")}
+        >
+          <Sparkles className="h-4 w-4" /> Face Exercises
+        </button>
+        <button
+          className={`flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-medium rounded-full transition-all ${
+            activeTab === "skincare"
+              ? "bg-background shadow-md text-foreground"
+              : "text-muted-foreground hover:text-foreground/80"
+          }`}
+          onClick={() => setActiveTab("skincare")}
+        >
+          <Sun className="h-4 w-4" /> Skincare
+        </button>
+      </div>
 
-        <TabsContent value="exercises" className="mt-4 space-y-3">
-          {/* Progress Header */}
-          <div className="p-3 rounded-lg bg-muted/50">
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm font-medium text-foreground">
-                Today's Progress
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {completedExercises.length}/{faceExercises.length}
-              </p>
+      <AnimatePresence mode="wait">
+        {activeTab === "exercises" && (
+          <motion.div
+            key="exercises"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-3"
+          >
+            {/* Progress Header */}
+            <div className="p-3 rounded-lg bg-muted/50">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm font-medium text-foreground">
+                  Today's Progress
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {completedExercises.length}/{faceExercises.length}
+                </p>
+              </div>
+              <div className="relative">
+                <motion.div
+                  animate={
+                    milestoneGlow
+                      ? {
+                          boxShadow: [
+                            "0 0 0 0 hsl(var(--primary)/0)",
+                            "0 0 12px 4px hsl(var(--primary)/0.4)",
+                            "0 0 0 0 hsl(var(--primary)/0)",
+                          ],
+                        }
+                      : {}
+                  }
+                  transition={{ duration: 0.8 }}
+                  className="rounded-full"
+                >
+                  <Progress value={exerciseProgress} className="h-2.5" />
+                </motion.div>
+              </div>
+              {completedExercises.length === faceExercises.length && (
+                <motion.p
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-xs text-success font-medium mt-2 text-center"
+                >
+                  All exercises complete! Great job!
+                </motion.p>
+              )}
             </div>
-            <div className="relative">
-              <motion.div
-                animate={
-                  milestoneGlow
-                    ? {
-                        boxShadow: [
-                          "0 0 0 0 hsl(var(--primary)/0)",
-                          "0 0 12px 4px hsl(var(--primary)/0.4)",
-                          "0 0 0 0 hsl(var(--primary)/0)",
-                        ],
-                      }
-                    : {}
+
+            {/* Exercise Cards */}
+            {faceExercises.map((ex, i) => (
+              <ExerciseCard
+                key={ex.name}
+                ex={ex}
+                index={i}
+                isExpanded={expandedExercise === ex.name}
+                onToggleExpand={() =>
+                  setExpandedExercise(
+                    expandedExercise === ex.name ? null : ex.name,
+                  )
                 }
-                transition={{ duration: 0.8 }}
-                className="rounded-full"
-              >
-                <Progress value={exerciseProgress} className="h-2.5" />
-              </motion.div>
+                isDone={completedExercises.includes(ex.name)}
+                onToggleComplete={() => toggleExercise(ex.name)}
+              />
+            ))}
+          </motion.div>
+        )}
+
+        {activeTab === "skincare" && (
+          <motion.div
+            key="skincare"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
+          >
+            {/* Morning Routine */}
+            <div className="border border-border/50 rounded-2xl overflow-hidden bg-background">
+              <div className="bg-card/40 px-4 py-3 border-b border-border/50 flex items-center gap-2">
+                <Sun className="h-5 w-5 text-warning" />
+                <h2 className="font-semibold text-foreground">
+                  Morning Routine
+                </h2>
+              </div>
+              <div className="p-4 space-y-3">
+                {morningRoutine.map((step) => (
+                  <SkincareStepCard
+                    key={step.id}
+                    item={step}
+                    isDone={completedSkincare.includes(step.id)}
+                    onToggle={() => toggleSkincare(step.id)}
+                  />
+                ))}
+              </div>
             </div>
-            {completedExercises.length === faceExercises.length && (
-              <motion.p
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-xs text-success font-medium mt-2 text-center"
-              >
-                All exercises complete! Great job!
-              </motion.p>
-            )}
-          </div>
 
-          {/* Exercise Cards */}
-          {faceExercises.map((ex, i) => (
-            <ExerciseCard
-              key={ex.name}
-              ex={ex}
-              index={i}
-              isExpanded={expandedExercise === ex.name}
-              onToggleExpand={() =>
-                setExpandedExercise(
-                  expandedExercise === ex.name ? null : ex.name,
-                )
-              }
-              isDone={completedExercises.includes(ex.name)}
-              onToggleComplete={() => toggleExercise(ex.name)}
-            />
-          ))}
-        </TabsContent>
-
-        <TabsContent value="skincare" className="mt-4 space-y-4">
-          {/* Morning Routine */}
-          <Card className="shadow-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Sun className="h-4 w-4 text-warning" /> Morning Routine
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {skincareRoutine
-                .filter((s) => s.when === "morning" || s.when === "both")
-                .map((step) => {
-                  const key = `am-${step.name}`;
-                  const done = completedSkincare.includes(key);
-                  return (
-                    <div
-                      key={key}
-                      className={`flex items-start gap-3 p-3 rounded-lg transition-all ${done ? "bg-success/5" : "bg-muted/50"}`}
-                    >
-                      <div className="relative mt-0.5">
-                        <motion.div
-                          animate={done ? { scale: [1, 1.2, 1] } : {}}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Checkbox
-                            checked={done}
-                            onCheckedChange={() => toggleSkincare(key)}
-                          />
-                        </motion.div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p
-                            className={`text-sm font-medium ${done ? "line-through text-muted-foreground" : "text-foreground"}`}
-                          >
-                            Step {step.step}: {step.name}
-                          </p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {step.description}
-                        </p>
-                        <p className="text-xs text-primary mt-1">{step.tip}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-            </CardContent>
-          </Card>
-
-          {/* Evening Routine */}
-          <Card className="shadow-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Moon className="h-4 w-4 text-info" /> Evening Routine
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {skincareRoutine
-                .filter((s) => s.when === "evening" || s.when === "both")
-                .map((step) => {
-                  const key = `pm-${step.name}`;
-                  const done = completedSkincare.includes(key);
-                  return (
-                    <div
-                      key={key}
-                      className={`flex items-start gap-3 p-3 rounded-lg transition-all ${done ? "bg-success/5" : "bg-muted/50"}`}
-                    >
-                      <div className="relative mt-0.5">
-                        <motion.div
-                          animate={done ? { scale: [1, 1.2, 1] } : {}}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <Checkbox
-                            checked={done}
-                            onCheckedChange={() => toggleSkincare(key)}
-                          />
-                        </motion.div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p
-                            className={`text-sm font-medium ${done ? "line-through text-muted-foreground" : "text-foreground"}`}
-                          >
-                            Step {step.step}: {step.name}
-                          </p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {step.description}
-                        </p>
-                        <p className="text-xs text-primary mt-1">{step.tip}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            {/* Evening Routine */}
+            <div className="border border-border/50 rounded-2xl overflow-hidden bg-background">
+              <div className="bg-card/40 px-4 py-3 border-b border-border/50 flex items-center gap-2">
+                <Moon className="h-5 w-5 text-info" />
+                <h2 className="font-semibold text-foreground">
+                  Evening Routine
+                </h2>
+              </div>
+              <div className="p-4 space-y-3">
+                {eveningRoutine.map((step) => (
+                  <SkincareStepCard
+                    key={step.id}
+                    item={step}
+                    isDone={completedSkincare.includes(step.id)}
+                    onToggle={() => toggleSkincare(step.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
