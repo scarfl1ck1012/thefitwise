@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+
 import {
   Select,
   SelectContent,
@@ -32,8 +32,6 @@ import {
   Scale as ScaleIcon,
   TrendingUp,
   Trophy,
-  Bell,
-  Heart,
   Download,
   Trash2,
   Shield,
@@ -220,10 +218,6 @@ export default function SettingsPage() {
   );
   const [goal, setGoal] = useState(profile?.goal || "maintain");
   const [saved, setSaved] = useState(false);
-
-  // Preferences
-  const [dailyReminder, setDailyReminder] = useState(true);
-  const [healthSync, setHealthSync] = useState(false);
 
   // Sync initial values when profile loads
   useEffect(() => {
@@ -538,40 +532,6 @@ export default function SettingsPage() {
                 <p className="text-sm font-medium text-foreground">
                   {user?.email}
                 </p>
-              </div>
-            </div>
-
-            {/* Preferences */}
-            <div className="space-y-3">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Preferences
-              </p>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-foreground">Daily Reminders</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Get notified to log meals and workouts
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={dailyReminder}
-                  onCheckedChange={setDailyReminder}
-                />
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <div className="flex items-center gap-3">
-                  <Heart className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm text-foreground">Health App Sync</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Sync with Apple Health / Google Fit
-                    </p>
-                  </div>
-                </div>
-                <Switch checked={healthSync} onCheckedChange={setHealthSync} />
               </div>
             </div>
           </CardContent>
