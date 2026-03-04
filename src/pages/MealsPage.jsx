@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 export default function MealsPage() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -182,38 +183,96 @@ export default function MealsPage() {
         </div>
       </div>
 
-      {/* Calories Overview */}
+      {/* Macro Donut + Limits */}
       <Card className="shadow-card">
         <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-medium text-foreground">
-              Calories
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {totalCalories} / {calorieGoal}
-            </span>
-          </div>
-          <Progress
-            value={Math.min((totalCalories / calorieGoal) * 100, 100)}
-            className="h-3 mb-4"
-          />
-          <div className="grid grid-cols-5 gap-2">
+          {/* Donut Chart */}
+          {(() => {
+            const macroData = [
+              { name: "Protein", value: Math.round(totalProtein) || 0 },
+              { name: "Carbs", value: Math.round(totalCarbs) || 0 },
+              { name: "Fat", value: Math.round(totalFat) || 0 },
+            ];
+            const COLORS = [
+              "hsl(var(--primary))", // Protein = mint green
+              "hsl(var(--info))", // Carbs = blue
+              "hsl(var(--accent))", // Fat = orange
+            ];
+            const hasData = macroData.some((d) => d.value > 0);
+            const emptyData = [{ name: "Empty", value: 1 }];
+            return (
+              <div className="relative flex flex-col items-center">
+                <div className="w-44 h-44 relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={hasData ? macroData : emptyData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={72}
+                        paddingAngle={hasData ? 3 : 0}
+                        dataKey="value"
+                        strokeWidth={0}
+                      >
+                        {hasData ? (
+                          macroData.map((_, i) => (
+                            <Cell key={i} fill={COLORS[i]} />
+                          ))
+                        ) : (
+                          <Cell fill="hsl(var(--muted))" />
+                        )}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Center Label */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl font-bold text-foreground leading-tight">
+                      {totalCalories}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      / {calorieGoal} kcal
+                    </span>
+                  </div>
+                </div>
+
+                {/* Macro Legend */}
+                <div className="flex items-center gap-4 mt-2">
+                  {[
+                    {
+                      label: "Protein",
+                      value: `${Math.round(totalProtein)}g`,
+                      color: "bg-primary",
+                    },
+                    {
+                      label: "Carbs",
+                      value: `${Math.round(totalCarbs)}g`,
+                      color: "bg-info",
+                    },
+                    {
+                      label: "Fat",
+                      value: `${Math.round(totalFat)}g`,
+                      color: "bg-accent",
+                    },
+                  ].map((m) => (
+                    <div key={m.label} className="flex items-center gap-1.5">
+                      <div className={`w-2.5 h-2.5 rounded-full ${m.color}`} />
+                      <span className="text-xs text-muted-foreground">
+                        {m.label}
+                      </span>
+                      <span className="text-xs font-bold text-foreground">
+                        {m.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Sodium & Potassium Limits */}
+          <div className="grid grid-cols-2 gap-3 mt-4">
             {[
-              {
-                label: "Protein",
-                value: `${Math.round(totalProtein)}g`,
-                color: "bg-info",
-              },
-              {
-                label: "Carbs",
-                value: `${Math.round(totalCarbs)}g`,
-                color: "bg-warning",
-              },
-              {
-                label: "Fat",
-                value: `${Math.round(totalFat)}g`,
-                color: "bg-accent",
-              },
               {
                 label: "Sodium",
                 raw: Math.round(totalSodium),
@@ -229,34 +288,26 @@ export default function MealsPage() {
                 color: "bg-primary",
               },
             ].map((m) => (
-              <div
-                key={m.label}
-                className="text-center p-2 rounded-lg bg-muted/50"
-              >
-                <div
-                  className={`w-2 h-2 rounded-full ${m.color} mx-auto mb-1`}
-                />
-                <p className="text-[10px] text-muted-foreground">{m.label}</p>
-                {m.limit ? (
-                  <>
-                    <p
-                      className={`text-[10px] font-bold ${m.raw > m.limit ? "text-destructive" : "text-foreground"}`}
-                    >
-                      {m.raw}/{m.limit}
-                      {m.unit}
-                    </p>
-                    <div className="w-full bg-muted rounded-full h-1 mt-1">
-                      <div
-                        className={`h-1 rounded-full transition-all ${m.raw > m.limit ? "bg-destructive" : m.color}`}
-                        style={{
-                          width: `${Math.min((m.raw / m.limit) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-xs font-bold text-foreground">{m.value}</p>
-                )}
+              <div key={m.label} className="p-2.5 rounded-lg bg-muted/50">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] text-muted-foreground">
+                    {m.label}
+                  </span>
+                  <span
+                    className={`text-[10px] font-bold ${m.raw > m.limit ? "text-destructive" : "text-foreground"}`}
+                  >
+                    {m.raw}/{m.limit}
+                    {m.unit}
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-1.5">
+                  <div
+                    className={`h-1.5 rounded-full transition-all ${m.raw > m.limit ? "bg-destructive" : m.color}`}
+                    style={{
+                      width: `${Math.min((m.raw / m.limit) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -543,7 +594,7 @@ export default function MealsPage() {
                 placeholder="Search foods..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 bg-muted/80 placeholder:text-muted-foreground/70 focus-visible:ring-primary/50 focus-visible:ring-2 focus-visible:bg-muted"
               />
             </div>
             {search.length > 1 && (
