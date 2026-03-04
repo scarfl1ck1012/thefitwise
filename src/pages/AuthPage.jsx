@@ -39,9 +39,20 @@ export default function AuthPage() {
         if (error) throw error;
         toast.success("Welcome back!");
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast.success("Account created! You're signed in.");
+
+        if (data?.user && data?.session === null) {
+          toast.success(
+            "Confirmation email sent! Please check your inbox and verify your email.",
+            {
+              duration: 5000,
+            },
+          );
+          setIsLogin(true);
+        } else {
+          toast.success("Account created! You're signed in.");
+        }
       }
     } catch (err) {
       const msg = err?.message?.toLowerCase() || "";
