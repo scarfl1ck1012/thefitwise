@@ -35,9 +35,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 export default function MealsPage() {
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const getLocalDate = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+  const [selectedDate, setSelectedDate] = useState(getLocalDate());
   const {
     meals,
     totalCalories,
@@ -75,7 +77,7 @@ export default function MealsPage() {
   const potassiumLimit = profile?.gender === "female" ? 2600 : 3400; // mg, by gender
   const caffeineLimit = 400; // mg, FDA recommended
   const results = search.length > 1 ? searchFoods(search) : [];
-  const isToday = selectedDate === new Date().toISOString().split("T")[0];
+  const isToday = selectedDate === getLocalDate();
   const waterLiters = (totalWaterMl / 1000).toFixed(1);
   const logFood = (food) => {
     addMeal.mutate({
@@ -152,10 +154,13 @@ export default function MealsPage() {
     }
   };
   const shiftDate = (days) => {
-    const d = new Date(selectedDate);
+    const d = new Date(selectedDate + "T12:00:00");
     d.setDate(d.getDate() + days);
-    setSelectedDate(d.toISOString().split("T")[0]);
+    setSelectedDate(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
+    );
   };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

@@ -458,6 +458,24 @@ function WorkoutBuilder({ profile }) {
     }));
   }, []);
 
+  // Add custom exercise
+  const addCustomExercise = useCallback((day, name) => {
+    const instance = {
+      instanceId: crypto.randomUUID(),
+      exerciseId: `custom-${Date.now()}`,
+      name: name,
+      muscle: "Custom",
+      sets: 3,
+      reps: 10,
+    };
+    setWeeklyPlan((prev) => ({
+      ...prev,
+      [day]: [...prev[day], instance],
+    }));
+    setSearch("");
+    toast.success(`Custom exercise added to ${DAY_LABELS[day]}`);
+  }, []);
+
   // Update sets/reps
   const updateExercise = useCallback((day, instanceId, field, value) => {
     setWeeklyPlan((prev) => ({
@@ -614,12 +632,12 @@ function WorkoutBuilder({ profile }) {
 
             {/* Search results */}
             <AnimatePresence>
-              {filteredExercises.length > 0 && (
+              {search.trim().length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="space-y-1 max-h-48 overflow-y-auto"
+                  className="space-y-1 max-h-48 overflow-y-auto mb-3"
                 >
                   {filteredExercises.map((ex) => (
                     <button
@@ -638,6 +656,23 @@ function WorkoutBuilder({ profile }) {
                       </Badge>
                     </button>
                   ))}
+                  <button
+                    onClick={() => addCustomExercise(selectedDay, search)}
+                    className="w-full flex items-center justify-between p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/20 mt-1"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Plus className="h-3 w-3 text-primary" />
+                      <span className="text-xs text-primary font-medium">
+                        Add "{search}"
+                      </span>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] border-primary/30 text-primary"
+                    >
+                      Custom
+                    </Badge>
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

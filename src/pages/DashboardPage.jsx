@@ -93,6 +93,28 @@ function MiniDonut({ protein, carbs, fat, calories, goal }) {
   );
 }
 
+// ─── Helpers ──────────────────────────────────────────────
+
+const getLocalDate = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+function getDailyRotation(items, dateStr) {
+  if (!items || items.length === 0) return [];
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const seed = Math.abs(hash);
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.abs(Math.sin(seed + i)) * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 // ─── Next Best Action Banner ────────────────────────────
 
 function NextActionBanner({
@@ -292,14 +314,19 @@ function RecipeModal({ recipe, onClose }) {
 
 // ─── Recipe Carousel ────────────────────────────────────
 
-function RecipeCarousel() {
+function RecipeCarousel({ dateStr }) {
   const [index, setIndex] = useState(0);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const recipe = popularRecipes[index];
 
-  const next = () => setIndex((i) => (i + 1) % popularRecipes.length);
+  const rotatedRecipes = useMemo(
+    () => getDailyRotation(popularRecipes, dateStr),
+    [dateStr],
+  );
+  const recipe = rotatedRecipes[index];
+
+  const next = () => setIndex((i) => (i + 1) % rotatedRecipes.length);
   const prev = () =>
-    setIndex((i) => (i - 1 + popularRecipes.length) % popularRecipes.length);
+    setIndex((i) => (i - 1 + rotatedRecipes.length) % rotatedRecipes.length);
 
   return (
     <>
@@ -363,9 +390,8 @@ function RecipeCarousel() {
               </div>
             </div>
 
-            {/* Dots */}
             <div className="absolute top-3 right-3 flex gap-1">
-              {popularRecipes.map((_, i) => (
+              {rotatedRecipes.map((_, i) => (
                 <span
                   key={i}
                   className={`w-1.5 h-1.5 rounded-full ${i === index ? "bg-primary" : "bg-white/30"}`}
@@ -397,7 +423,7 @@ export default function DashboardPage() {
   const { stats, addXP } = useUserStats();
   const { checkins } = useWorkouts();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalDate();
   const challenges = getDailyChallenges(today, {
     userId: user?.id,
     goal: profile?.goal,
@@ -537,7 +563,7 @@ export default function DashboardPage() {
 
         {/* Recipe Carousel (replaces Activity Card) */}
         <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-          <RecipeCarousel />
+          <RecipeCarousel dateStr={today} />
         </motion.div>
 
         {/* XP & Streak Card */}
@@ -646,7 +672,7 @@ export default function DashboardPage() {
           </h2>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          {trendingArticles.map((article) => (
+          {getDailyRotation(trendingArticles, today).map((article) => (
             <a
               key={article.id}
               href={article.url}

@@ -6,72 +6,27 @@ import { motion } from "framer-motion";
 import { Activity, Flame, Calendar } from "lucide-react";
 
 const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
+  "January",
+  "February",
+  "March",
+  "April",
   "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-const DAYS = ["Mon", "", "Wed", "", "Fri", "", ""];
-
-// Build all days of a year
-function getDaysOfYear(year) {
-  const days = [];
-  const start = new Date(year, 0, 1);
-  const end = new Date(year, 11, 31);
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    days.push(new Date(d).toISOString().split("T")[0]);
-  }
-  return days;
-}
-
-// Compute which "week column" each day belongs to
-function groupByWeek(days) {
-  const weeks = [];
-  let currentWeek = [];
-  const firstDay = new Date(days[0] + "T12:00:00");
-  // Pad the first week
-  const startDow = (firstDay.getDay() + 6) % 7; // Mon=0
-  for (let i = 0; i < startDow; i++) currentWeek.push(null);
-
-  for (const day of days) {
-    currentWeek.push(day);
-    if (currentWeek.length === 7) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-  if (currentWeek.length > 0) {
-    while (currentWeek.length < 7) currentWeek.push(null);
-    weeks.push(currentWeek);
-  }
-  return weeks;
-}
-
-// Intensity level for a day
-// 0 = no activity, 1 = meals only, 2 = workout only, 3 = perfect day (meals + workout + more)
-function getIntensity(day, workoutDays, mealDays) {
-  const hasWorkout = workoutDays.has(day);
-  const hasMeals = mealDays.has(day);
-  if (hasWorkout && hasMeals) return 3;
-  if (hasWorkout) return 2;
-  if (hasMeals) return 1;
-  return 0;
-}
+const DAY_HEADERS = ["M", "T", "W", "T", "F", "S", "S"];
 
 const INTENSITY_CLASSES = [
-  "bg-muted-foreground/10", // 0: no activity
-  "bg-primary/30", // 1: meals only
-  "bg-primary/60", // 2: workout only
-  "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]", // 3: perfect day
+  "bg-muted-foreground/10",
+  "bg-primary/30",
+  "bg-primary/60",
+  "bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.5)]",
 ];
 
 const INTENSITY_LABELS = [
@@ -81,82 +36,143 @@ const INTENSITY_LABELS = [
   "Meals + Workout (Perfect Day)",
 ];
 
+function getLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// Build calendar grid for a single month
+function getMonthGrid(year, month) {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDow = (firstDay.getDay() + 6) % 7; // Mon=0
+
+  const cells = [];
+  // Padding before the 1st
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  // Days
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    cells.push(
+      `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`,
+    );
+  }
+  // Pad to fill last week row
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  // Split into weeks
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(cells.slice(i, i + 7));
+  }
+  return weeks;
+}
+
+function getIntensity(day, workoutDays, mealDates) {
+  const hasWorkout = workoutDays.has(day);
+  const hasMeals = mealDates.has(day);
+  if (hasWorkout && hasMeals) return 3;
+  if (hasWorkout) return 2;
+  if (hasMeals) return 1;
+  return 0;
+}
+
+// Mini calendar for one month
+function MonthCalendar({ year, month, workoutDays, mealDates, todayStr }) {
+  const weeks = useMemo(() => getMonthGrid(year, month), [year, month]);
+
+  return (
+    <div>
+      <p className="text-xs font-medium text-foreground mb-1.5">
+        {MONTHS[month]}
+      </p>
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-[2px] mb-[2px]">
+        {DAY_HEADERS.map((d, i) => (
+          <div
+            key={i}
+            className="text-[8px] text-muted-foreground/60 text-center"
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+      {/* Weeks */}
+      <div className="space-y-[2px]">
+        {weeks.map((week, wi) => (
+          <div key={wi} className="grid grid-cols-7 gap-[2px]">
+            {week.map((day, di) => {
+              if (!day)
+                return <div key={di} className="w-full aspect-square" />;
+              const isFuture = day > todayStr;
+              const intensity = isFuture
+                ? -1
+                : getIntensity(day, workoutDays, mealDates);
+              const isCurrentDay = day === todayStr;
+              return (
+                <div
+                  key={di}
+                  className={`w-full aspect-square rounded-sm transition-colors ${
+                    isFuture
+                      ? "bg-muted/20"
+                      : INTENSITY_CLASSES[intensity] || "bg-muted/20"
+                  } ${isCurrentDay ? "ring-1 ring-foreground/30" : ""}`}
+                  title={`${day}: ${isFuture ? "Future" : INTENSITY_LABELS[intensity]}`}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WorkoutsPage() {
   const { checkins } = useWorkouts();
 
-  // Build sets of days with activity
-  const { workoutDays, mealDays, totalWorkouts, perfectDays, longestRun } =
-    useMemo(() => {
-      const wDays = new Set();
-      checkins.forEach((c) => wDays.add(c.logged_at));
+  const todayStr = getLocalDateStr(new Date());
 
-      // For meals, we don't have easy access to all meal dates from the hook,
-      // so we'll use a simulated approach based on workout data
-      // In production, you'd query meal_logs dates as well
-      const mDays = new Set();
-      // We simulate meal logging -- assume the user logged meals on most recent days
-      const today = new Date();
-      for (let i = 0; i < 30; i++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        mDays.add(d.toISOString().split("T")[0]);
-      }
+  // Build real activity data — only from actual workout checkins
+  const { workoutDays, totalWorkouts, longestRun } = useMemo(() => {
+    const wDays = new Set();
+    checkins.forEach((c) => wDays.add(c.logged_at));
 
-      let perfect = 0;
-      wDays.forEach((d) => {
-        if (mDays.has(d)) perfect++;
-      });
+    // Longest consecutive streak
+    const sortedDays = [...wDays].sort();
+    let maxRun = 0,
+      run = 1;
+    for (let i = 1; i < sortedDays.length; i++) {
+      const prev = new Date(sortedDays[i - 1] + "T12:00:00");
+      const curr = new Date(sortedDays[i] + "T12:00:00");
+      const diff = (curr - prev) / 86400000;
+      if (diff === 1) {
+        run++;
+        maxRun = Math.max(maxRun, run);
+      } else run = 1;
+    }
+    maxRun = Math.max(maxRun, run);
 
-      // Longest consecutive run
-      const sortedDays = [...wDays].sort();
-      let maxRun = 0,
-        run = 1;
-      for (let i = 1; i < sortedDays.length; i++) {
-        const prev = new Date(sortedDays[i - 1] + "T12:00:00");
-        const curr = new Date(sortedDays[i] + "T12:00:00");
-        const diff = (curr - prev) / 86400000;
-        if (diff === 1) {
-          run++;
-          maxRun = Math.max(maxRun, run);
-        } else run = 1;
-      }
-      maxRun = Math.max(maxRun, run);
+    return {
+      workoutDays: wDays,
+      totalWorkouts: wDays.size,
+      longestRun: sortedDays.length > 0 ? maxRun : 0,
+    };
+  }, [checkins]);
 
-      return {
-        workoutDays: wDays,
-        mealDays: mDays,
-        totalWorkouts: wDays.size,
-        perfectDays: perfect,
-        longestRun: sortedDays.length > 0 ? maxRun : 0,
-      };
-    }, [checkins]);
+  // Meal dates: empty set for now — we'd need a separate hook to fetch all meal dates
+  // This ensures no fake data is shown
+  const mealDates = useMemo(() => new Set(), []);
 
   const year = 2026;
-  const allDays = useMemo(() => getDaysOfYear(year), [year]);
-  const weeks = useMemo(() => groupByWeek(allDays), [allDays]);
-
-  // Month labels with their starting week index
-  const monthLabels = useMemo(() => {
-    const labels = [];
-    let lastMonth = -1;
-    weeks.forEach((week, wi) => {
-      for (const day of week) {
-        if (!day) continue;
-        const m = parseInt(day.slice(5, 7)) - 1;
-        if (m !== lastMonth) {
-          labels.push({ month: MONTHS[m], weekIndex: wi });
-          lastMonth = m;
-        }
-        break;
-      }
+  const perfectDays = useMemo(() => {
+    let count = 0;
+    workoutDays.forEach((d) => {
+      if (mealDates.has(d)) count++;
     });
-    return labels;
-  }, [weeks]);
-
-  const today = new Date().toISOString().split("T")[0];
+    return count;
+  }, [workoutDays, mealDates]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Progress</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -205,7 +221,7 @@ export default function WorkoutsPage() {
         ))}
       </div>
 
-      {/* 12-Month Heatmap */}
+      {/* Monthly Mini-Calendars */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -218,76 +234,25 @@ export default function WorkoutsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto pb-2 scrollbar-hide">
-              <div className="min-w-[750px]">
-                {/* Month labels */}
-                <div className="flex mb-1 ml-8">
-                  {monthLabels.map((ml, i) => {
-                    const nextStart =
-                      monthLabels[i + 1]?.weekIndex || weeks.length;
-                    const span = nextStart - ml.weekIndex;
-                    return (
-                      <div
-                        key={ml.month}
-                        className="text-[9px] text-muted-foreground"
-                        style={{ width: `${(span / weeks.length) * 100}%` }}
-                      >
-                        {ml.month}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Grid */}
-                <div className="flex gap-[1px]">
-                  {/* Day labels */}
-                  <div className="flex flex-col gap-[1px] mr-1 shrink-0">
-                    {DAYS.map((d, i) => (
-                      <div
-                        key={i}
-                        className="h-[11px] w-6 text-[8px] text-muted-foreground flex items-center"
-                      >
-                        {d}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Week columns */}
-                  {weeks.map((week, wi) => (
-                    <div key={wi} className="flex flex-col gap-[1px]">
-                      {week.map((day, di) => {
-                        if (!day)
-                          return <div key={di} className="w-[11px] h-[11px]" />;
-                        const intensity = getIntensity(
-                          day,
-                          workoutDays,
-                          mealDays,
-                        );
-                        const isFuture = day > today;
-                        return (
-                          <div
-                            key={di}
-                            className={`w-[11px] h-[11px] rounded-[2px] transition-colors ${
-                              isFuture
-                                ? "bg-muted/30"
-                                : INTENSITY_CLASSES[intensity]
-                            }`}
-                            title={`${day}: ${isFuture ? "Future" : INTENSITY_LABELS[intensity]}`}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 12 }, (_, i) => (
+                <MonthCalendar
+                  key={i}
+                  year={year}
+                  month={i}
+                  workoutDays={workoutDays}
+                  mealDates={mealDates}
+                  todayStr={todayStr}
+                />
+              ))}
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-4 mt-3 flex-wrap">
+            <div className="flex items-center gap-3 mt-4 flex-wrap">
               <span className="text-[10px] text-muted-foreground">Less</span>
               {INTENSITY_CLASSES.map((cls, i) => (
                 <div key={i} className="flex items-center gap-1.5">
-                  <div className={`w-[11px] h-[11px] rounded-[2px] ${cls}`} />
+                  <div className={`w-3 h-3 rounded-sm ${cls}`} />
                   <span className="text-[9px] text-muted-foreground">
                     {INTENSITY_LABELS[i]}
                   </span>
