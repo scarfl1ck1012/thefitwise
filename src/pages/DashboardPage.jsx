@@ -100,7 +100,7 @@ const getLocalDate = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-function getDailyRotation(items, dateStr) {
+function getDailyRotation(items, dateStr, limit = 5) {
   if (!items || items.length === 0) return [];
   let hash = 0;
   for (let i = 0; i < dateStr.length; i++) {
@@ -112,7 +112,7 @@ function getDailyRotation(items, dateStr) {
     const j = Math.floor(Math.abs(Math.sin(seed + i)) * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled;
+  return shuffled.slice(0, limit);
 }
 
 // ─── Next Best Action Banner ────────────────────────────
