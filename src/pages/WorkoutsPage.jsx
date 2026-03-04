@@ -1,6 +1,9 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useWorkouts } from "@/hooks/useWorkouts";
-import { useMeals } from "@/hooks/useMeals";
+import { getLocalDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Activity, Flame, Calendar } from "lucide-react";
@@ -35,10 +38,6 @@ const INTENSITY_LABELS = [
   "Completed Workout",
   "Meals + Workout (Perfect Day)",
 ];
-
-function getLocalDateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 // Build calendar grid for a single month
 function getMonthGrid(year, month) {
@@ -128,8 +127,24 @@ function MonthCalendar({ year, month, workoutDays, mealDates, todayStr }) {
 
 export default function WorkoutsPage() {
   const { checkins } = useWorkouts();
+  const { user } = useAuth();
 
-  const todayStr = getLocalDateStr(new Date());
+  const { data: allMeals = [] } = useQuery({
+    queryKey: ["all_meals", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("meal_logs")
+        .select("logged_at")
+        .eq("user_id", user.id)
+        .order("logged_at", { ascending: false })
+        .limit(1000);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const todayStr = getLocalDate();
 
   // Build real activity data — only from actual workout checkins
   const { workoutDays, totalWorkouts, longestRun } = useMemo(() => {
@@ -158,11 +173,14 @@ export default function WorkoutsPage() {
     };
   }, [checkins]);
 
-  // Meal dates: empty set for now — we'd need a separate hook to fetch all meal dates
-  // This ensures no fake data is shown
-  const mealDates = useMemo(() => new Set(), []);
+  // Build real meal data from the global query
+  const mealDates = useMemo(() => {
+    const mDays = new Set();
+    allMeals.forEach((m) => mDays.add(m.logged_at));
+    return mDays;
+  }, [allMeals]);
 
-  const year = 2026;
+  const year = new Date().getFullYear();
   const perfectDays = useMemo(() => {
     let count = 0;
     workoutDays.forEach((d) => {

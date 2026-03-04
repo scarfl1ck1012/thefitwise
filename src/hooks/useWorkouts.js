@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { getLocalDate } from "@/lib/utils";
+
 export function useWorkouts() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -20,16 +22,14 @@ export function useWorkouts() {
   });
   const addCheckin = useMutation({
     mutationFn: async ({ workout_type, duration_min, notes }) => {
-      const today = new Date().toISOString().split("T")[0];
-      const { error } = await supabase
-        .from("workout_checkins")
-        .insert({
-          user_id: user.id,
-          workout_type,
-          duration_min,
-          notes: notes || "",
-          logged_at: today,
-        });
+      const today = getLocalDate();
+      const { error } = await supabase.from("workout_checkins").insert({
+        user_id: user.id,
+        workout_type,
+        duration_min,
+        notes: notes || "",
+        logged_at: today,
+      });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["workout_checkins"] }),

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getLocalDate } from "@/lib/utils";
 
 import {
   Select,
@@ -302,7 +303,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `fitwise-profile-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `fitwise-profile-${getLocalDate()}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Profile data exported!");

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { Scale, TrendingDown, TrendingUp, Minus, Target } from "lucide-react";
 import { toast } from "sonner";
+import { getLocalDate } from "@/lib/utils";
 import {
   AreaChart,
   Area,
@@ -48,7 +49,7 @@ function buildContinuousTimeline(logs, days = 60) {
   end.setHours(12, 0, 0, 0);
 
   while (cursor <= end) {
-    const dateStr = cursor.toISOString().split("T")[0];
+    const dateStr = getLocalDate(cursor);
     const actualWeight = dateMap[dateStr];
 
     if (actualWeight !== undefined) {
@@ -124,7 +125,7 @@ export default function WeightPage() {
   const { addXP } = useUserStats();
   const { profile } = useProfile();
   const [weight, setWeight] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(getLocalDate());
 
   const handleLog = () => {
     const w = parseFloat(weight);
