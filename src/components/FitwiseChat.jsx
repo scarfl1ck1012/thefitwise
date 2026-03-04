@@ -121,7 +121,14 @@ ${systemContext}
         },
       );
 
-      if (!response.ok) throw new Error("Failed to fetch");
+      if (!response.ok) {
+        let errorMessage = "Failed to fetch from Gemini";
+        try {
+          const errData = await response.json();
+          errorMessage = errData.error?.message || errorMessage;
+        } catch (_) {}
+        throw new Error(errorMessage);
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -136,7 +143,7 @@ ${systemContext}
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\\n");
+        const lines = chunk.split("\n");
 
         for (const line of lines) {
           if (line.startsWith("data: ") && line !== "data: [DONE]") {
@@ -163,8 +170,7 @@ ${systemContext}
         ...prev,
         {
           role: "assistant",
-          content:
-            "Sorry, I ran into an error connecting to my brain. Try again later!",
+          content: `Sorry, I ran into an error connecting to my brain: **${e.message}**.`,
         },
       ]);
       setIsLoading(false);

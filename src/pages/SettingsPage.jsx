@@ -235,7 +235,7 @@ export default function SettingsPage() {
 
   // Dirty state detection
   const isDirty = useMemo(() => {
-    if (!profile) return false;
+    if (!profile) return true; // Always allow new users to save their initial profile
     return (
       name !== (profile.full_name || "") ||
       age !== (profile.age?.toString() || "") ||
