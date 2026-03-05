@@ -244,9 +244,5 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 <div align="center">
-
-**Built with ❤️ by the FitWise team**
-
 [Live Demo](https://thefitwise.vercel.app/) · [Report Bug](https://github.com/your-username/thefitwise/issues) · [Request Feature](https://github.com/your-username/thefitwise/issues)
-
 </div>
