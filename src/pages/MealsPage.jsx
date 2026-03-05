@@ -81,7 +81,7 @@ export default function MealsPage() {
   const waterLiters = (totalWaterMl / 1000).toFixed(1);
   const logFood = (food) => {
     addMeal.mutate({
-      meal_name: food.name,
+      recipe_title: food.name,
       calories: food.calories,
       protein: food.protein,
       carbs: food.carbs,
@@ -99,7 +99,7 @@ export default function MealsPage() {
   const logCustomMeal = () => {
     if (!customName.trim() || !customCalories) return;
     addMeal.mutate({
-      meal_name: customName,
+      recipe_title: customName,
       calories: parseInt(customCalories) || 0,
       protein: parseInt(customProtein) || 0,
       carbs: parseInt(customCarbs) || 0,
@@ -165,7 +165,7 @@ export default function MealsPage() {
       const items = parsed.items || [];
       for (const item of items) {
         await addMeal.mutateAsync({
-          meal_name: item.name,
+          recipe_title: item.name,
           calories: item.calories,
           protein: item.protein || 0,
           carbs: item.carbs || 0,
@@ -728,7 +728,7 @@ export default function MealsPage() {
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      {meal.meal_name}{" "}
+                      {meal.recipe_title}{" "}
                       {meal.servings > 1 ? `(${meal.servings}x)` : ""}
                     </p>
                     <div className="flex gap-2 mt-1 flex-wrap">
