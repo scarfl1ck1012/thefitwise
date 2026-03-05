@@ -34,9 +34,13 @@ function buildContinuousTimeline(logs, days = 60) {
   // Step 2: Determine the range
   const sortedDates = Object.keys(dateMap).sort();
   const endDate = new Date();
+  const latestLoggedDate = new Date(sortedDates[sortedDates.length - 1]);
+  if (latestLoggedDate > endDate) {
+    endDate.setTime(latestLoggedDate.getTime());
+  }
   const startDate = new Date(sortedDates[0]);
   // Go back at most `days` from today
-  const earliest = new Date(endDate);
+  const earliest = new Date();
   earliest.setDate(earliest.getDate() - days);
   if (startDate > earliest) earliest.setTime(startDate.getTime());
 
