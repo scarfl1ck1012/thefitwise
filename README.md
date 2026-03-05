@@ -23,7 +23,6 @@
 ![Dashboard](./2123123.png)
 ![Weight Page](./122.png)
 ![Progress Page](./3123123.png)
-![Face & Skincare Page](./4324342.png)
 ---
 
 ## 🧠 Overview
