@@ -30,16 +30,17 @@ export function useUserStats() {
       if (lastActive !== today) {
         newStreak = lastActive === yesterday ? newStreak + 1 : 1;
       }
-      const { error } = await supabase
-        .from("user_stats")
-        .update({
+      const { error } = await supabase.from("user_stats").upsert(
+        {
+          user_id: user.id,
           xp: currentXP,
           level: newLevel,
           current_streak: newStreak,
           longest_streak: Math.max(newStreak, stats?.longest_streak || 0),
           last_active_date: today,
-        })
-        .eq("user_id", user.id);
+        },
+        { onConflict: "user_id" },
+      );
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user_stats"] }),
@@ -50,8 +51,10 @@ export function useUserStats() {
       if (current.includes(badge)) return;
       const { error } = await supabase
         .from("user_stats")
-        .update({ badges: [...current, badge] })
-        .eq("user_id", user.id);
+        .upsert(
+          { user_id: user.id, badges: [...current, badge] },
+          { onConflict: "user_id" },
+        );
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user_stats"] }),
