@@ -56,8 +56,10 @@ export function useProfile() {
       const calories = calculateCalories({ ...profile, ...updates });
       const { error } = await supabase
         .from("profiles")
-        .update({ ...updates, daily_calories: calories })
-        .eq("user_id", user.id);
+        .upsert(
+          { user_id: user.id, ...updates, daily_calories: calories },
+          { onConflict: "user_id" },
+        );
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
