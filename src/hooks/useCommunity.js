@@ -2,18 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-// Format helper to safely return users across the standard model shape you are using in CommunityPage
-const formatUserNode = (dataRow) => ({
-  id: dataRow.user_id,
-  name: dataRow.full_name || "Unknown User",
-  avatar:
-    dataRow.avatar_url ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(dataRow.full_name || "U")}&background=random`,
-  // Safely grab stat relations if available
-  xp: dataRow.user_stats?.[0]?.xp || 0,
-  level: dataRow.user_stats?.[0]?.level || 1,
-  streak: dataRow.user_stats?.[0]?.current_streak || 0,
-});
+// We will format the user node inline during combination
 
 export function useCommunity() {
   const { user } = useAuth();
@@ -23,22 +12,35 @@ export function useCommunity() {
   const { data: allUsers = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["community_users"],
     queryFn: async () => {
-      // Query profiles and joined user_stats table to get the raw combined payloads for everyone
-      const { data, error } = await supabase.from("profiles").select(`
-          user_id,
-          full_name,
-          avatar_url,
-          user_stats (
-             xp,
-             level,
-             current_streak
-          )
-        `);
+      // 1. Fetch profiles safely
+      const { data: profiles, error: pError } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, avatar_url");
 
-      if (error) throw error;
+      if (pError) throw pError;
 
-      // Transform that shape into the `id`, `name`, `xp` mapping we use on the page
-      return data.map(formatUserNode);
+      // 2. Fetch stats safely
+      const { data: stats, error: sError } = await supabase
+        .from("user_stats")
+        .select("user_id, xp, level, current_streak");
+
+      if (sError) console.error("Fetch stats error:", sError);
+
+      // 3. Combine them without strict SQL constraint dependencies
+      return (profiles || []).map((profile) => {
+        const userStat =
+          (stats || []).find((s) => s.user_id === profile.user_id) || {};
+        return {
+          id: profile.user_id,
+          name: profile.full_name || "Unknown User",
+          avatar:
+            profile.avatar_url ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || "U")}&background=random`,
+          xp: userStat.xp || 0,
+          level: userStat.level || 1,
+          streak: userStat.current_streak || 0,
+        };
+      });
     },
     enabled: !!user,
   });
