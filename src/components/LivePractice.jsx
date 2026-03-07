@@ -86,6 +86,18 @@ export default function LivePractice({ exerciseName, onClose }) {
     return () => stopCamera();
   }, [stopCamera]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && cameraActive) {
+        stopCamera();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [cameraActive, stopCamera]);
+
   return (
     <div className="mt-3 rounded-lg overflow-hidden bg-background/80 border border-border">
       {/* Header */}

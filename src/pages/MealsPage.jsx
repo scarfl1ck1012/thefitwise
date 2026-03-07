@@ -125,44 +125,23 @@ export default function MealsPage() {
     if (!aiInput.trim()) return;
     setAiLoading(true);
     try {
-      const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!geminiKey) throw new Error("Missing Gemini API Key in .env.local");
+      const { data, error } = await supabase.functions.invoke("analyze-meal", {
+        body: { description: aiInput },
+      });
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [
-                {
-                  text: 'You are a nutrition analyzer API. You must return RAW JSON ONLY. No markdown blocks, no explanation. Parse the user\'s meal description and return an array of items. Structure: { "items": [ { "name": "Item Name", "calories": 100, "protein": 10, "carbs": 10, "fat": 5, "sodium": 50, "potassium": 100, "servings": 1 } ] }',
-                },
-              ],
-            },
-            contents: [{ role: "user", parts: [{ text: aiInput }] }],
-          }),
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to reach Gemini API");
-      const respData = await response.json();
-
-      const rawText = respData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      let parsed;
-      try {
-        parsed = JSON.parse(
-          rawText
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
-            .trim(),
-        );
-      } catch (e) {
-        throw new Error("AI failed to return valid JSON macros.");
+      if (error) {
+        throw new Error(error.message || "Failed to reach AI service");
       }
 
-      const items = parsed.items || [];
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      const items = data?.items || [];
+      if (items.length === 0) {
+        throw new Error("No items could be parsed from your description.");
+      }
+
       for (const item of items) {
         await addMeal.mutateAsync({
           recipe_title: item.name,

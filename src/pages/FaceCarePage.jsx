@@ -459,8 +459,37 @@ function SkincareStepCard({ item, isDone, onToggle }) {
 // --- Main Page ---
 export default function FaceCarePage() {
   const [activeTab, setActiveTab] = useState("skincare");
-  const [completedExercises, setCompletedExercises] = useState([]);
-  const [completedSkincare, setCompletedSkincare] = useState([]);
+  const todayDate = new Date().toLocaleDateString("en-CA");
+  const [completedExercises, setCompletedExercises] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_face_ex_" + todayDate);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [completedSkincare, setCompletedSkincare] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_skin_" + todayDate);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "fitwise_face_ex_" + todayDate,
+      JSON.stringify(completedExercises),
+    );
+  }, [completedExercises, todayDate]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "fitwise_skin_" + todayDate,
+      JSON.stringify(completedSkincare),
+    );
+  }, [completedSkincare, todayDate]);
   const [expandedExercise, setExpandedExercise] = useState(null);
   const [milestoneGlow, setMilestoneGlow] = useState(false);
 

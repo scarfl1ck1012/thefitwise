@@ -64,21 +64,22 @@ export default function AuthPage() {
         toast.error(
           "Network error. Check your internet connection and try again.",
         );
-      } else if (msg.includes("invalid login credentials")) {
-        toast.error("Incorrect email or password. Please try again.");
-      } else if (msg.includes("user already registered")) {
+      } else if (err.status === 400) {
+        if (msg.includes("password") && msg.includes("at least")) {
+          toast.error("Password must be at least 6 characters long.");
+        } else if (msg.includes("email not confirmed")) {
+          toast.error(
+            "Please check your email and confirm your account first.",
+          );
+        } else {
+          toast.error("Incorrect email or password. Please try again.");
+        }
+      } else if (err.status === 422) {
         toast.error(
           "This email already has an account. Try signing in instead.",
         );
-      } else if (
-        msg.includes("rate limit") ||
-        msg.includes("too many requests")
-      ) {
+      } else if (err.status === 429) {
         toast.error("Too many attempts. Please wait a moment and try again.");
-      } else if (msg.includes("email not confirmed")) {
-        toast.error("Please check your email and confirm your account first.");
-      } else if (msg.includes("password") && msg.includes("at least")) {
-        toast.error("Password must be at least 6 characters long.");
       } else {
         toast.error(err.message || "Something went wrong. Please try again.");
       }

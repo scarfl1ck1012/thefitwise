@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserStats } from "@/hooks/useUserStats";
@@ -181,7 +181,18 @@ function LiveTimer({ onComplete }) {
 // ──────────────────────────────────────────────
 
 function CardioTracker({ profile }) {
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_cardio_sessions");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("fitwise_cardio_sessions", JSON.stringify(sessions));
+  }, [sessions]);
   const [showForm, setShowForm] = useState(false);
   const [selectedType, setSelectedType] = useState("");
   const [duration, setDuration] = useState("");
@@ -410,8 +421,30 @@ const emptyWeek = () => ({
 
 function WorkoutBuilder({ profile }) {
   const [mode, setMode] = useState("gym"); // "gym" | "home"
-  const [weeklyPlan, setWeeklyPlan] = useState(emptyWeek());
-  const [restDays, setRestDays] = useState({ wednesday: true, sunday: true });
+  const [weeklyPlan, setWeeklyPlan] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_weekly_plan");
+      return saved ? JSON.parse(saved) : emptyWeek();
+    } catch {
+      return emptyWeek();
+    }
+  });
+  const [restDays, setRestDays] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_weekly_rest");
+      return saved ? JSON.parse(saved) : { wednesday: true, sunday: true };
+    } catch {
+      return { wednesday: true, sunday: true };
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("fitwise_weekly_plan", JSON.stringify(weeklyPlan));
+  }, [weeklyPlan]);
+
+  useEffect(() => {
+    localStorage.setItem("fitwise_weekly_rest", JSON.stringify(restDays));
+  }, [restDays]);
   const [selectedDay, setSelectedDay] = useState("monday");
   const [search, setSearch] = useState("");
   const [showAI, setShowAI] = useState(false);

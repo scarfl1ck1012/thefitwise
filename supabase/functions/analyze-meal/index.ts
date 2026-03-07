@@ -30,9 +30,9 @@ serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } =
-      await supabaseAuth.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: userData, error: userError } =
+      await supabaseAuth.auth.getUser(token);
+    if (userError || !userData?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -50,23 +50,12 @@ serve(async (req) => {
       );
     }
 
-    const apiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!apiKey) {
-      throw new Error("OPENAI_API_KEY not configured");
+    const geminiKey = Deno.env.get("GEMINI_API_KEY");
+    if (!geminiKey) {
+      throw new Error("GEMINI_API_KEY not configured in Edge Secrets");
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are a certified clinical nutritionist with a USDA food composition database. When given a food description, break it down into individual food items and provide PRECISE nutritional data.
+    const systemInstruction = `You are a certified clinical nutritionist with a USDA food composition database. When given a food description, break it down into individual food items and provide PRECISE nutritional data.
 
 CRITICAL: Return ONLY valid JSON, no markdown, no code blocks. Format:
 {"items":[{"name":"Food name","calories":123,"protein":10,"carbs":20,"fat":5,"sodium":200,"potassium":300,"servings":1}]}
@@ -90,20 +79,23 @@ REFERENCE VALUES (per standard serving):
 - 1 bowl dal: 180cal, 12g protein, 30g carbs, 2g fat, 490mg sodium, 480mg potassium
 - 1 medium banana: 105cal, 1g protein, 27g carbs, 0g fat, 1mg sodium, 422mg potassium
 - 100g chicken breast: 165cal, 31g protein, 0g carbs, 3.6g fat, 74mg sodium, 256mg potassium
-- 100g cooked white rice: 130cal, 3g protein, 28g carbs, 0.3g fat, 1mg sodium, 35mg potassium`,
-          },
-          {
-            role: "user",
-            content: description,
-          },
-        ],
-        temperature: 0.1,
-        max_tokens: 1500,
-      }),
-    });
+- 100g cooked white rice: 130cal, 3g protein, 28g carbs, 0.3g fat, 1mg sodium, 35mg potassium`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          contents: [{ role: "user", parts: [{ text: description }] }],
+          generationConfig: { temperature: 0.1 },
+        }),
+      },
+    );
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     // Parse JSON from response, handling potential markdown wrapping
     let parsed;

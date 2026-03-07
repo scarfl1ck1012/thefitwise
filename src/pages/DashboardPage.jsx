@@ -4,6 +4,7 @@ import { useUserStats } from "@/hooks/useUserStats";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { getDailyChallenges } from "@/lib/challenges";
 import { trendingArticles, popularRecipes } from "@/lib/dashboardData";
+import { getLocalDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -21,7 +22,7 @@ import {
   Clock,
   BookOpen,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -94,11 +95,6 @@ function MiniDonut({ protein, carbs, fat, calories, goal }) {
 }
 
 // ─── Helpers ──────────────────────────────────────────────
-
-const getLocalDate = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
 
 function getDailyRotation(items, dateStr, limit = 5) {
   if (!items || items.length === 0) return [];
@@ -430,7 +426,21 @@ export default function DashboardPage() {
     activity_level: profile?.activity_level,
   });
 
-  const [completedChallenges, setCompletedChallenges] = useState([]);
+  const [completedChallenges, setCompletedChallenges] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_challenges_" + today);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "fitwise_challenges_" + today,
+      JSON.stringify(completedChallenges),
+    );
+  }, [completedChallenges, today]);
   const calorieGoal = profile?.daily_calories || 2000;
   const todayWorkouts = checkins.filter((c) => c.logged_at === today).length;
 
