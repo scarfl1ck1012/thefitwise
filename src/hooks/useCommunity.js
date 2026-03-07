@@ -15,7 +15,7 @@ export function useCommunity() {
       // 1. Fetch profiles safely
       const { data: profiles, error: pError } = await supabase
         .from("profiles")
-        .select("user_id, full_name, avatar_url");
+        .select("*");
       if (pError) {
         console.error("Fetch profiles error:", pError);
         return [];
@@ -23,7 +23,7 @@ export function useCommunity() {
       // 2. Fetch stats safely
       const { data: stats, error: sError } = await supabase
         .from("user_stats")
-        .select("user_id, xp, level, current_streak");
+        .select("*");
 
       if (sError) console.error("Fetch stats error:", sError);
 
