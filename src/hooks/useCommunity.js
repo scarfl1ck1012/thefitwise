@@ -16,9 +16,10 @@ export function useCommunity() {
       const { data: profiles, error: pError } = await supabase
         .from("profiles")
         .select("user_id, full_name, avatar_url");
-
-      if (pError) throw pError;
-
+      if (pError) {
+        console.error("Fetch profiles error:", pError);
+        return [];
+      }
       // 2. Fetch stats safely
       const { data: stats, error: sError } = await supabase
         .from("user_stats")
@@ -55,7 +56,10 @@ export function useCommunity() {
         .select("user_id, friend_id")
         .eq("user_id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Fetch friendships error:", error);
+        return [];
+      }
       return data || []; // e.g [{ userId: A, friendId: B }]
     },
     enabled: !!user,
@@ -71,7 +75,10 @@ export function useCommunity() {
         .eq("status", "pending")
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`); // Fetch both incoming and outgoing
 
-      if (error) throw error;
+      if (error) {
+        console.error("Fetch friend requests error:", error);
+        return [];
+      }
       return data || [];
     },
     enabled: !!user,
