@@ -24,7 +24,7 @@ export default function AuthPage() {
   // Redirect to dashboard if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [user, authLoading, navigate]);
   const handleSubmit = async (e) => {

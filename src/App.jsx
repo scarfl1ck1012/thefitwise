@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import AuthPage from "./pages/AuthPage";
 import AppLayout from "./components/AppLayout";
+import LandingPage from "./pages/LandingPage";
 import DashboardPage from "./pages/DashboardPage";
 import MealsPage from "./pages/MealsPage";
 import WeightPage from "./pages/WeightPage";
@@ -40,9 +41,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route element={<AuthGuard />}>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/meals" element={<MealsPage />} />
             <Route path="/weight" element={<WeightPage />} />
             <Route path="/workouts" element={<WorkoutsPage />} />

@@ -22,7 +22,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import FitwiseChat from "@/components/FitwiseChat";
 const navItems = [
-  { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/meals", icon: UtensilsCrossed, label: "Meals" },
   { to: "/weight", icon: Weight, label: "Weight" },
   { to: "/workouts", icon: Activity, label: "Progress" },
@@ -54,7 +54,7 @@ export default function AppLayout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === "/"}
+              end={item.to === "/dashboard"}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
@@ -127,7 +127,7 @@ export default function AppLayout() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  end={item.to === "/"}
+                  end={item.to === "/dashboard"}
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`
