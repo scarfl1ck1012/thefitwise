@@ -6,35 +6,40 @@ export const trendingArticles = [
   {
     id: 1,
     title: "The Mechanisms of Muscle Hypertrophy and Their Application",
-    thumbnail: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
     url: "https://pubmed.ncbi.nlm.nih.gov/20847704/",
     tag: "Science",
   },
   {
     id: 2,
     title: "The Complete Strength Training Guide",
-    thumbnail: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=250&fit=crop",
     url: "https://www.strongerbyscience.com/complete-strength-training-guide/",
     tag: "Training",
   },
   {
     id: 3,
     title: "Pain in Training: What To Do?",
-    thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
     url: "https://www.barbellmedicine.com/blog/pain-in-training-what-do/",
     tag: "Rehab",
   },
   {
     id: 4,
     title: "How to Squat: The Definitive Guide",
-    thumbnail: "https://images.unsplash.com/photo-1566241440091-ec10de8db2e1?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1566241440091-ec10de8db2e1?w=400&h=250&fit=crop",
     url: "https://www.strongerbyscience.com/how-to-squat/",
     tag: "Biomechanics",
   },
   {
     id: 5,
     title: "Volume, Load, and Frequency in Resistance Training",
-    thumbnail: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop",
     url: "https://www.strongerbyscience.com/training-frequency/",
     tag: "Programming",
   },
@@ -43,35 +48,40 @@ export const trendingArticles = [
   {
     id: 6,
     title: "Creatine: The Ultimate Guide to the Most Researched Supplement",
-    thumbnail: "https://images.unsplash.com/photo-1593095948071-474c5cc2c614?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1693996045435-af7c48b9cafb?w=400&h=250&fit=crop",
     url: "https://examine.com/supplements/creatine/",
     tag: "Supplements",
   },
   {
     id: 7,
     title: "International Society of Sports Nutrition Position Stand: Protein",
-    thumbnail: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=400&h=250&fit=crop",
     url: "https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0177-8",
     tag: "Nutrition",
   },
   {
     id: 8,
     title: "Ashwagandha: Benefits, Side Effects, and Dosage",
-    thumbnail: "https://images.unsplash.com/photo-1612852098516-55d01c75769a?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1612852098516-55d01c75769a?w=400&h=250&fit=crop",
     url: "https://examine.com/supplements/ashwagandha/",
     tag: "Supplements",
   },
   {
     id: 9,
     title: "The Ultimate Guide to Intermittent Fasting",
-    thumbnail: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop",
     url: "https://www.healthline.com/nutrition/intermittent-fasting-guide",
     tag: "Diet",
   },
   {
     id: 10,
     title: "Do You Need to Drink 8 Glasses of Water a Day?",
-    thumbnail: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=250&fit=crop",
     url: "https://www.healthline.com/nutrition/8-glasses-of-water-per-day",
     tag: "Hydration",
   },
@@ -80,35 +90,40 @@ export const trendingArticles = [
   {
     id: 11,
     title: "How Exercise Affects Sleep Duration and Quality",
-    thumbnail: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=400&h=250&fit=crop",
     url: "https://www.sleepfoundation.org/physical-activity/exercise-and-sleep",
     tag: "Sleep",
   },
   {
     id: 12,
     title: "Centenarian Decathlon: Training for the Last Decade of Life",
-    thumbnail: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=250&fit=crop",
     url: "https://peterattiamd.com/how-to-train-for-the-centenarian-decathlon/",
     tag: "Longevity",
   },
   {
     id: 13,
     title: "The Truth About Cold Plunges and Ice Baths",
-    thumbnail: "https://images.unsplash.com/photo-1515444744559-7be63e1600de?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1515444744559-7be63e1600de?w=400&h=250&fit=crop",
     url: "https://hubermanlab.com/the-science-and-use-of-cold-exposure-for-health-and-performance/",
     tag: "Recovery",
   },
   {
     id: 14,
     title: "Sauna Health Benefits: Are They Real?",
-    thumbnail: "https://images.unsplash.com/photo-1515444744559-7be63e1600de?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1515444744559-7be63e1600de?w=400&h=250&fit=crop",
     url: "https://www.health.harvard.edu/blog/sauna-use-linked-longer-life-fewer-fatal-heart-problems-201502257755",
     tag: "Recovery",
   },
   {
     id: 15,
     title: "Why You Should Take a Deload Week",
-    thumbnail: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
     url: "https://www.barbellmedicine.com/blog/the-science-of-deloading/",
     tag: "Training",
   },
@@ -117,35 +132,41 @@ export const trendingArticles = [
   {
     id: 16,
     title: "What is Zone 2 Training and Why Is It Important?",
-    thumbnail: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop",
     url: "https://peterattiamd.com/category/exercise/aerobic-zone-2/",
     tag: "Cardio",
   },
   {
     id: 17,
-    title: "High-Intensity Interval Training (HIIT): What It Is and How to Do It",
-    thumbnail: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=250&fit=crop",
+    title:
+      "High-Intensity Interval Training (HIIT): What It Is and How to Do It",
+    thumbnail:
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=250&fit=crop",
     url: "https://www.acsm.org/docs/default-source/files-for-resource-library/high-intensity-interval-training.pdf",
     tag: "Cardio",
   },
   {
     id: 18,
     title: "VO2 Max: How to Measure and Improve It",
-    thumbnail: "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=400&h=250&fit=crop",
     url: "https://health.clevelandclinic.org/what-is-vo2-max-and-how-to-improve-it",
     tag: "Health",
   },
   {
     id: 19,
     title: "The Benefits of Rucking for Strength and Cardio",
-    thumbnail: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=250&fit=crop",
     url: "https://www.goruck.com/pages/what-is-rucking",
     tag: "Conditioning",
   },
   {
     id: 20,
     title: "10,000 Steps a Day: Too Low? Too High?",
-    thumbnail: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=250&fit=crop",
     url: "https://www.health.harvard.edu/blog/10000-steps-a-day-or-fewer-2019071117305",
     tag: "Activity",
   },
@@ -154,35 +175,40 @@ export const trendingArticles = [
   {
     id: 21,
     title: "How to Build New Habits That Actually Stick",
-    thumbnail: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=250&fit=crop",
     url: "https://jamesclear.com/habit-guide",
     tag: "Habits",
   },
   {
     id: 22,
     title: "The Psychology of Weight Loss Motivation",
-    thumbnail: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&h=250&fit=crop",
     url: "https://www.apa.org/topics/healthy-eating/weight-loss",
     tag: "Mindset",
   },
   {
     id: 23,
     title: "Dopamine, Mindset & Drive",
-    thumbnail: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=250&fit=crop",
     url: "https://hubermanlab.com/controlling-your-dopamine-for-motivation-focus-and-satisfaction/",
     tag: "Psychology",
   },
   {
     id: 24,
     title: "Why You Should Stop Relying on Motivation",
-    thumbnail: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop",
     url: "https://hbr.org/2018/11/stop-relying-on-motivation-and-build-habits-instead",
     tag: "Discipline",
   },
   {
     id: 25,
     title: "Orthorexia: When Healthy Eating Becomes an Obsession",
-    thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop",
     url: "https://www.nationaleatingdisorders.org/learn/by-eating-disorder/other/orthorexia",
     tag: "Mental Health",
   },
@@ -191,80 +217,735 @@ export const trendingArticles = [
   {
     id: 26,
     title: "The Vegan Diet: A Complete Guide for Beginners",
-    thumbnail: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=250&fit=crop",
     url: "https://www.healthline.com/nutrition/vegan-diet-guide",
     tag: "Diet",
   },
   {
     id: 27,
     title: "Fish Oil / Omega-3 Supplements: Do They Work?",
-    thumbnail: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&h=250&fit=crop",
     url: "https://examine.com/supplements/fish-oil/",
     tag: "Supplements",
   },
   {
     id: 28,
     title: "The Ketogenic Diet: A Detailed Beginner's Guide",
-    thumbnail: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=250&fit=crop",
     url: "https://www.healthline.com/nutrition/ketogenic-diet-101",
     tag: "Diet",
   },
   {
     id: 29,
     title: "Macronutrients vs. Micronutrients: What's the Difference?",
-    thumbnail: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=400&h=250&fit=crop",
     url: "https://www.healthline.com/nutrition/micronutrients",
     tag: "Nutrition",
   },
   {
     id: 30,
     title: "How to Calculate Your Macros for Cutting or Bulking",
-    thumbnail: "https://images.unsplash.com/photo-1593095948071-474c5cc2c614?w=400&h=250&fit=crop",
+    thumbnail:
+      "https://images.unsplash.com/photo-1593095948071-474c5cc2c614?w=400&h=250&fit=crop",
     url: "https://www.strongerbyscience.com/diet/",
     tag: "Nutrition",
-  }
+  },
 ];
 
 export const popularRecipes = [
   // Bowls & Salads
-  { id: 1, title: "Lemon Herb Grilled Chicken Bowl", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop", calories: 480, protein: 42, carbs: 38, fat: 16, prepTime: "25 min", ingredients: ["2 chicken breasts (200g)", "1 cup brown rice", "1 cup mixed greens", "1 lemon", "2 tbsp olive oil"], steps: ["Marinate chicken in lemon juice and oil.", "Cook brown rice.", "Grill chicken for 6-7 mins per side.", "Assemble bowls with greens."] },
-  { id: 2, title: "Salmon Avocado Power Plate", image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop", calories: 560, protein: 38, carbs: 30, fat: 32, prepTime: "20 min", ingredients: ["1 salmon fillet", "1 avocado", "1 cup quinoa", "2 cups spinach", "Soy sauce"], steps: ["Pan-sear salmon skin-side down.", "Cook quinoa.", "Slice avocado.", "Assemble and drizzle with soy sauce."] },
-  { id: 3, title: "Turkey & Black Bean Burrito Bowl", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop", calories: 450, protein: 36, carbs: 52, fat: 12, prepTime: "15 min", ingredients: ["200g ground turkey", "1 can black beans", "1 cup brown rice", "1/2 cup salsa", "1 tsp cumin"], steps: ["Cook brown rice.", "Brown turkey with cumin.", "Add black beans and salsa.", "Layer in a bowl."] },
-  { id: 4, title: "Mediterranean Quinoa Salad", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop", calories: 380, protein: 14, carbs: 45, fat: 16, prepTime: "15 min", ingredients: ["1 cup cooked quinoa", "1/2 cup cherry tomatoes", "1/4 cup feta cheese", "1/4 cup kalamata olives", "2 tbsp vinaigrette"], steps: ["Chop veggies.", "Mix all ingredients in a large bowl.", "Toss with vinaigrette."] },
-  { id: 5, title: "Tuna Poke Bowl (High Protein)", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop", calories: 420, protein: 35, carbs: 40, fat: 12, prepTime: "10 min", ingredients: ["150g sashimi-grade tuna", "1 cup sushi rice", "1/2 avocado", "1 tbsp sesame oil", "1 tbsp soy sauce"], steps: ["Cube tuna and toss with sesame oil and soy sauce.", "Slice avocado.", "Serve over warm sushi rice."] },
+  {
+    id: 1,
+    title: "Lemon Herb Grilled Chicken Bowl",
+    image:
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop",
+    calories: 480,
+    protein: 42,
+    carbs: 38,
+    fat: 16,
+    prepTime: "25 min",
+    ingredients: [
+      "2 chicken breasts (200g)",
+      "1 cup brown rice",
+      "1 cup mixed greens",
+      "1 lemon",
+      "2 tbsp olive oil",
+    ],
+    steps: [
+      "Marinate chicken in lemon juice and oil.",
+      "Cook brown rice.",
+      "Grill chicken for 6-7 mins per side.",
+      "Assemble bowls with greens.",
+    ],
+  },
+  {
+    id: 2,
+    title: "Salmon Avocado Power Plate",
+    image:
+      "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop",
+    calories: 560,
+    protein: 38,
+    carbs: 30,
+    fat: 32,
+    prepTime: "20 min",
+    ingredients: [
+      "1 salmon fillet",
+      "1 avocado",
+      "1 cup quinoa",
+      "2 cups spinach",
+      "Soy sauce",
+    ],
+    steps: [
+      "Pan-sear salmon skin-side down.",
+      "Cook quinoa.",
+      "Slice avocado.",
+      "Assemble and drizzle with soy sauce.",
+    ],
+  },
+  {
+    id: 3,
+    title: "Turkey & Black Bean Burrito Bowl",
+    image:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop",
+    calories: 450,
+    protein: 36,
+    carbs: 52,
+    fat: 12,
+    prepTime: "15 min",
+    ingredients: [
+      "200g ground turkey",
+      "1 can black beans",
+      "1 cup brown rice",
+      "1/2 cup salsa",
+      "1 tsp cumin",
+    ],
+    steps: [
+      "Cook brown rice.",
+      "Brown turkey with cumin.",
+      "Add black beans and salsa.",
+      "Layer in a bowl.",
+    ],
+  },
+  {
+    id: 4,
+    title: "Mediterranean Quinoa Salad",
+    image:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop",
+    calories: 380,
+    protein: 14,
+    carbs: 45,
+    fat: 16,
+    prepTime: "15 min",
+    ingredients: [
+      "1 cup cooked quinoa",
+      "1/2 cup cherry tomatoes",
+      "1/4 cup feta cheese",
+      "1/4 cup kalamata olives",
+      "2 tbsp vinaigrette",
+    ],
+    steps: [
+      "Chop veggies.",
+      "Mix all ingredients in a large bowl.",
+      "Toss with vinaigrette.",
+    ],
+  },
+  {
+    id: 5,
+    title: "Tuna Poke Bowl (High Protein)",
+    image:
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop",
+    calories: 420,
+    protein: 35,
+    carbs: 40,
+    fat: 12,
+    prepTime: "10 min",
+    ingredients: [
+      "150g sashimi-grade tuna",
+      "1 cup sushi rice",
+      "1/2 avocado",
+      "1 tbsp sesame oil",
+      "1 tbsp soy sauce",
+    ],
+    steps: [
+      "Cube tuna and toss with sesame oil and soy sauce.",
+      "Slice avocado.",
+      "Serve over warm sushi rice.",
+    ],
+  },
 
   // Breakfasts & Oats
-  { id: 6, title: "High-Protein Overnight Oats", image: "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=600&h=400&fit=crop", calories: 390, protein: 32, carbs: 48, fat: 10, prepTime: "5 min", ingredients: ["1/2 cup rolled oats", "1 scoop vanilla whey", "3/4 cup Greek yogurt", "1/2 cup almond milk", "1/2 cup berries"], steps: ["Combine all dry ingredients.", "Mix in wet ingredients.", "Refrigerate overnight."] },
-  { id: 7, title: "Egg White Spinach Omelette", image: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=600&h=400&fit=crop", calories: 250, protein: 30, carbs: 5, fat: 10, prepTime: "10 min", ingredients: ["1 cup egg whites", "2 whole eggs", "2 cups fresh spinach", "1/4 cup feta cheese", "Salt and pepper"], steps: ["Whisk eggs and egg whites.", "Wilt spinach in pan.", "Pour eggs over spinach.", "Fold and top with feta."] },
-  { id: 8, title: "Anabolic Protein Pancakes", image: "https://images.unsplash.com/photo-1528207776546-384bb1c7d6c6?w=600&h=400&fit=crop", calories: 410, protein: 40, carbs: 45, fat: 6, prepTime: "15 min", ingredients: ["1 scoop protein powder", "1/2 cup oats (blended)", "1 banana (mashed)", "1/2 cup egg whites", "1 tsp baking powder"], steps: ["Blend oats into flour.", "Mix all ingredients into batter.", "Cook on non-stick pan until bubbly, then flip."] },
-  { id: 9, title: "Avocado Toast with Poached Egg", image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop", calories: 350, protein: 18, carbs: 30, fat: 18, prepTime: "10 min", ingredients: ["2 slices sourdough bread", "1/2 avocado", "2 large eggs", "Red pepper flakes"], steps: ["Toast bread.", "Mash avocado and spread on toast.", "Poach eggs for 3 mins.", "Place eggs on toast and season."] },
-  { id: 10, title: "Cottage Cheese Berry Bowl", image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop", calories: 280, protein: 28, carbs: 22, fat: 8, prepTime: "2 min", ingredients: ["1 cup low-fat cottage cheese", "1/2 cup blueberries", "1/2 cup raspberries", "1 tbsp honey"], steps: ["Add cottage cheese to bowl.", "Top with berries.", "Drizzle with honey."] },
+  {
+    id: 6,
+    title: "High-Protein Overnight Oats",
+    image:
+      "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=600&h=400&fit=crop",
+    calories: 390,
+    protein: 32,
+    carbs: 48,
+    fat: 10,
+    prepTime: "5 min",
+    ingredients: [
+      "1/2 cup rolled oats",
+      "1 scoop vanilla whey",
+      "3/4 cup Greek yogurt",
+      "1/2 cup almond milk",
+      "1/2 cup berries",
+    ],
+    steps: [
+      "Combine all dry ingredients.",
+      "Mix in wet ingredients.",
+      "Refrigerate overnight.",
+    ],
+  },
+  {
+    id: 7,
+    title: "Egg White Spinach Omelette",
+    image:
+      "https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=600&h=400&fit=crop",
+    calories: 250,
+    protein: 30,
+    carbs: 5,
+    fat: 10,
+    prepTime: "10 min",
+    ingredients: [
+      "1 cup egg whites",
+      "2 whole eggs",
+      "2 cups fresh spinach",
+      "1/4 cup feta cheese",
+      "Salt and pepper",
+    ],
+    steps: [
+      "Whisk eggs and egg whites.",
+      "Wilt spinach in pan.",
+      "Pour eggs over spinach.",
+      "Fold and top with feta.",
+    ],
+  },
+  {
+    id: 8,
+    title: "Anabolic Protein Pancakes",
+    image:
+      "https://images.unsplash.com/photo-1528207776546-384bb1c7d6c6?w=600&h=400&fit=crop",
+    calories: 410,
+    protein: 40,
+    carbs: 45,
+    fat: 6,
+    prepTime: "15 min",
+    ingredients: [
+      "1 scoop protein powder",
+      "1/2 cup oats (blended)",
+      "1 banana (mashed)",
+      "1/2 cup egg whites",
+      "1 tsp baking powder",
+    ],
+    steps: [
+      "Blend oats into flour.",
+      "Mix all ingredients into batter.",
+      "Cook on non-stick pan until bubbly, then flip.",
+    ],
+  },
+  {
+    id: 9,
+    title: "Avocado Toast with Poached Egg",
+    image:
+      "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop",
+    calories: 350,
+    protein: 18,
+    carbs: 30,
+    fat: 18,
+    prepTime: "10 min",
+    ingredients: [
+      "2 slices sourdough bread",
+      "1/2 avocado",
+      "2 large eggs",
+      "Red pepper flakes",
+    ],
+    steps: [
+      "Toast bread.",
+      "Mash avocado and spread on toast.",
+      "Poach eggs for 3 mins.",
+      "Place eggs on toast and season.",
+    ],
+  },
+  {
+    id: 10,
+    title: "Cottage Cheese Berry Bowl",
+    image:
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop",
+    calories: 280,
+    protein: 28,
+    carbs: 22,
+    fat: 8,
+    prepTime: "2 min",
+    ingredients: [
+      "1 cup low-fat cottage cheese",
+      "1/2 cup blueberries",
+      "1/2 cup raspberries",
+      "1 tbsp honey",
+    ],
+    steps: [
+      "Add cottage cheese to bowl.",
+      "Top with berries.",
+      "Drizzle with honey.",
+    ],
+  },
 
   // Heavy Meals & Dinners
-  { id: 11, title: "Lean Beef & Broccoli Stir-fry", image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=400&fit=crop", calories: 450, protein: 35, carbs: 30, fat: 18, prepTime: "20 min", ingredients: ["200g flank steak (sliced)", "2 cups broccoli florets", "2 tbsp soy sauce", "1 tsp sesame oil", "1 tsp ginger"], steps: ["Stir fry beef until browned.", "Remove beef, add broccoli and steam.", "Add beef back with soy sauce and ginger.", "Serve."] },
-  { id: 12, title: "Baked Cod with Asparagus", image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop", calories: 290, protein: 38, carbs: 8, fat: 10, prepTime: "25 min", ingredients: ["2 cod fillets (150g each)", "1 bunch asparagus", "1 lemon", "1 tbsp olive oil"], steps: ["Preheat oven to 400F.", "Place cod and asparagus on baking sheet.", "Drizzle with oil and lemon.", "Bake for 15 minutes."] },
-  { id: 13, title: "Protein Packed Lentil Stew", image: "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=400&fit=crop", calories: 380, protein: 22, carbs: 60, fat: 4, prepTime: "40 min", ingredients: ["1 cup dry lentils", "4 cups vegetable broth", "1 diced onion", "2 diced carrots", "1 can crushed tomatoes"], steps: ["Saute onions and carrots.", "Add broth, tomatoes, and lentils.", "Simmer for 30 minutes until lentils are soft."] },
-  { id: 14, title: "Bison Burger with Sweet Potato Buns", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop", calories: 520, protein: 40, carbs: 35, fat: 22, prepTime: "20 min", ingredients: ["150g ground bison", "2 sweet potato slices (roasted)", "1 slice pepper jack cheese", "Lettuce and tomato"], steps: ["Form bison into patty and grill.", "Roast thick sweet potato slices to use as buns.", "Assemble burger."] },
-  { id: 15, title: "Greek Chicken Meatballs", image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&h=400&fit=crop", calories: 340, protein: 35, carbs: 12, fat: 16, prepTime: "30 min", ingredients: ["250g ground chicken", "1/4 cup feta", "1 tbsp oregano", "1/2 cup tzatziki", "1 cucumber"], steps: ["Mix chicken, feta, and oregano.", "Form meatballs and bake at 400F for 20 mins.", "Serve with tzatziki and cucumbers."] },
+  {
+    id: 11,
+    title: "Lean Beef & Broccoli Stir-fry",
+    image:
+      "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=400&fit=crop",
+    calories: 450,
+    protein: 35,
+    carbs: 30,
+    fat: 18,
+    prepTime: "20 min",
+    ingredients: [
+      "200g flank steak (sliced)",
+      "2 cups broccoli florets",
+      "2 tbsp soy sauce",
+      "1 tsp sesame oil",
+      "1 tsp ginger",
+    ],
+    steps: [
+      "Stir fry beef until browned.",
+      "Remove beef, add broccoli and steam.",
+      "Add beef back with soy sauce and ginger.",
+      "Serve.",
+    ],
+  },
+  {
+    id: 12,
+    title: "Baked Cod with Asparagus",
+    image:
+      "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop",
+    calories: 290,
+    protein: 38,
+    carbs: 8,
+    fat: 10,
+    prepTime: "25 min",
+    ingredients: [
+      "2 cod fillets (150g each)",
+      "1 bunch asparagus",
+      "1 lemon",
+      "1 tbsp olive oil",
+    ],
+    steps: [
+      "Preheat oven to 400F.",
+      "Place cod and asparagus on baking sheet.",
+      "Drizzle with oil and lemon.",
+      "Bake for 15 minutes.",
+    ],
+  },
+  {
+    id: 13,
+    title: "Protein Packed Lentil Stew",
+    image:
+      "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=400&fit=crop",
+    calories: 380,
+    protein: 22,
+    carbs: 60,
+    fat: 4,
+    prepTime: "40 min",
+    ingredients: [
+      "1 cup dry lentils",
+      "4 cups vegetable broth",
+      "1 diced onion",
+      "2 diced carrots",
+      "1 can crushed tomatoes",
+    ],
+    steps: [
+      "Saute onions and carrots.",
+      "Add broth, tomatoes, and lentils.",
+      "Simmer for 30 minutes until lentils are soft.",
+    ],
+  },
+  {
+    id: 14,
+    title: "Bison Burger with Sweet Potato Buns",
+    image:
+      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop",
+    calories: 520,
+    protein: 40,
+    carbs: 35,
+    fat: 22,
+    prepTime: "20 min",
+    ingredients: [
+      "150g ground bison",
+      "2 sweet potato slices (roasted)",
+      "1 slice pepper jack cheese",
+      "Lettuce and tomato",
+    ],
+    steps: [
+      "Form bison into patty and grill.",
+      "Roast thick sweet potato slices to use as buns.",
+      "Assemble burger.",
+    ],
+  },
+  {
+    id: 15,
+    title: "Greek Chicken Meatballs",
+    image:
+      "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&h=400&fit=crop",
+    calories: 340,
+    protein: 35,
+    carbs: 12,
+    fat: 16,
+    prepTime: "30 min",
+    ingredients: [
+      "250g ground chicken",
+      "1/4 cup feta",
+      "1 tbsp oregano",
+      "1/2 cup tzatziki",
+      "1 cucumber",
+    ],
+    steps: [
+      "Mix chicken, feta, and oregano.",
+      "Form meatballs and bake at 400F for 20 mins.",
+      "Serve with tzatziki and cucumbers.",
+    ],
+  },
 
   // Global & Spiced
-  { id: 16, title: "Macro-Friendly Chicken Tikka Masala", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop", calories: 410, protein: 45, carbs: 20, fat: 14, prepTime: "35 min", ingredients: ["200g chicken breast", "1/2 cup greek yogurt", "1/2 cup tomato puree", "1 tbsp garam masala", "1/2 onion"], steps: ["Marinate chicken in yogurt and spices.", "Cook chicken in a pan.", "Add onion and tomato puree, simmer for 15 mins."] },
-  { id: 17, title: "Vegan Tofu Pad Thai", image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?w=600&h=400&fit=crop", calories: 460, protein: 22, carbs: 60, fat: 16, prepTime: "25 min", ingredients: ["150g firm tofu", "2 oz rice noodles", "1/4 cup bean sprouts", "2 tbsp peanut butter", "1 tbsp soy sauce"], steps: ["Press and cube tofu, pan-fry until crispy.", "Boil noodles.", "Mix peanut butter and soy sauce for dressing.", "Toss everything together."] },
-  { id: 18, title: "Spicy Shrimp Tacos", image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=600&h=400&fit=crop", calories: 350, protein: 28, carbs: 38, fat: 10, prepTime: "15 min", ingredients: ["150g raw shrimp", "2 corn tortillas", "1/4 cup purple cabbage", "1 lime", "1 tsp chili powder"], steps: ["Season shrimp with chili powder and saute for 4 mins.", "Warm tortillas.", "Assemble with cabbage and lime juice."] },
-  { id: 19, title: "Healthy Butter Paneer", image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop", calories: 420, protein: 22, carbs: 18, fat: 30, prepTime: "30 min", ingredients: ["150g paneer", "2 medium tomatoes (pureed)", "1 tsp kasuri methi", "1 tbsp cashew paste", "1/2 cup skim milk"], steps: ["Saute tomato puree until thick.", "Add cashew paste and skim milk.", "Add cubed paneer and simmer with kasuri methi."] },
-  { id: 20, title: "Korean Beef Bowl", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop", calories: 510, protein: 32, carbs: 45, fat: 20, prepTime: "15 min", ingredients: ["150g ground beef", "1 cup jasmine rice", "1 tbsp gochujang", "1 tbsp soy sauce", "1 green onion"], steps: ["Brown ground beef.", "Stir in gochujang and soy sauce.", "Serve over rice and top with green onions."] },
+  {
+    id: 16,
+    title: "Macro-Friendly Chicken Tikka Masala",
+    image:
+      "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop",
+    calories: 410,
+    protein: 45,
+    carbs: 20,
+    fat: 14,
+    prepTime: "35 min",
+    ingredients: [
+      "200g chicken breast",
+      "1/2 cup greek yogurt",
+      "1/2 cup tomato puree",
+      "1 tbsp garam masala",
+      "1/2 onion",
+    ],
+    steps: [
+      "Marinate chicken in yogurt and spices.",
+      "Cook chicken in a pan.",
+      "Add onion and tomato puree, simmer for 15 mins.",
+    ],
+  },
+  {
+    id: 17,
+    title: "Vegan Tofu Pad Thai",
+    image:
+      "https://images.unsplash.com/photo-1559314809-0d155014e29e?w=600&h=400&fit=crop",
+    calories: 460,
+    protein: 22,
+    carbs: 60,
+    fat: 16,
+    prepTime: "25 min",
+    ingredients: [
+      "150g firm tofu",
+      "2 oz rice noodles",
+      "1/4 cup bean sprouts",
+      "2 tbsp peanut butter",
+      "1 tbsp soy sauce",
+    ],
+    steps: [
+      "Press and cube tofu, pan-fry until crispy.",
+      "Boil noodles.",
+      "Mix peanut butter and soy sauce for dressing.",
+      "Toss everything together.",
+    ],
+  },
+  {
+    id: 18,
+    title: "Spicy Shrimp Tacos",
+    image:
+      "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=600&h=400&fit=crop",
+    calories: 350,
+    protein: 28,
+    carbs: 38,
+    fat: 10,
+    prepTime: "15 min",
+    ingredients: [
+      "150g raw shrimp",
+      "2 corn tortillas",
+      "1/4 cup purple cabbage",
+      "1 lime",
+      "1 tsp chili powder",
+    ],
+    steps: [
+      "Season shrimp with chili powder and saute for 4 mins.",
+      "Warm tortillas.",
+      "Assemble with cabbage and lime juice.",
+    ],
+  },
+  {
+    id: 19,
+    title: "Healthy Butter Paneer",
+    image:
+      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop",
+    calories: 420,
+    protein: 22,
+    carbs: 18,
+    fat: 30,
+    prepTime: "30 min",
+    ingredients: [
+      "150g paneer",
+      "2 medium tomatoes (pureed)",
+      "1 tsp kasuri methi",
+      "1 tbsp cashew paste",
+      "1/2 cup skim milk",
+    ],
+    steps: [
+      "Saute tomato puree until thick.",
+      "Add cashew paste and skim milk.",
+      "Add cubed paneer and simmer with kasuri methi.",
+    ],
+  },
+  {
+    id: 20,
+    title: "Korean Beef Bowl",
+    image:
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=400&fit=crop",
+    calories: 510,
+    protein: 32,
+    carbs: 45,
+    fat: 20,
+    prepTime: "15 min",
+    ingredients: [
+      "150g ground beef",
+      "1 cup jasmine rice",
+      "1 tbsp gochujang",
+      "1 tbsp soy sauce",
+      "1 green onion",
+    ],
+    steps: [
+      "Brown ground beef.",
+      "Stir in gochujang and soy sauce.",
+      "Serve over rice and top with green onions.",
+    ],
+  },
 
   // Smoothies & Snacks
-  { id: 21, title: "Peanut Butter Banana Bulk Shake", image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600&h=400&fit=crop", calories: 600, protein: 40, carbs: 65, fat: 24, prepTime: "5 min", ingredients: ["2 scoops chocolate whey", "1 large banana", "2 tbsp peanut butter", "1 cup whole milk", "Handful of ice"], steps: ["Add all ingredients to blender.", "Blend on high for 30 seconds."] },
-  { id: 22, title: "Berry Antioxidant Smoothie", image: "https://images.unsplash.com/photo-1505253304499-671c55fb57fe?w=600&h=400&fit=crop", calories: 250, protein: 25, carbs: 30, fat: 4, prepTime: "5 min", ingredients: ["1 scoop vanilla whey", "1 cup mixed berries", "1 cup spinach", "1 cup almond milk"], steps: ["Add all ingredients to blender.", "Blend until smooth."] },
-  { id: 23, title: "No-Bake Energy Bites", image: "https://images.unsplash.com/photo-1528207776546-384bb1c7d6c6?w=600&h=400&fit=crop", calories: 150, protein: 5, carbs: 18, fat: 8, prepTime: "10 min", ingredients: ["1 cup oats", "1/2 cup peanut butter", "1/3 cup honey", "1/4 cup chocolate chips"], steps: ["Mix all ingredients in a bowl.", "Roll into 1-inch balls.", "Chill in fridge for 30 minutes."] },
-  { id: 24, title: "Chocolate Chia Pudding", image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop", calories: 220, protein: 8, carbs: 25, fat: 12, prepTime: "5 min + overnight", ingredients: ["3 tbsp chia seeds", "1 cup almond milk", "1 tbsp cocoa powder", "1 tbsp maple syrup"], steps: ["Whisk all ingredients together.", "Let sit for 5 minutes, whisk again.", "Refrigerate overnight."] },
-  { id: 25, title: "Roasted Chickpea Snack", image: "https://images.unsplash.com/photo-1515444744559-7be63e1600de?w=600&h=400&fit=crop", calories: 180, protein: 8, carbs: 25, fat: 6, prepTime: "30 min", ingredients: ["1 can chickpeas", "1 tbsp olive oil", "1 tsp smoked paprika", "1/2 tsp garlic powder"], steps: ["Drain and dry chickpeas thoroughly.", "Toss with oil and spices.", "Roast at 400F for 20-25 minutes until crunchy."] },
+  {
+    id: 21,
+    title: "Peanut Butter Banana Bulk Shake",
+    image:
+      "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600&h=400&fit=crop",
+    calories: 600,
+    protein: 40,
+    carbs: 65,
+    fat: 24,
+    prepTime: "5 min",
+    ingredients: [
+      "2 scoops chocolate whey",
+      "1 large banana",
+      "2 tbsp peanut butter",
+      "1 cup whole milk",
+      "Handful of ice",
+    ],
+    steps: ["Add all ingredients to blender.", "Blend on high for 30 seconds."],
+  },
+  {
+    id: 22,
+    title: "Berry Antioxidant Smoothie",
+    image:
+      "https://images.unsplash.com/photo-1505253304499-671c55fb57fe?w=600&h=400&fit=crop",
+    calories: 250,
+    protein: 25,
+    carbs: 30,
+    fat: 4,
+    prepTime: "5 min",
+    ingredients: [
+      "1 scoop vanilla whey",
+      "1 cup mixed berries",
+      "1 cup spinach",
+      "1 cup almond milk",
+    ],
+    steps: ["Add all ingredients to blender.", "Blend until smooth."],
+  },
+  {
+    id: 23,
+    title: "No-Bake Energy Bites",
+    image:
+      "https://images.unsplash.com/photo-1528207776546-384bb1c7d6c6?w=600&h=400&fit=crop",
+    calories: 150,
+    protein: 5,
+    carbs: 18,
+    fat: 8,
+    prepTime: "10 min",
+    ingredients: [
+      "1 cup oats",
+      "1/2 cup peanut butter",
+      "1/3 cup honey",
+      "1/4 cup chocolate chips",
+    ],
+    steps: [
+      "Mix all ingredients in a bowl.",
+      "Roll into 1-inch balls.",
+      "Chill in fridge for 30 minutes.",
+    ],
+  },
+  {
+    id: 24,
+    title: "Chocolate Chia Pudding",
+    image:
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=400&fit=crop",
+    calories: 220,
+    protein: 8,
+    carbs: 25,
+    fat: 12,
+    prepTime: "5 min + overnight",
+    ingredients: [
+      "3 tbsp chia seeds",
+      "1 cup almond milk",
+      "1 tbsp cocoa powder",
+      "1 tbsp maple syrup",
+    ],
+    steps: [
+      "Whisk all ingredients together.",
+      "Let sit for 5 minutes, whisk again.",
+      "Refrigerate overnight.",
+    ],
+  },
+  {
+    id: 25,
+    title: "Roasted Chickpea Snack",
+    image:
+      "https://images.unsplash.com/photo-1515444744559-7be63e1600de?w=600&h=400&fit=crop",
+    calories: 180,
+    protein: 8,
+    carbs: 25,
+    fat: 6,
+    prepTime: "30 min",
+    ingredients: [
+      "1 can chickpeas",
+      "1 tbsp olive oil",
+      "1 tsp smoked paprika",
+      "1/2 tsp garlic powder",
+    ],
+    steps: [
+      "Drain and dry chickpeas thoroughly.",
+      "Toss with oil and spices.",
+      "Roast at 400F for 20-25 minutes until crunchy.",
+    ],
+  },
 
   // Plant-Based Mains
-  { id: 26, title: "Lentil Bolognese Pasta", image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop", calories: 420, protein: 18, carbs: 65, fat: 10, prepTime: "30 min", ingredients: ["1 cup cooked green lentils", "1/2 cup marinara sauce", "2 oz whole wheat pasta", "1 tbsp nutritional yeast"], steps: ["Cook pasta.", "Warm marinara sauce and mix in lentils.", "Combine and top with nutritional yeast."] },
-  { id: 27, title: "Vegan Seitan Fajitas", image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop", calories: 390, protein: 35, carbs: 40, fat: 12, prepTime: "20 min", ingredients: ["150g seitan strips", "1 bell pepper (sliced)", "1/2 onion (sliced)", "2 flour tortillas", "1 tbsp fajita seasoning"], steps: ["Saute onions and peppers until soft.", "Add seitan and fajita seasoning, cook for 5 mins.", "Serve in tortillas."] },
-  { id: 28, title: "Sweet Potato & Black Bean Hash", image: "https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=600&h=400&fit=crop", calories: 340, protein: 12, carbs: 55, fat: 8, prepTime: "25 min", ingredients: ["1 sweet potato (diced)", "1/2 cup black beans", "1/4 cup corn", "1 tsp paprika", "1 tbsp olive oil"], steps: ["Saute sweet potatoes in oil until tender.", "Stir in black beans, corn, and spices.", "Cook until heated through."] },
-  { id: 29, title: "Edamame & Soba Noodle Salad", image: "https://images.unsplash.com/photo-1559314809-0d155014e29e?w=600&h=400&fit=crop", calories: 380, protein: 20, carbs: 50, fat: 12, prepTime: "15 min", ingredients: ["2 oz soba noodles", "1/2 cup shelled edamame", "1/4 cup shredded carrots", "2 tbsp sesame dressing"], steps: ["Boil soba noodles and chill.", "Toss noodles with edamame and carrots.", "Mix in sesame dressing."] },
-  { id: 30, title: "Tempeh Bacon BLT", image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop", calories: 450, protein: 25, carbs: 45, fat: 18, prepTime: "15 min", ingredients: ["100g tempeh (sliced thin)", "2 slices whole wheat bread", "Lettuce and tomato", "1 tbsp vegan mayo", "Liquid smoke & soy sauce"], steps: ["Marinate tempeh in soy sauce and liquid smoke.", "Pan-fry tempeh until crispy.", "Toast bread and assemble sandwich."] }
+  {
+    id: 26,
+    title: "Lentil Bolognese Pasta",
+    image:
+      "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop",
+    calories: 420,
+    protein: 18,
+    carbs: 65,
+    fat: 10,
+    prepTime: "30 min",
+    ingredients: [
+      "1 cup cooked green lentils",
+      "1/2 cup marinara sauce",
+      "2 oz whole wheat pasta",
+      "1 tbsp nutritional yeast",
+    ],
+    steps: [
+      "Cook pasta.",
+      "Warm marinara sauce and mix in lentils.",
+      "Combine and top with nutritional yeast.",
+    ],
+  },
+  {
+    id: 27,
+    title: "Vegan Seitan Fajitas",
+    image:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop",
+    calories: 390,
+    protein: 35,
+    carbs: 40,
+    fat: 12,
+    prepTime: "20 min",
+    ingredients: [
+      "150g seitan strips",
+      "1 bell pepper (sliced)",
+      "1/2 onion (sliced)",
+      "2 flour tortillas",
+      "1 tbsp fajita seasoning",
+    ],
+    steps: [
+      "Saute onions and peppers until soft.",
+      "Add seitan and fajita seasoning, cook for 5 mins.",
+      "Serve in tortillas.",
+    ],
+  },
+  {
+    id: 28,
+    title: "Sweet Potato & Black Bean Hash",
+    image:
+      "https://images.unsplash.com/photo-1494390248081-4e521a5940db?w=600&h=400&fit=crop",
+    calories: 340,
+    protein: 12,
+    carbs: 55,
+    fat: 8,
+    prepTime: "25 min",
+    ingredients: [
+      "1 sweet potato (diced)",
+      "1/2 cup black beans",
+      "1/4 cup corn",
+      "1 tsp paprika",
+      "1 tbsp olive oil",
+    ],
+    steps: [
+      "Saute sweet potatoes in oil until tender.",
+      "Stir in black beans, corn, and spices.",
+      "Cook until heated through.",
+    ],
+  },
+  {
+    id: 29,
+    title: "Edamame & Soba Noodle Salad",
+    image:
+      "https://images.unsplash.com/photo-1559314809-0d155014e29e?w=600&h=400&fit=crop",
+    calories: 380,
+    protein: 20,
+    carbs: 50,
+    fat: 12,
+    prepTime: "15 min",
+    ingredients: [
+      "2 oz soba noodles",
+      "1/2 cup shelled edamame",
+      "1/4 cup shredded carrots",
+      "2 tbsp sesame dressing",
+    ],
+    steps: [
+      "Boil soba noodles and chill.",
+      "Toss noodles with edamame and carrots.",
+      "Mix in sesame dressing.",
+    ],
+  },
+  {
+    id: 30,
+    title: "Tempeh Bacon BLT",
+    image:
+      "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop",
+    calories: 450,
+    protein: 25,
+    carbs: 45,
+    fat: 18,
+    prepTime: "15 min",
+    ingredients: [
+      "100g tempeh (sliced thin)",
+      "2 slices whole wheat bread",
+      "Lettuce and tomato",
+      "1 tbsp vegan mayo",
+      "Liquid smoke & soy sauce",
+    ],
+    steps: [
+      "Marinate tempeh in soy sauce and liquid smoke.",
+      "Pan-fry tempeh until crispy.",
+      "Toast bread and assemble sandwich.",
+    ],
+  },
 ];
