@@ -10,6 +10,7 @@ import {
   Activity,
   Trophy,
   Sparkles,
+  Users,
   Settings,
   LogOut,
   Moon,
@@ -28,6 +29,7 @@ const navItems = [
   { to: "/gym", icon: Dumbbell, label: "Gym" },
   { to: "/habits", icon: Trophy, label: "Habits & XP" },
   { to: "/face-care", icon: Sparkles, label: "Face & Skincare" },
+  { to: "/community", icon: Users, label: "Community" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 export default function AppLayout() {

@@ -14,6 +14,7 @@ import HabitsPage from "./pages/HabitsPage";
 import FaceCarePage from "./pages/FaceCarePage";
 import SettingsPage from "./pages/SettingsPage";
 import GymPage from "./pages/GymPage";
+import CommunityPage from "./pages/CommunityPage";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 function AuthGuard() {
@@ -45,10 +46,11 @@ const App = () => (
             <Route path="/meals" element={<MealsPage />} />
             <Route path="/weight" element={<WeightPage />} />
             <Route path="/workouts" element={<WorkoutsPage />} />
+            <Route path="/gym" element={<GymPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/face-care" element={<FaceCarePage />} />
+            <Route path="/community" element={<CommunityPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/gym" element={<GymPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
