@@ -111,7 +111,7 @@ export default function CommunityPage() {
 
         {/* Animated Background Pill */}
         <div
-          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#1e1e1e] rounded-full transition-transform duration-300 ease-out z-0 shadow-sm border border-border/50"
+          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-full transition-transform duration-300 ease-out z-0 shadow-sm border border-border/50"
           style={{
             transform:
               activeTab === "friends" ? "translateX(100%)" : "translateX(0)",

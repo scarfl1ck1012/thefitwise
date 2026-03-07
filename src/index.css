@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 40 33% 97%;
+    --background: 40 25% 95%;
     --foreground: 160 10% 15%;
 
     --card: 0 0% 100%;
@@ -21,8 +21,8 @@
     --secondary: 40 30% 93%;
     --secondary-foreground: 160 10% 25%;
 
-    --muted: 40 20% 94%;
-    --muted-foreground: 160 5% 50%;
+    --muted: 40 20% 90%;
+    --muted-foreground: 160 5% 45%;
 
     --accent: 12 80% 62%;
     --accent-foreground: 0 0% 100%;
@@ -30,8 +30,8 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 15% 80%;
-    --input: 40 15% 80%;
+    --border: 40 15% 82%;
+    --input: 40 15% 82%;
     --ring: 142 75% 36%;
 
     --radius: 0.75rem;
@@ -70,11 +70,11 @@
     );
     --gradient-warm: linear-gradient(
       135deg,
-      hsl(40, 33%, 97%),
-      hsl(40, 30%, 93%)
+      hsl(40, 25%, 95%),
+      hsl(40, 20%, 90%)
     );
     --shadow-card:
-      0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+      0 6px 16px -2px rgba(0, 0, 0, 0.08), 0 3px 8px -2px rgba(0, 0, 0, 0.04);
     --shadow-elevated:
       0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
   }
