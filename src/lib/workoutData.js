@@ -362,6 +362,7 @@ export const faceExercises = [
     name: "Neck Rotations",
     duration: "2x5 each direction",
     icon: "🔄",
+    image: "/exercises/neck-rotations.png",
     description: "Slowly rotate head in circles. Relieves tension.",
     target: "Trapezius, Neck",
     timerSeconds: 40,

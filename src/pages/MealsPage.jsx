@@ -100,12 +100,12 @@ export default function MealsPage() {
     if (!customName.trim() || !customCalories) return;
     addMeal.mutate({
       recipe_title: customName,
-      calories: parseInt(customCalories) || 0,
-      protein: parseInt(customProtein) || 0,
-      carbs: parseInt(customCarbs) || 0,
-      fat: parseInt(customFat) || 0,
-      sodium: parseInt(customSodium) || 0,
-      potassium: parseInt(customPotassium) || 0,
+      calories: Math.max(0, parseInt(customCalories) || 0),
+      protein: Math.max(0, parseInt(customProtein) || 0),
+      carbs: Math.max(0, parseInt(customCarbs) || 0),
+      fat: Math.max(0, parseInt(customFat) || 0),
+      sodium: Math.max(0, parseInt(customSodium) || 0),
+      potassium: Math.max(0, parseInt(customPotassium) || 0),
       servings: 1,
       meal_type: "custom",
     });

@@ -14,9 +14,17 @@ export default function LivePractice({ exerciseName, onClose }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const mountedRef = useRef(true);
   const [cameraActive, setCameraActive] = useState(false);
   const [error, setError] = useState(null);
   const [poseDetected, setPoseDetected] = useState(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const startCamera = useCallback(async () => {
     try {
@@ -25,6 +33,10 @@ export default function LivePractice({ exerciseName, onClose }) {
         video: { facingMode: "user", width: 480, height: 360 },
         audio: false,
       });
+      if (!mountedRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;

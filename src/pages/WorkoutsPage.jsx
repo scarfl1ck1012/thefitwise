@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,7 @@ import { getLocalDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Activity, Flame, Calendar } from "lucide-react";
+import { toast } from "sonner";
 
 const MONTHS = [
   "January",
@@ -129,20 +130,29 @@ export default function WorkoutsPage() {
   const { checkins } = useWorkouts();
   const { user } = useAuth();
 
-  const { data: allMeals = [] } = useQuery({
+  const {
+    data: allMeals = [],
+    isError,
+    isLoading,
+  } = useQuery({
     queryKey: ["all_meals", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("meal_logs")
-        .select("logged_at")
-        .eq("user_id", user.id)
-        .order("logged_at", { ascending: false })
-        .limit(1000);
+      const { data, error } = await supabase.rpc("get_unique_meal_dates", {
+        uid: user.id,
+      });
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(
+        "Failed to connect. Some consistency streak data may be unavailable.",
+      );
+    }
+  }, [isError]);
 
   const todayStr = getLocalDate();
 

@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/hooks/useTheme";
@@ -36,6 +36,7 @@ export default function AppLayout() {
   const { signOut } = useAuth();
   const { profile } = useProfile();
   const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const displayName = profile?.full_name || "User";
   return (
@@ -128,7 +129,11 @@ export default function AppLayout() {
                   key={item.to}
                   to={item.to}
                   end={item.to === "/dashboard"}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileOpen(false);
+                    setTimeout(() => navigate(item.to), 250);
+                  }}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`
                   }

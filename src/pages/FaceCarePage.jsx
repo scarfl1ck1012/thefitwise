@@ -118,7 +118,7 @@ function useTimer(totalSeconds) {
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (running && remaining > 0) {
+    if (running) {
       intervalRef.current = setInterval(() => {
         setRemaining((r) => {
           if (r <= 1) {
@@ -130,7 +130,7 @@ function useTimer(totalSeconds) {
       }, 1000);
     }
     return () => clearInterval(intervalRef.current);
-  }, [running, remaining]);
+  }, [running]);
 
   const start = () => {
     setRemaining(totalSeconds);
@@ -213,7 +213,8 @@ function ExerciseCard({
             onClick={onToggleExpand}
           >
             {/* Animated Checkbox */}
-            <div
+            <button
+              type="button"
               className="relative mt-0.5 shrink-0"
               onClick={(e) => {
                 e.stopPropagation();
@@ -227,7 +228,7 @@ function ExerciseCard({
                 <Checkbox checked={isDone} className="pointer-events-none" />
               </motion.div>
               <CompletionBurst active={showBurst} />
-            </div>
+            </button>
 
             {/* Exercise Thumbnail */}
             <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden shrink-0">

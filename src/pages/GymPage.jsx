@@ -217,15 +217,15 @@ function CardioTracker({ profile }) {
       toast.error("Select a type and enter duration");
       return;
     }
-    const cal = parseInt(calories) || estCalories;
+    const cal = Math.max(0, parseInt(calories) || estCalories);
     setSessions((prev) => [
       {
         id: crypto.randomUUID(),
         type: selectedType,
         label: selectedCardio?.label,
         icon: selectedCardio?.icon,
-        duration: parseInt(duration),
-        distance: parseFloat(distance) || 0,
+        duration: Math.max(1, parseInt(duration) || 1),
+        distance: Math.max(0, parseFloat(distance) || 0),
         calories: cal,
         date: new Date().toLocaleDateString("en-US", {
           month: "short",
@@ -516,7 +516,7 @@ function WorkoutBuilder({ profile }) {
       ...prev,
       [day]: prev[day].map((e) =>
         e.instanceId === instanceId
-          ? { ...e, [field]: parseInt(value) || 0 }
+          ? { ...e, [field]: Math.max(0, parseInt(value) || 0) }
           : e,
       ),
     }));
