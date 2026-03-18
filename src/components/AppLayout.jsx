@@ -166,7 +166,7 @@ export default function AppLayout() {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0">
+      <main className="flex-1 min-w-0 lg:ml-64 pt-14 lg:pt-0 overflow-x-hidden">
         <div className="p-4 lg:p-8 max-w-6xl mx-auto">
           <Outlet />
         </div>

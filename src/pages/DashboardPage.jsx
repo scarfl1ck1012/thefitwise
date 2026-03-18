@@ -675,7 +675,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* ─── Trending Fitness Articles ─────────────── */}
-      <motion.div {...fadeUp} transition={{ delay: 0.25 }}>
+      <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="w-full min-w-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-primary" /> Trending Articles
