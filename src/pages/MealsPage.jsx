@@ -30,6 +30,7 @@ import {
   Droplets,
   PlusCircle,
   Coffee,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
