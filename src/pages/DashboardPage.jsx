@@ -465,7 +465,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="space-y-5 pb-6 overflow-x-hidden">
       {/* Greeting */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
@@ -506,7 +506,7 @@ export default function DashboardPage() {
       />
 
       {/* ─── Bento Grid ──────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {/* Nutrition Card */}
         <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
           <Link to="/meals" className="block h-full">
@@ -580,7 +580,7 @@ export default function DashboardPage() {
         <motion.div
           {...fadeUp}
           transition={{ delay: 0.15 }}
-          className="col-span-2 lg:col-span-1"
+          className="col-span-1 md:col-span-2 lg:col-span-1"
         >
           <Card className="shadow-card h-full">
             <CardContent className="p-4">

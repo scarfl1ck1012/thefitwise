@@ -590,7 +590,14 @@ export default function MealsPage() {
                   disabled={aiLoading || !aiInput.trim()}
                   className="w-full"
                 >
-                  {aiLoading ? "Analyzing..." : "Analyze & Log Items"}
+                  {aiLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    "Analyze & Log Items"
+                  )}
                 </Button>
               </CardContent>
             </Card>
