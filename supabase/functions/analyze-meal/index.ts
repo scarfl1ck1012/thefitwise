@@ -82,7 +82,7 @@ REFERENCE VALUES (per standard serving):
 - 100g cooked white rice: 130cal, 3g protein, 28g carbs, 0.3g fat, 1mg sodium, 35mg potassium`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
