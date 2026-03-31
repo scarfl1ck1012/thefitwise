@@ -157,7 +157,7 @@ REFERENCE VALUES (per standard serving):
 - 100g chicken breast: 165cal, 31g protein, 0g carbs, 3.6g fat, 74mg sodium, 256mg potassium
 - 100g cooked white rice: 130cal, 3g protein, 28g carbs, 0.3g fat, 1mg sodium, 35mg potassium`;
 
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key=${geminiKey}`;
       const requestBody = JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },
         contents: [{ role: "user", parts: [{ text: aiInput }] }],
