@@ -157,20 +157,35 @@ REFERENCE VALUES (per standard serving):
 - 100g chicken breast: 165cal, 31g protein, 0g carbs, 3.6g fat, 74mg sodium, 256mg potassium
 - 100g cooked white rice: 130cal, 3g protein, 28g carbs, 0.3g fat, 1mg sodium, 35mg potassium`;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-        {
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+      const requestBody = JSON.stringify({
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+        contents: [{ role: "user", parts: [{ text: aiInput }] }],
+        generationConfig: { temperature: 0.1 },
+      });
+
+      let response;
+      const maxRetries = 3;
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        response = await fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            contents: [{ role: "user", parts: [{ text: aiInput }] }],
-            generationConfig: { temperature: 0.1 },
-          }),
-        },
-      );
+          body: requestBody,
+        });
+
+        if (response.status === 429 && attempt < maxRetries - 1) {
+          const waitMs = Math.pow(2, attempt) * 1500; // 1.5s, 3s, 6s
+          toast.info(`Rate limited — retrying in ${waitMs / 1000}s...`);
+          await new Promise((r) => setTimeout(r, waitMs));
+          continue;
+        }
+        break;
+      }
 
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error("API rate limit reached. Please wait a minute and try again.");
+        }
         throw new Error(`Gemini API returned status ${response.status}`);
       }
 
