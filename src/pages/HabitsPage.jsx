@@ -79,39 +79,49 @@ export default function HabitsPage() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="shadow-elevated overflow-hidden">
-          <div className="gradient-primary p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-primary-foreground/80 text-sm">Total XP</p>
-                <p className="text-4xl font-bold text-primary-foreground">
-                  {xp}
+        <div className="glass rounded-[2rem] overflow-hidden relative border border-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+          <div className="p-8">
+            <div className="flex flex-col md:flex-row items-center gap-8 justify-between">
+              <div className="flex-1 flex flex-col md:items-start items-center text-center md:text-left">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                  Total Experience
+                </span>
+                <p className="text-6xl font-black text-foreground drop-shadow-xl tracking-tight mb-1">
+                  {xp} <span className="text-lg text-muted-foreground font-medium uppercase tracking-widest">XP</span>
                 </p>
+                <div className="mt-6 w-full max-w-sm space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[15px] font-bold text-foreground uppercase tracking-widest">
+                      Level {level}
+                    </span>
+                    <span className="text-xs font-bold text-muted-foreground">
+                      {xpInLevel}/500 XP
+                    </span>
+                  </div>
+                  <div className="h-3 w-full bg-surface-highest/50 rounded-full overflow-hidden shadow-inner">
+                    <motion.div 
+                      className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full shadow-[0_0_15px_rgba(34,197,94,0.6)]"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(xpInLevel / 500) * 100}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
+                  </div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest text-right mt-2">
+                    {xpToNext} XP To Next Level
+                  </p>
+                </div>
               </div>
               <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="bg-primary-foreground/20 p-4 rounded-2xl"
+                animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="w-32 h-32 rounded-[2rem] bg-gradient-to-tr from-primary/30 to-primary/5 flex items-center justify-center border border-primary/20 shadow-[0_0_40px_rgba(34,197,94,0.2)] backdrop-blur-xl shrink-0"
               >
-                <Zap className="h-8 w-8 text-primary-foreground" />
+                <Zap className="h-16 w-16 text-primary drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
               </motion.div>
             </div>
           </div>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-foreground">
-                Level {level}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {xpInLevel}/500 XP
-              </span>
-            </div>
-            <Progress value={(xpInLevel / 500) * 100} className="h-3" />
-            <p className="text-xs text-muted-foreground mt-2">
-              {xpToNext} XP to Level {level + 1}
-            </p>
-          </CardContent>
-        </Card>
+        </div>
       </motion.div>
 
       {/* Streaks */}
@@ -121,107 +131,115 @@ export default function HabitsPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="shadow-card">
-            <CardContent className="p-4 text-center">
-              <motion.div
-                animate={streak > 0 ? { scale: [1, 1.1, 1] } : {}}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <Flame
-                  className={`h-8 w-8 mx-auto mb-2 ${streak > 0 ? "text-accent" : "text-muted-foreground"}`}
-                />
-              </motion.div>
-              <p className="text-3xl font-bold text-foreground">{streak}</p>
-              <p className="text-sm text-muted-foreground">Current Streak</p>
-            </CardContent>
-          </Card>
+          <div className="glass rounded-[2rem] p-6 text-center h-full flex flex-col justify-center items-center relative overflow-hidden group hover:border-accent/30 transition-all hover:shadow-[0_10px_40px_rgba(251,146,60,0.15)]">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
+            <motion.div
+              animate={streak > 0 ? { scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] } : {}}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-accent/20 to-transparent flex items-center justify-center border border-accent/20 mb-4 shadow-[0_0_20px_rgba(251,146,60,0.2)]"
+            >
+              <Flame
+                className={`h-8 w-8 ${streak > 0 ? "text-accent drop-shadow-[0_0_10px_rgba(251,146,60,0.8)]" : "text-muted-foreground"}`}
+              />
+            </motion.div>
+            <p className="text-4xl font-black text-foreground mb-1">{streak}</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Current Streak</p>
+          </div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, x: 15 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <Card className="shadow-card">
-            <CardContent className="p-4 text-center">
-              <Target className="h-8 w-8 mx-auto mb-2 text-info" />
-              <p className="text-3xl font-bold text-foreground">
-                {longestStreak}
-              </p>
-              <p className="text-sm text-muted-foreground">Best Streak</p>
-            </CardContent>
-          </Card>
+          <div className="glass rounded-[2rem] p-6 text-center h-full flex flex-col justify-center items-center relative overflow-hidden group hover:border-info/30 transition-all hover:shadow-[0_10px_40px_rgba(59,130,246,0.15)]">
+            <div className="absolute top-0 left-0 w-24 h-24 bg-info/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-info/20 to-transparent flex items-center justify-center border border-info/20 mb-4 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+              <Target className="h-8 w-8 text-info drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+            </div>
+            <p className="text-4xl font-black text-foreground mb-1">{longestStreak}</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Best Streak</p>
+          </div>
         </motion.div>
       </div>
 
       {/* Badges */}
-      <Card className="shadow-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Award className="h-4 w-4 text-accent" /> Badges
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="glass rounded-[2rem] p-6 lg:p-8">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-sm uppercase tracking-widest font-bold text-foreground flex items-center gap-2">
+            <Award className="h-4 w-4 text-accent" /> Achievement Badges
+          </h2>
+          <span className="text-xs font-bold text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+            {allBadges.filter(b => b.earned).length} / {allBadges.length}
+          </span>
+        </div>
+        <div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {allBadges.map((badge, i) => (
               <motion.div
                 key={badge.name}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.05 }}
-                className={`text-center p-3 rounded-xl border transition-all ${
+                className={`text-center p-4 rounded-2xl transition-all border relative overflow-hidden group ${
                   badge.earned
-                    ? "bg-primary/5 border-primary/20 shadow-card"
-                    : "bg-muted/30 border-border opacity-50"
+                    ? "bg-surface-highest/40 border-accent/20 shadow-[0_8px_30px_rgba(251,146,60,0.1)] hover:border-accent/40"
+                    : "bg-surface-lowest/50 border-white/5 opacity-50 grayscale hover:grayscale-0 hover:opacity-80"
                 }`}
               >
+                {badge.earned && (
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-accent/10 rounded-full blur-xl pointer-events-none group-hover:bg-accent/20 transition-colors" />
+                )}
                 <motion.span
-                  className="text-2xl block mb-1"
-                  animate={badge.earned ? { y: [0, -3, 0] } : {}}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                  className="text-4xl block mb-3 drop-shadow-xl"
+                  animate={badge.earned ? { y: [0, -5, 0], scale: [1, 1.05, 1] } : {}}
+                  transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
                 >
                   {badge.icon}
                 </motion.span>
-                <p className="text-xs font-medium text-foreground">
+                <p className="text-[13px] font-bold text-foreground uppercase tracking-wide">
                   {badge.name}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mt-1 bg-surface-lowest/80 py-1 px-2 rounded-lg inline-block border border-white/5">
                   {badge.description}
                 </p>
               </motion.div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* How XP Works */}
-      <Card className="shadow-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
+      <div className="glass rounded-[2rem] p-6 lg:p-8">
+        <div className="mb-6">
+          <h2 className="text-sm uppercase tracking-widest font-bold text-foreground flex items-center gap-2">
             <Star className="h-4 w-4 text-warning" /> How to Earn XP
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
+          </h2>
+        </div>
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              { action: "Log a meal", xp: "+10 XP" },
-              { action: "AI meal analysis", xp: "+15 XP per item" },
-              { action: "Log weight", xp: "+15 XP" },
-              { action: "Complete a workout", xp: "+50 XP" },
-              { action: "Complete daily challenge", xp: "+20-50 XP" },
+              { action: "Log a Meal", xp: "+10 XP", icon: "🍽️" },
+              { action: "AI Recipe Analysis", xp: "+15 XP per item", icon: "✨" },
+              { action: "Log Weight", xp: "+15 XP", icon: "⚖️" },
+              { action: "Complete Workout", xp: "+50 XP", icon: "🏋️" },
+              { action: "Daily Challenge", xp: "+20-50 XP", icon: "🎯" },
             ].map((item) => (
               <div
                 key={item.action}
-                className="flex justify-between p-2 rounded-lg bg-muted/50"
+                className="flex items-center justify-between p-4 rounded-xl bg-surface-lowest/50 border border-white/5 hover:bg-surface-highest/50 transition-colors group"
               >
-                <span className="text-sm text-foreground">{item.action}</span>
-                <span className="text-sm font-bold text-primary">
+                <div className="flex items-center gap-3">
+                  <span className="text-lg opacity-80 group-hover:scale-110 transition-transform">{item.icon}</span>
+                  <span className="text-[13px] font-bold text-foreground uppercase tracking-wide">{item.action}</span>
+                </div>
+                <span className="text-xs font-black text-warning bg-warning/10 px-3 py-1 rounded-lg border border-warning/20">
                   {item.xp}
                 </span>
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

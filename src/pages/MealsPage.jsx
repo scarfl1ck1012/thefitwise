@@ -272,8 +272,8 @@ REFERENCE VALUES (per standard serving):
       </div>
 
       {/* Macro Donut + Limits */}
-      <Card className="shadow-card">
-        <CardContent className="p-4">
+      <div className="glass rounded-[2rem] p-6">
+        <div>
           {/* Donut Chart */}
           {(() => {
             const macroData = [
@@ -398,19 +398,20 @@ REFERENCE VALUES (per standard serving):
                 </div>
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Water & Caffeine Tracker */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {/* Water */}
-        <Card className="shadow-card">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Droplets className="h-4 w-4 text-info" />
-              <span className="text-xs font-medium text-foreground">Water</span>
-              <span className="text-xs font-bold text-info ml-auto">
+        <div className="glass rounded-[2rem] p-5">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-full bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                <Droplets className="h-4 w-4 text-info" />
+              </div>
+              <span className="text-xs uppercase tracking-widest font-bold text-muted-foreground font-inter">Water</span>
+              <span className="text-sm font-black text-info ml-auto">
                 {waterLiters}L
               </span>
             </div>
@@ -469,15 +470,18 @@ REFERENCE VALUES (per standard serving):
                 ↩
               </Button>
             </div>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
 
         {/* Caffeine */}
-        <Card className="shadow-card">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Coffee className="h-4 w-4 text-warning" />
-              <span className="text-xs font-medium text-foreground">
+        <div className="glass rounded-[2rem] p-5">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center border border-warning/20 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                <Coffee className="h-4 w-4 text-warning" />
+              </div>
+              <span className="text-xs uppercase tracking-widest font-bold text-muted-foreground font-inter">
                 Caffeine
               </span>
               <span
@@ -549,8 +553,8 @@ REFERENCE VALUES (per standard serving):
                 ↩
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -644,9 +648,9 @@ REFERENCE VALUES (per standard serving):
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
           >
-            <Card className="shadow-card border-primary/20">
-              <CardContent className="p-4 space-y-3">
-                <p className="text-xs text-muted-foreground">
+            <div className="glass rounded-3xl border border-primary/20 shadow-[0_0_30px_rgba(34,197,94,0.1)]">
+              <div className="p-5 space-y-4">
+                <p className="text-xs font-medium text-muted-foreground leading-relaxed">
                   Describe what you ate. Multiple items will be logged
                   separately with sodium & potassium.
                 </p>
@@ -670,19 +674,19 @@ REFERENCE VALUES (per standard serving):
                     "Analyze & Log Items"
                   )}
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Food Search */}
       {isToday && (
-        <Card className="shadow-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Log Food</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="glass rounded-[2rem] p-6 lg:p-8">
+          <div className="mb-6">
+            <h2 className="text-sm uppercase tracking-widest font-bold text-foreground">Log Food</h2>
+          </div>
+          <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -758,20 +762,20 @@ REFERENCE VALUES (per standard serving):
                 </p>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Today's Meals */}
-      <Card className="shadow-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">
+      <div className="glass rounded-[2rem] p-6 lg:p-8">
+        <div className="mb-6">
+          <h2 className="text-sm uppercase tracking-widest font-bold text-foreground">
             {isToday
               ? "Today's Meals"
               : `Meals on ${new Date(selectedDate + "T12:00:00").toLocaleDateString()}`}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h2>
+        </div>
+        <div>
           {meals.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               No meals logged
@@ -828,8 +832,8 @@ REFERENCE VALUES (per standard serving):
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

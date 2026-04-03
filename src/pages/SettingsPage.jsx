@@ -335,13 +335,16 @@ export default function SettingsPage() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="shadow-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" /> Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
+        <div className="glass rounded-[2rem] p-6 lg:p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+              <User className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
+              Profile
+            </h2>
+          </div>
+          <div className="space-y-5">
             {/* Name & Gender */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -438,8 +441,8 @@ export default function SettingsPage() {
                 </Button>
               </motion.div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Calorie Hero Card */}
@@ -449,12 +452,10 @@ export default function SettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="shadow-card overflow-hidden border-primary/20">
-            <div className="relative">
-              {/* Gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-primary/3" />
+          <div className="glass rounded-[2rem] overflow-hidden border border-primary/30 shadow-[0_0_30px_rgba(34,197,94,0.15)] relative">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-primary/20 via-primary/5 to-transparent pointer-events-none" />
 
-              <CardContent className="relative p-5">
+            <div className="relative p-6 lg:p-8">
                 <div className="flex items-center gap-2 mb-3">
                   <Flame className="h-5 w-5 text-primary" />
                   <span className="text-sm font-medium text-muted-foreground">
@@ -531,9 +532,8 @@ export default function SettingsPage() {
                     </div>
                   )}
                 </div>
-              </CardContent>
             </div>
-          </Card>
+          </div>
         </motion.div>
       )}
 
@@ -543,13 +543,16 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <Card className="shadow-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary" /> Account
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="glass rounded-[2rem] p-6 lg:p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+              <Shield className="h-5 w-5 text-info" />
+            </div>
+            <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
+              Account
+            </h2>
+          </div>
+          <div className="space-y-4">
             {/* Email */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
               <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -560,8 +563,8 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Danger Zone */}
@@ -570,13 +573,16 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="shadow-card border-destructive/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-4 w-4" /> Danger Zone
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="glass rounded-[2rem] p-6 lg:p-8 border border-destructive/30 shadow-[0_0_30px_rgba(239,68,68,0.15)] bg-destructive/5">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center border border-destructive/40 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <h2 className="text-lg uppercase tracking-widest font-bold text-destructive">
+              Danger Zone
+            </h2>
+          </div>
+          <div className="space-y-4">
             <p className="text-xs text-muted-foreground">
               These actions are permanent and cannot be undone.
             </p>
@@ -598,8 +604,8 @@ export default function SettingsPage() {
                 <Trash2 className="h-3.5 w-3.5" /> Delete Account
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

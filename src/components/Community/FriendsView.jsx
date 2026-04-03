@@ -69,7 +69,7 @@ export default function FriendsView({
     <div className="flex flex-col gap-6 relative">
       {/* Search Bar */}
       <div className="relative z-20">
-        <div className="relative flex items-center bg-card border border-border rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all shadow-sm">
+        <div className="relative flex items-center glass rounded-2xl px-5 py-3 focus-within:ring-2 focus-within:ring-info focus-within:border-info transition-all shadow-[0_0_20px_rgba(0,0,0,0.2)]">
           <Search className="w-5 h-5 text-muted-foreground mr-3" />
           <input
             type="text"
@@ -82,7 +82,7 @@ export default function FriendsView({
 
         {/* Search Dropdown Results */}
         {searchQuery.trim() && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
+          <div className="absolute top-full left-0 right-0 mt-3 glass rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
             {searchResults.length === 0 ? (
               <div className="px-4 py-3 text-sm text-muted-foreground text-center">
                 No users found.
@@ -132,7 +132,7 @@ export default function FriendsView({
 
       {/* Pending Requests */}
       {pendingRequests.length > 0 && (
-        <div className="bg-card/50 border border-border/50 rounded-xl overflow-hidden">
+        <div className="glass rounded-[2rem] overflow-hidden">
           <button
             className="w-full flex items-center justify-between p-4 hover:bg-card/80 transition-colors"
             onClick={() => setShowRequests(!showRequests)}
@@ -155,7 +155,7 @@ export default function FriendsView({
               {pendingRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="flex items-center justify-between p-3 bg-background rounded-lg border border-border/50 shadow-sm"
+                  className="flex items-center justify-between p-4 bg-surface-lowest/50 rounded-2xl border border-white/5 shadow-sm"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <img
@@ -210,7 +210,7 @@ export default function FriendsView({
             {friendsList.map((friend) => (
               <div
                 key={friend.id}
-                className="bg-card border border-border/50 rounded-xl p-4 flex flex-col hover:border-border transition-colors group"
+                className="glass rounded-[2rem] p-5 flex flex-col hover:border-info/30 hover:shadow-[0_10px_30px_rgba(59,130,246,0.1)] transition-all group"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ export default function FriendsView({
                   </button>
                 </div>
 
-                <div className="mt-4 flex items-center gap-4 text-sm bg-background/50 p-2 rounded-lg">
+                <div className="mt-5 flex items-center gap-4 text-sm bg-surface-lowest/50 p-3 rounded-xl border border-white/5">
                   <div className="flex items-center gap-1.5 flex-1">
                     <Flame className="w-4 h-4 text-orange-500 shrink-0" />
                     <span className="font-medium">

@@ -159,20 +159,20 @@ function NextActionBanner({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-xl border border-primary/20"
+      className="relative overflow-hidden rounded-3xl glass-panel group"
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-primary/5" />
-      <div className="relative p-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-            <Zap className="h-4 w-4 text-primary" />
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/5" />
+      <div className="relative p-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(34,197,94,0.2)] group-hover:bg-primary/20 transition-colors">
+            <Zap className="h-5 w-5 text-primary" />
           </div>
-          <p className="text-sm text-foreground leading-snug">{message}</p>
+          <p className="text-[15px] font-medium text-foreground leading-snug">{message}</p>
         </div>
         {action && (
           <Link to={action} className="shrink-0">
-            <Button size="sm" className="gap-1 text-xs h-8">
-              {actionLabel} <ChevronRight className="h-3 w-3" />
+            <Button size="sm" className="gap-1 h-9 rounded-full px-4 text-xs font-bold tracking-wide uppercase bg-primary text-primary-foreground hover:brightness-110 hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-all">
+              {actionLabel} <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
         )}
@@ -326,77 +326,75 @@ function RecipeCarousel({ dateStr }) {
 
   return (
     <>
-      <Card className="shadow-card overflow-hidden">
-        <CardContent className="p-0">
-          <div
-            className="relative group cursor-pointer"
-            onClick={() => setSelectedRecipe(recipe)}
+      <div className="glass overflow-hidden rounded-[2rem] h-full flex flex-col relative group">
+        <div
+          className="relative group cursor-pointer flex-1 min-h-[220px]"
+          onClick={() => setSelectedRecipe(recipe)}
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <motion.img
+              key={recipe.id}
+              src={recipe.image}
+              alt={recipe.title}
+              className="w-full h-full object-cover"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-lowest/90 via-surface-lowest/30 to-transparent" />
+
+          {/* Nav arrows */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prev();
+            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-surface-high/60 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-surface-high"
           >
-            <div className="h-44 overflow-hidden">
-              <motion.img
-                key={recipe.id}
-                src={recipe.image}
-                alt={recipe.title}
-                className="w-full h-full object-cover"
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+            <ChevronLeft className="h-4 w-4 text-foreground" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              next();
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-surface-high/60 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-surface-high"
+          >
+            <ChevronRight className="h-4 w-4 text-foreground" />
+          </button>
 
-            {/* Nav arrows */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                prev();
-              }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ChevronLeft className="h-4 w-4 text-foreground" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                next();
-              }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-background/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ChevronRight className="h-4 w-4 text-foreground" />
-            </button>
-
-            {/* Info overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-sm font-semibold text-foreground">
-                {recipe.title}
-              </p>
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] text-primary font-medium">
-                  {recipe.calories} cal
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  {recipe.protein}g P
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  {recipe.carbs}g C
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  {recipe.fat}g F
-                </span>
-              </div>
-            </div>
-
-            <div className="absolute top-3 right-3 flex gap-1">
-              {rotatedRecipes.map((_, i) => (
-                <span
-                  key={i}
-                  className={`w-1.5 h-1.5 rounded-full ${i === index ? "bg-primary" : "bg-white/30"}`}
-                />
-              ))}
+          {/* Info overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <p className="text-base font-bold text-foreground mb-2 drop-shadow-md">
+              {recipe.title}
+            </p>
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] uppercase tracking-wider text-primary font-bold">
+                {recipe.calories} cal
+              </span>
+              <span className="text-[11px] text-muted-foreground font-medium">
+                {recipe.protein}g P
+              </span>
+              <span className="text-[11px] text-muted-foreground font-medium">
+                {recipe.carbs}g C
+              </span>
+              <span className="text-[11px] text-muted-foreground font-medium">
+                {recipe.fat}g F
+              </span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="absolute top-4 right-4 flex gap-1.5">
+            {rotatedRecipes.map((_, i) => (
+              <span
+                key={i}
+                className={`transition-all rounded-full ${i === index ? "w-4 h-1.5 bg-primary shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "w-1.5 h-1.5 bg-white/30"}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       <AnimatePresence>
         {selectedRecipe && (
@@ -506,212 +504,198 @@ export default function DashboardPage() {
       />
 
       {/* ─── Bento Grid ──────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {/* Nutrition Card */}
-        <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
-          <Link to="/meals" className="block h-full">
-            <Card className="shadow-card h-full hover:border-primary/20 transition-colors">
-              <CardContent className="p-4 flex flex-col h-full">
-                <div className="flex items-center gap-1.5 mb-3">
-                  <UtensilsCrossed className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Nutrition
-                  </span>
-                </div>
-                <MiniDonut
-                  protein={totalProtein}
-                  carbs={totalCarbs}
-                  fat={totalFat}
-                  calories={totalCalories}
-                  goal={calorieGoal}
-                />
-                <div className="space-y-1.5 mt-3">
-                  {[
-                    {
-                      label: "P",
-                      value: totalProtein,
-                      goal: proteinGoal,
-                      color: "bg-primary",
-                    },
-                    {
-                      label: "C",
-                      value: totalCarbs,
-                      goal: carbsGoal,
-                      color: "bg-blue-500",
-                    },
-                    {
-                      label: "F",
-                      value: totalFat,
-                      goal: fatGoal,
-                      color: "bg-amber-500",
-                    },
-                  ].map((m) => (
-                    <div key={m.label} className="flex items-center gap-2">
-                      <span className="text-[9px] text-muted-foreground w-2">
-                        {m.label}
-                      </span>
-                      <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
-                        <motion.div
-                          className={`h-1.5 rounded-full ${m.color}`}
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${Math.min((m.value / m.goal) * 100, 100)}%`,
-                          }}
-                          transition={{ duration: 0.5 }}
-                        />
-                      </div>
-                      <span className="text-[9px] text-muted-foreground w-10 text-right">
-                        {Math.round(m.value)}/{m.goal}g
-                      </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Nutrition Cell */}
+        <motion.div {...fadeUp} transition={{ delay: 0.05 }} className="h-full">
+          <Link to="/meals" className="block h-full cursor-pointer group">
+            <div className="glass rounded-[2rem] p-6 h-full flex flex-col relative overflow-hidden transition-all group-hover:border-primary/30 group-hover:shadow-[0_8px_30px_rgba(34,197,94,0.1)]">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="flex items-center gap-2 mb-4">
+                <UtensilsCrossed className="h-4 w-4 text-primary" />
+                <span className="text-xs uppercase tracking-widest font-bold text-muted-foreground">
+                  Nutrition
+                </span>
+              </div>
+              <MiniDonut
+                protein={totalProtein}
+                carbs={totalCarbs}
+                fat={totalFat}
+                calories={totalCalories}
+                goal={calorieGoal}
+              />
+              <div className="space-y-3 mt-6">
+                {[
+                  { label: "Pro", value: totalProtein, goal: proteinGoal, color: "bg-primary" },
+                  { label: "Carb", value: totalCarbs, goal: carbsGoal, color: "bg-blue-400" },
+                  { label: "Fat", value: totalFat, goal: fatGoal, color: "bg-amber-400" },
+                ].map((m) => (
+                  <div key={m.label} className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground w-8 text-right">
+                      {m.label}
+                    </span>
+                    <div className="flex-1 bg-surface-highest/50 rounded-full h-2 overflow-hidden">
+                      <motion.div
+                        className={`h-full rounded-full ${m.color}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min((m.value / m.goal) * 100, 100)}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                      />
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <span className="text-[10px] font-medium text-foreground w-12">
+                      {Math.round(m.value)}/{m.goal}g
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </Link>
         </motion.div>
 
-        {/* Recipe Carousel (replaces Activity Card) */}
-        <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
+        {/* Recipe Carousel Cell */}
+        <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="h-full">
           <RecipeCarousel dateStr={today} />
         </motion.div>
 
-        {/* XP & Streak Card */}
-        <motion.div
-          {...fadeUp}
-          transition={{ delay: 0.15 }}
-          className="col-span-1 md:col-span-2 lg:col-span-1"
-        >
-          <Card className="shadow-card h-full">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-1.5 mb-3">
-                <Zap className="h-3.5 w-3.5 text-warning" />
-                <span className="text-xs font-medium text-muted-foreground">
-                  XP & Streak
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center gap-1">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                    <Flame className="h-6 w-6 text-accent" />
-                  </div>
-                  <span className="text-lg font-bold text-foreground">
-                    {stats?.current_streak || 0}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground">
-                    day streak
-                  </span>
+        {/* XP & Streak Cell */}
+        <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="col-span-1 md:col-span-2 lg:col-span-1 h-full">
+          <div className="glass rounded-[2rem] p-6 h-full flex flex-col relative overflow-hidden">
+            <div className="absolute bottom-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="h-4 w-4 text-warning" />
+              <span className="text-xs uppercase tracking-widest font-bold text-muted-foreground">
+                XP & Streak
+              </span>
+            </div>
+            
+            <div className="flex flex-col justify-center flex-1 gap-6">
+              <div className="flex items-center gap-4 bg-surface-lowest/50 p-4 rounded-2xl">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-accent/20 to-accent/5 flex items-center justify-center shrink-0 border border-accent/20 shadow-[0_0_15px_rgba(251,146,60,0.15)]">
+                  <Flame className="h-7 w-7 text-accent" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-bold text-foreground">
-                      Level {level}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {xp} XP
-                    </span>
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black text-foreground">{stats?.current_streak || 0}</span>
+                    <span className="text-sm text-accent font-semibold lowercase">day</span>
                   </div>
-                  <Progress value={(xpInLevel / 500) * 100} className="h-2.5" />
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    {xpToNext} XP to Level {level + 1}
-                  </p>
+                  <span className="text-xs text-muted-foreground tracking-wide font-medium uppercase">Active Streak</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="px-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-bold text-foreground uppercase tracking-widest">
+                    Level {level}
+                  </span>
+                  <span className="text-xs font-bold text-primary">
+                    {xp} XP
+                  </span>
+                </div>
+                <div className="h-3 w-full bg-surface-highest/50 rounded-full overflow-hidden">
+                   <motion.div 
+                     className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                     initial={{ width: 0 }}
+                     animate={{ width: `${(xpInLevel / 500) * 100}%` }}
+                     transition={{ duration: 1, delay: 0.2 }}
+                   />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-2 text-right font-medium">
+                  {xpToNext} XP to Level {level + 1}
+                </p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
 
       {/* ─── Daily Challenges ─────────────────────── */}
       <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
-        <Card className="shadow-card">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-accent" /> Today's Challenges
-              </CardTitle>
-              <span className="text-sm font-medium text-muted-foreground">
-                {completedChallenges.length}/{challenges.length}
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <div className="glass rounded-[2rem] p-6 lg:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-sm uppercase tracking-widest font-bold text-muted-foreground flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-accent" /> Daily Challenges
+            </h2>
+            <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+              {completedChallenges.length}/{challenges.length} Done
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {challenges.map((ch) => {
               const done = completedChallenges.includes(ch.id);
               return (
                 <div
                   key={ch.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all ${done ? "bg-success/10 border-success/30" : "bg-muted/50 border-border"}`}
+                  className={`flex items-start gap-4 p-4 rounded-2xl transition-all border ${done ? "bg-success/5 border-success/20" : "bg-surface-lowest/40 border-white/5 hover:bg-surface-lowest/60"}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{ch.icon}</span>
-                    <div>
-                      <p
-                        className={`text-sm font-medium ${done ? "line-through text-muted-foreground" : "text-foreground"}`}
-                      >
-                        {ch.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {ch.description}
-                      </p>
+                  <div className="text-2xl mt-1 opacity-80">{ch.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-[15px] font-semibold leading-snug mb-1 ${done ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                      {ch.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {ch.description}
+                    </p>
+                    <div className="mt-3">
+                      {done ? (
+                        <div className="inline-flex items-center gap-1 text-xs font-bold text-success bg-success/10 px-2.5 py-1.5 rounded-lg">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Completed
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="h-8 rounded-lg text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground border border-primary/20 hover:border-transparent transition-all"
+                          onClick={() => completeChallenge(ch.id, ch.xp)}
+                        >
+                          +{ch.xp} XP
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  {done ? (
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => completeChallenge(ch.id, ch.xp)}
-                    >
-                      +{ch.xp} XP
-                    </Button>
-                  )}
                 </div>
               );
             })}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* ─── Trending Fitness Articles ─────────────── */}
-      <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="w-full min-w-0">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-foreground flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-primary" /> Trending Articles
+      <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="w-full min-w-0 pb-10">
+        <div className="flex items-center justify-between mb-4 px-2">
+          <h2 className="text-sm uppercase tracking-widest font-bold text-muted-foreground flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-primary" /> Trending Reading
           </h2>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
           {getDailyRotation(trendingArticles, today).map((article) => (
             <a
               key={article.id}
               href={article.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-w-[240px] shrink-0 group block"
+              className="min-w-[280px] shrink-0 group block"
             >
-              <Card className="shadow-card overflow-hidden hover:border-primary/20 transition-all h-full">
-                <div className="h-28 overflow-hidden">
+              <div className="glass rounded-3xl overflow-hidden h-full flex flex-col transition-all group-hover:-translate-y-1 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/5">
+                <div className="h-36 overflow-hidden relative">
                   <img
                     src={article.thumbnail}
                     alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface-low to-transparent" />
                 </div>
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[9px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                <div className="p-5 flex-1 flex flex-col bg-surface-low">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold tracking-wider uppercase text-primary border border-primary/20 px-2 py-0.5 rounded-full">
                       {article.tag}
                     </span>
                   </div>
-                  <p className="text-xs font-medium text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  <p className="text-[15px] font-bold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors flex-1">
                     {article.title}
                   </p>
-                  <div className="flex items-center gap-1 mt-2 text-[10px] text-muted-foreground">
-                    <ExternalLink className="h-3 w-3" /> Read more
+                  <div className="flex items-center gap-1.5 mt-4 text-[11px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest">
+                    <ExternalLink className="h-3 w-3" /> Read Article
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </a>
           ))}
         </div>

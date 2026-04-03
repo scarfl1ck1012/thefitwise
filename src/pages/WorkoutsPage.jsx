@@ -209,25 +209,34 @@ export default function WorkoutsPage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-4">
         {[
           {
             label: "Total Workouts",
             value: totalWorkouts,
             icon: Activity,
             color: "text-primary",
+            bg: "bg-primary/10",
+            border: "border-primary/20",
+            shadow: "shadow-[0_0_15px_rgba(34,197,94,0.15)]",
           },
           {
             label: "Perfect Days",
             value: perfectDays,
             icon: Flame,
             color: "text-accent",
+            bg: "bg-accent/10",
+            border: "border-accent/20",
+            shadow: "shadow-[0_0_15px_rgba(251,146,60,0.15)]",
           },
           {
             label: "Longest Streak",
             value: `${longestRun}d`,
             icon: Calendar,
             color: "text-warning",
+            bg: "bg-warning/10",
+            border: "border-warning/20",
+            shadow: "shadow-[0_0_15px_rgba(245,158,11,0.15)]",
           },
         ].map((stat, i) => (
           <motion.div
@@ -235,16 +244,17 @@ export default function WorkoutsPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
+            className={`glass flex flex-col items-center justify-center p-4 rounded-[2rem] border border-white/5 overflow-hidden relative group hover:${stat.border} hover:${stat.shadow} transition-all`}
           >
-            <Card className="shadow-card">
-              <CardContent className="p-3 text-center">
-                <stat.icon className={`h-5 w-5 mx-auto mb-1 ${stat.color}`} />
-                <p className="text-xl font-bold text-foreground">
-                  {stat.value}
-                </p>
-                <p className="text-[9px] text-muted-foreground">{stat.label}</p>
-              </CardContent>
-            </Card>
+            <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform border border-white/5`}>
+               <stat.icon className={`h-5 w-5 ${stat.color}`} />
+            </div>
+            <p className="text-2xl lg:text-3xl font-black text-foreground tracking-tight">
+              {stat.value}
+            </p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 text-center font-bold">
+              {stat.label}
+            </p>
           </motion.div>
         ))}
       </div>
@@ -255,13 +265,16 @@ export default function WorkoutsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="shadow-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" /> {year} Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="glass rounded-[2rem] p-6 lg:p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+              <Activity className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
+              {year} Activity
+            </h2>
+          </div>
+          <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 12 }, (_, i) => (
                 <MonthCalendar
@@ -288,8 +301,8 @@ export default function WorkoutsPage() {
               ))}
               <span className="text-[10px] text-muted-foreground">More</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

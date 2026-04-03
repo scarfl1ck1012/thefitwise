@@ -85,12 +85,12 @@ export default function CommunityPage() {
       </div>
 
       {/* Segmented Control */}
-      <div className="flex bg-card/50 p-1 rounded-full border border-border shadow-sm max-w-md mx-auto relative">
+      <div className="flex glass p-1.5 rounded-full max-w-md mx-auto relative overflow-hidden">
         <button
           onClick={() => setActiveTab("leaderboard")}
-          className={`flex-1 flex justify-center items-center gap-2 py-2.5 px-4 rounded-full text-sm font-medium transition-all duration-300 relative z-10 ${
+          className={`flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
             activeTab === "leaderboard"
-              ? "text-primary"
+              ? "text-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -99,9 +99,9 @@ export default function CommunityPage() {
         </button>
         <button
           onClick={() => setActiveTab("friends")}
-          className={`flex-1 flex justify-center items-center gap-2 py-2.5 px-4 rounded-full text-sm font-medium transition-all duration-300 relative z-10 ${
+          className={`flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
             activeTab === "friends"
-              ? "text-primary"
+              ? "text-info drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -111,10 +111,12 @@ export default function CommunityPage() {
 
         {/* Animated Background Pill */}
         <div
-          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-full transition-transform duration-300 ease-out z-0 shadow-sm border border-border/50"
+          className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full transition-all duration-300 ease-out z-0 border"
           style={{
-            transform:
-              activeTab === "friends" ? "translateX(100%)" : "translateX(0)",
+            transform: activeTab === "friends" ? "translateX(100%)" : "translateX(0)",
+            backgroundColor: activeTab === "friends" ? "rgba(59,130,246,0.15)" : "rgba(34,197,94,0.15)",
+            borderColor: activeTab === "friends" ? "rgba(59,130,246,0.3)" : "rgba(34,197,94,0.3)",
+            boxShadow: activeTab === "friends" ? "0 0 15px rgba(59,130,246,0.2)" : "0 0 15px rgba(34,197,94,0.2)",
           }}
         />
       </div>

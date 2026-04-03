@@ -203,10 +203,10 @@ function ExerciseCard({
       transition={{ delay: index * 0.04 }}
       layout
     >
-      <Card
-        className={`shadow-card transition-all overflow-hidden ${isDone ? "border-success/30 bg-success/5" : ""} ${isExpanded ? "border-primary/20" : ""}`}
+      <div
+        className={`glass rounded-[2rem] transition-all overflow-hidden relative group hover:border-primary/20 ${isDone ? "opacity-60 bg-surface-lowest grayscale hover:grayscale-[50%]" : ""} ${isExpanded ? "border-primary/30 shadow-[0_10px_30px_rgba(34,197,94,0.1)]" : ""}`}
       >
-        <CardContent className="p-0">
+        <div>
           {/* Collapsed Header — always visible */}
           <button
             className="w-full p-4 text-left flex items-start gap-3"
@@ -417,8 +417,8 @@ function ExerciseCard({
               </motion.div>
             )}
           </AnimatePresence>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -429,14 +429,14 @@ function SkincareStepCard({ item, isDone, onToggle }) {
     <motion.div
       layout
       onClick={onToggle}
-      className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all border border-border/40 ${isDone ? "opacity-50 bg-background/50" : "bg-card/40 hover:bg-card/80"}`}
+      className={`flex items-start gap-5 p-5 rounded-[2rem] cursor-pointer transition-all border border-white/5 group ${isDone ? "opacity-50 bg-surface-lowest grayscale hover:grayscale-[50%]" : "glass hover:bg-surface-highest hover:border-info/30 hover:shadow-[0_10px_30px_rgba(59,130,246,0.15)]"}`}
     >
       <div className="relative mt-1 shrink-0">
         <div
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+          className={`w-7 h-7 rounded-2xl flex items-center justify-center transition-all ${
             isDone
-              ? "bg-primary border-primary text-background"
-              : "border-muted-foreground/40 bg-transparent"
+              ? "bg-info text-info-foreground shadow-[0_0_10px_rgba(59,130,246,0.6)]"
+              : "bg-surface-high border border-info/20 text-info group-hover:scale-110"
           }`}
         >
           {isDone && <Check className="w-4 h-4" strokeWidth={3} />}
@@ -444,13 +444,13 @@ function SkincareStepCard({ item, isDone, onToggle }) {
       </div>
       <div className="flex-1 space-y-1">
         <h3
-          className={`text-sm font-bold ${isDone ? "text-muted-foreground" : "text-foreground"}`}
+          className={`text-[15px] font-bold ${isDone ? "text-muted-foreground" : "text-foreground group-hover:text-info transition-colors"}`}
         >
           Step {item.step}: {item.title}
         </h3>
-        <p className="text-xs text-muted-foreground">{item.desc}</p>
-        <p className="text-[10px] text-primary font-medium tracking-wide">
-          {item.tip}
+        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+        <p className="text-[10px] text-info font-black uppercase tracking-widest mt-2 bg-info/10 py-1 px-3 rounded-lg inline-block border border-info/20">
+          Tip: {item.tip}
         </p>
       </div>
     </motion.div>
@@ -530,22 +530,22 @@ export default function FaceCarePage() {
       </div>
 
       {/* Custom Segmented Control */}
-      <div className="flex p-1 bg-card rounded-full shadow-inner border border-border/50 max-w-sm mx-auto">
+      <div className="flex p-1.5 glass rounded-full max-w-sm mx-auto">
         <button
-          className={`flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-medium rounded-full transition-all ${
+          className={`flex-1 flex justify-center items-center gap-2 py-3 text-xs font-bold uppercase tracking-widest rounded-full transition-all ${
             activeTab === "exercises"
-              ? "bg-background shadow-md text-foreground"
-              : "text-muted-foreground hover:text-foreground/80"
+              ? "bg-primary/20 text-primary border border-primary/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
+              : "text-muted-foreground hover:text-foreground/80 hover:bg-surface-highest"
           }`}
           onClick={() => setActiveTab("exercises")}
         >
           <Sparkles className="h-4 w-4" /> Face Exercises
         </button>
         <button
-          className={`flex-1 flex justify-center items-center gap-2 py-2.5 text-sm font-medium rounded-full transition-all ${
+          className={`flex-1 flex justify-center items-center gap-2 py-3 text-xs font-bold uppercase tracking-widest rounded-full transition-all ${
             activeTab === "skincare"
-              ? "bg-background shadow-md text-foreground"
-              : "text-muted-foreground hover:text-foreground/80"
+              ? "bg-info/20 text-info border border-info/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]"
+              : "text-muted-foreground hover:text-foreground/80 hover:bg-surface-highest"
           }`}
           onClick={() => setActiveTab("skincare")}
         >
@@ -560,12 +560,12 @@ export default function FaceCarePage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-3"
+            className="space-y-4"
           >
             {/* Progress Header */}
-            <div className="p-3 rounded-lg bg-muted/50">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-medium text-foreground">
+            <div className="p-5 rounded-[2rem] glass">
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-foreground">
                   Today's Progress
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -630,14 +630,16 @@ export default function FaceCarePage() {
             className="space-y-6"
           >
             {/* Morning Routine */}
-            <div className="border border-border/50 rounded-2xl overflow-hidden bg-background">
-              <div className="bg-card/40 px-4 py-3 border-b border-border/50 flex items-center gap-2">
-                <Sun className="h-5 w-5 text-warning" />
-                <h2 className="font-semibold text-foreground">
+            <div className="glass rounded-[2rem] overflow-hidden">
+              <div className="bg-surface-highest/50 px-6 py-5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center border border-warning/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                  <Sun className="h-5 w-5 text-warning" />
+                </div>
+                <h2 className="text-lg font-bold uppercase tracking-widest text-foreground">
                   Morning Routine
                 </h2>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-6 space-y-4 bg-surface-lowest/30">
                 {morningRoutine.map((step) => (
                   <SkincareStepCard
                     key={step.id}
@@ -650,14 +652,16 @@ export default function FaceCarePage() {
             </div>
 
             {/* Evening Routine */}
-            <div className="border border-border/50 rounded-2xl overflow-hidden bg-background">
-              <div className="bg-card/40 px-4 py-3 border-b border-border/50 flex items-center gap-2">
-                <Moon className="h-5 w-5 text-info" />
-                <h2 className="font-semibold text-foreground">
+            <div className="glass rounded-[2rem] overflow-hidden">
+              <div className="bg-surface-highest/50 px-6 py-5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                  <Moon className="h-5 w-5 text-info" />
+                </div>
+                <h2 className="text-lg font-bold uppercase tracking-widest text-foreground">
                   Evening Routine
                 </h2>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-6 space-y-4 bg-surface-lowest/30">
                 {eveningRoutine.map((step) => (
                   <SkincareStepCard
                     key={step.id}

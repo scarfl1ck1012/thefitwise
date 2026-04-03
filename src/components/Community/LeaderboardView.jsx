@@ -117,7 +117,7 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
         {rest.map((user) => (
           <div
             key={user.id}
-            className={`flex items-center justify-between p-3 md:p-4 rounded-xl transition-colors ${user.id === currentUser.id ? "hidden" : "bg-card/40 hover:bg-card/80 border border-border/30"}`}
+            className={`flex items-center justify-between p-4 md:p-5 rounded-[2rem] transition-all group ${user.id === currentUser.id ? "hidden" : "glass hover:bg-surface-highest hover:border-white/10 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]"}`}
           >
             <div className="flex items-center gap-4">
               <div className="text-sm font-bold text-muted-foreground w-6 text-center">
@@ -145,7 +145,7 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
       {/* Pinned Current User */}
       {currentUserRanked && (
         <div className="fixed bottom-20 lg:bottom-4 left-4 right-4 lg:left-72 lg:max-w-6xl lg:mx-auto z-20">
-          <div className="bg-card border-2 border-primary shadow-[0_0_15px_rgba(var(--primary),0.3)] p-4 rounded-xl flex items-center justify-between backdrop-blur-md">
+          <div className="glass border border-primary/50 shadow-[0_0_20px_rgba(34,197,94,0.15)] p-5 md:p-6 rounded-[2rem] flex items-center justify-between bg-surface-highest/80 relative z-50">
             <div className="flex items-center gap-4">
               <div className="text-base font-bold text-primary w-6 text-center">
                 {currentUserRanked.rank}

@@ -40,9 +40,9 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const displayName = profile?.full_name || "User";
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex text-foreground">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-sidebar border-r border-sidebar-border p-4 fixed h-full">
+      <aside className="hidden lg:flex flex-col w-64 bg-surface-low p-4 fixed h-full z-20">
         <div className="flex items-center gap-2 mb-8 px-2">
           <img src="/logo.png" alt="FitWise" className="h-8 w-auto" />
           <span className="text-lg font-bold text-foreground">
@@ -57,10 +57,10 @@ export default function AppLayout() {
               to={item.to}
               end={item.to === "/dashboard"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                    ? "bg-surface-high text-primary shadow-sm"
+                    : "text-muted-foreground hover:bg-surface-high/50 hover:text-foreground"
                 }`
               }
             >
@@ -70,14 +70,14 @@ export default function AppLayout() {
           ))}
         </nav>
 
-        <div className="mt-auto space-y-2 pt-4 border-t border-sidebar-border">
-          <div className="px-3 py-2 text-sm text-muted-foreground">
+        <div className="mt-auto space-y-2 pt-4 border-t border-surface-high/50">
+          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Signed in as{" "}
             <span className="font-medium text-foreground">{displayName}</span>
           </div>
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground hover:bg-sidebar-accent/50 w-full transition-all"
+            className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-surface-high/50 hover:text-foreground w-full transition-all"
           >
             {isDark ? (
               <Sun className="h-4 w-4" />
@@ -88,7 +88,7 @@ export default function AppLayout() {
           </button>
           <button
             onClick={signOut}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 w-full transition-all"
+            className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 w-full transition-all"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
@@ -97,7 +97,7 @@ export default function AppLayout() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-surface-low/80 backdrop-blur-md px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="FitWise" className="h-7 w-auto" />
           <span className="font-bold text-foreground">The Fit Wise</span>
@@ -121,7 +121,7 @@ export default function AppLayout() {
             initial={{ opacity: 0, x: -300 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -300 }}
-            className="lg:hidden fixed inset-0 z-40 bg-card pt-16"
+            className="lg:hidden fixed inset-0 z-40 bg-surface-lowest/95 backdrop-blur-lg pt-16"
           >
             <nav className="p-4 space-y-1">
               {navItems.map((item) => (
@@ -135,7 +135,7 @@ export default function AppLayout() {
                     setTimeout(() => navigate(item.to), 250);
                   }}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`
+                    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive ? "bg-surface-high text-primary" : "text-muted-foreground hover:bg-surface-high/50 hover:text-foreground"}`
                   }
                 >
                   <item.icon className="h-5 w-5" />
@@ -144,7 +144,7 @@ export default function AppLayout() {
               ))}
               <button
                 onClick={toggleTheme}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-foreground hover:bg-muted w-full"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-surface-high/50 hover:text-foreground w-full"
               >
                 {isDark ? (
                   <Sun className="h-5 w-5" />
@@ -155,7 +155,7 @@ export default function AppLayout() {
               </button>
               <button
                 onClick={signOut}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-destructive hover:bg-destructive/10 w-full"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 w-full"
               >
                 <LogOut className="h-5 w-5" />
                 Sign Out

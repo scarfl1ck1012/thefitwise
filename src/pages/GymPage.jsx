@@ -57,36 +57,36 @@ function CheckInSection({ checkins, addCheckin, addXP }) {
   };
 
   return (
-    <Card className="shadow-card border-primary/20">
-      <CardContent className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className="glass rounded-[2rem] p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center ${checkedIn ? "bg-success/15" : "bg-primary/10"}`}
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${checkedIn ? "bg-success/10 border-success/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "bg-primary/10 border-primary/30"}`}
           >
             {checkedIn ? (
-              <CheckCircle2 className="h-5 w-5 text-success" />
+              <CheckCircle2 className="h-6 w-6 text-success drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
             ) : (
-              <Dumbbell className="h-5 w-5 text-primary" />
+              <Dumbbell className="h-6 w-6 text-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">
-              {checkedIn ? "You're checked in today!" : "Mark today's check-in"}
+            <p className="text-sm font-bold uppercase tracking-widest text-foreground">
+              {checkedIn ? "Checked In" : "Today's Session"}
             </p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
               {checkedIn
                 ? "Keep up the consistency"
-                : "Log your gym session for XP and streak"}
+                : "Log your gym session for XP"}
             </p>
           </div>
         </div>
         {!checkedIn && (
-          <Button size="sm" onClick={handleCheckIn} className="gap-1.5 text-xs">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Check In
+          <Button onClick={handleCheckIn} className="gap-2 shrink-0 h-10 w-full sm:w-auto">
+            <CheckCircle2 className="h-4 w-4" /> Check In Now
           </Button>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -248,13 +248,16 @@ function CardioTracker({ profile }) {
   };
 
   return (
-    <Card className="shadow-card">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Flame className="h-4 w-4 text-primary" /> Cardio
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <div className="glass rounded-[2rem] p-6 lg:p-8">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20 shadow-[0_0_15px_rgba(251,146,60,0.2)]">
+          <Flame className="h-5 w-5 text-accent" />
+        </div>
+        <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
+          Cardio Tracker
+        </h2>
+      </div>
+      <div className="space-y-4">
         {/* Weekly overview */}
         <div className="p-3 rounded-lg bg-muted/30">
           <div className="flex items-center justify-between mb-1">
@@ -400,8 +403,8 @@ function CardioTracker({ profile }) {
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -573,27 +576,30 @@ function WorkoutBuilder({ profile }) {
   const dayExercises = weeklyPlan[selectedDay] || [];
 
   return (
-    <Card className="shadow-card">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Dumbbell className="h-4 w-4 text-primary" /> Workout Plan
-          </CardTitle>
-          {/* Home / Gym toggle */}
-          <div className="flex bg-muted rounded-lg p-0.5">
-            {["home", "gym"].map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`px-3 py-1 text-xs rounded-md transition-all ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-              >
-                {m === "home" ? "Home" : "Gym"}
-              </button>
-            ))}
+    <div className="glass rounded-[2rem] p-6 lg:p-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+            <Dumbbell className="h-5 w-5 text-info" />
           </div>
+          <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
+            Plan
+          </h2>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+        {/* Home / Gym toggle */}
+        <div className="flex bg-surface-lowest rounded-xl p-1 border border-white/5">
+          {["home", "gym"].map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${mode === m ? "bg-info text-info-foreground shadow-[0_0_10px_rgba(59,130,246,0.4)]" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {m === "home" ? "Home" : "Gym"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-5">
         {/* AI Generate button */}
         <Button
           variant="outline"
@@ -809,7 +815,7 @@ function WorkoutBuilder({ profile }) {
             </p>
           </div>
         )}
-      </CardContent>
+      </div>
 
       {/* AI Modal */}
       <AnimatePresence>
@@ -889,7 +895,7 @@ function WorkoutBuilder({ profile }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </Card>
+    </div>
   );
 }
 
