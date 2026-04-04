@@ -9,13 +9,21 @@ export function useUserStats() {
   const { data: stats } = useQuery({
     queryKey: ["user_stats", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_stats")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from("user_stats")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (error) {
+           console.error("Supabase user_stats fetch error:", error);
+           return {};
+        }
+        return data || {};
+      } catch (err) {
+        console.error("Unexpected error fetching user_stats:", err);
+        return {};
+      }
     },
     enabled: !!user,
   });

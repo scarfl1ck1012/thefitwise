@@ -43,9 +43,11 @@ export default function AppLayout() {
     <div className="min-h-screen bg-background flex text-foreground">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-surface-low p-4 fixed h-full z-20">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <img src="/logo.png" alt="FitWise" className="h-8 w-auto" />
-          <span className="text-lg font-bold text-foreground">
+        <div className="flex items-center gap-3 mb-8 px-2">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+            <img src="/logo.png" alt="FitWise" className="h-6 w-auto" />
+          </div>
+          <span className="text-lg font-bold text-foreground tracking-tight">
             The Fit Wise
           </span>
         </div>
@@ -59,7 +61,7 @@ export default function AppLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-surface-high text-primary shadow-sm"
+                    ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
                     : "text-muted-foreground hover:bg-surface-high/50 hover:text-foreground"
                 }`
               }
@@ -114,14 +116,14 @@ export default function AppLayout() {
         </button>
       </div>
 
-      {/* Mobile Nav */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, x: -300 }}
+            initial={{ opacity: 0, x: "-100%" }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -300 }}
-            className="lg:hidden fixed inset-0 z-40 bg-surface-lowest/95 backdrop-blur-lg pt-16"
+            exit={{ opacity: 0, x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="lg:hidden fixed inset-0 z-40 bg-surface-lowest/95 backdrop-blur-xl pt-16"
           >
             <nav className="p-4 space-y-1">
               {navItems.map((item) => (
@@ -135,7 +137,7 @@ export default function AppLayout() {
                     setTimeout(() => navigate(item.to), 250);
                   }}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive ? "bg-surface-high text-primary" : "text-muted-foreground hover:bg-surface-high/50 hover:text-foreground"}`
+                    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(34,197,94,0.15)]" : "text-muted-foreground hover:bg-surface-high/50 hover:text-foreground"}`
                   }
                 >
                   <item.icon className="h-5 w-5" />

@@ -75,11 +75,13 @@ export default function CommunityPage() {
 
   return (
     <div className="space-y-6 pb-24 lg:pb-8 relative min-h-screen">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+      <div className="relative">
+        <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-info/5 rounded-full blur-3xl pointer-events-none" />
+        <h1 className="text-3xl font-bold tracking-tight text-foreground relative">
           Community Hub
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2 relative">
           Connect, compete, and conquer your goals together.
         </p>
       </div>
@@ -136,24 +138,26 @@ export default function CommunityPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {activeTab === "leaderboard" ? (
-              <LeaderboardView
-                users={users}
-                friendships={formattedFriendships}
-                currentUser={currentUser}
-              />
-            ) : (
-              <FriendsView
-                users={users}
-                friendships={formattedFriendships}
-                requests={formattedRequests}
-                currentUser={currentUser}
-                onAccept={handleAcceptRequest}
-                onDecline={handleDeclineRequest}
-                onRemove={handleRemoveFriend}
-                onAdd={handleAddFriend}
-              />
-            )}
+            <div className="glass rounded-[2rem] p-5 lg:p-6">
+              {activeTab === "leaderboard" ? (
+                <LeaderboardView
+                  users={users}
+                  friendships={formattedFriendships}
+                  currentUser={currentUser}
+                />
+              ) : (
+                <FriendsView
+                  users={users}
+                  friendships={formattedFriendships}
+                  requests={formattedRequests}
+                  currentUser={currentUser}
+                  onAccept={handleAcceptRequest}
+                  onDecline={handleDeclineRequest}
+                  onRemove={handleRemoveFriend}
+                  onAdd={handleAddFriend}
+                />
+              )}
+            </div>
           </motion.div>
         )}
       </div>

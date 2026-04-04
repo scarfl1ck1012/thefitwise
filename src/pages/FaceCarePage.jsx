@@ -1,680 +1,197 @@
 import { useState, useEffect, useRef } from "react";
 import { faceExercises } from "@/lib/workoutData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
+  Droplet,
+  Clock,
+  Play,
+  MoveRight,
   Sun,
   Moon,
-  Timer,
-  Play,
-  Square,
-  ChevronDown,
-  Camera,
-  Check,
+  Activity
 } from "lucide-react";
-import LivePractice from "@/components/LivePractice";
 
-// --- Skincare Data ---
+// --- Skincare Data (Hidden but preserved for structure) ---
 const morningRoutine = [
-  {
-    id: "am-1",
-    step: 1,
-    title: "Cleanser",
-    desc: "Gentle face wash to remove dirt and oil",
-    tip: "Use lukewarm water, not hot",
-  },
-  {
-    id: "am-2",
-    step: 2,
-    title: "Toner",
-    desc: "Balance skin pH and prep for products",
-    tip: "Pat gently, don't rub",
-  },
-  {
-    id: "am-3",
-    step: 3,
-    title: "Vitamin C Serum",
-    desc: "Brightens skin and fights free radicals",
-    tip: "Apply before moisturizer",
-  },
-  {
-    id: "am-4",
-    step: 4,
-    title: "Moisturizer",
-    desc: "Hydrate and lock in previous products",
-    tip: "Apply while skin is still slightly damp",
-  },
-  {
-    id: "am-5",
-    step: 5,
-    title: "Sunscreen SPF 30+",
-    desc: "Protect from UV damage and aging",
-    tip: "Reapply every 2 hours if outdoors",
-  },
-  {
-    id: "am-6",
-    step: 6,
-    title: "Eye Cream",
-    desc: "Hydrate under-eye area, reduce dark circles",
-    tip: "Use ring finger, lightest pressure",
-  },
-  {
-    id: "am-7",
-    step: 7,
-    title: "Lip Balm with SPF",
-    desc: "Protect and moisturize lips",
-    tip: "Reapply throughout the day",
-  },
+  { id: "am-1", step: 1, title: "Cleanser", desc: "Gentle face wash to remove dirt and oil" },
+  { id: "am-2", step: 2, title: "Toner", desc: "Balance skin pH and prep for products" },
+  { id: "am-3", step: 3, title: "Vitamin C Serum", desc: "Brightens skin and fights free radicals" },
+  { id: "am-4", step: 4, title: "Moisturizer", desc: "Hydrate and lock in previous products" },
+  { id: "am-5", step: 5, title: "Sunscreen SPF 30+", desc: "Protect from UV damage and aging" },
 ];
 
 const eveningRoutine = [
-  {
-    id: "pm-1",
-    step: 1,
-    title: "Cleanser",
-    desc: "Gentle face wash to remove dirt and oil",
-    tip: "Use lukewarm water, not hot",
-  },
-  {
-    id: "pm-2",
-    step: 2,
-    title: "Toner",
-    desc: "Balance skin pH and prep for products",
-    tip: "Pat gently, don't rub",
-  },
-  {
-    id: "pm-3",
-    step: 3,
-    title: "Retinol / Retinoid",
-    desc: "Anti-aging, reduces acne and dark spots",
-    tip: "Start 2x/week, build tolerance",
-  },
-  {
-    id: "pm-4",
-    step: 4,
-    title: "Moisturizer",
-    desc: "Hydrate and lock in previous products",
-    tip: "Apply while skin is still slightly damp",
-  },
-  {
-    id: "pm-5",
-    step: 5,
-    title: "Eye Cream",
-    desc: "Hydrate under-eye area, reduce dark circles",
-    tip: "Use ring finger, lightest pressure",
-  },
+  { id: "pm-1", step: 1, title: "Cleanser", desc: "Gentle face wash to remove dirt and oil" },
+  { id: "pm-2", step: 2, title: "Toner", desc: "Balance skin pH and prep for products" },
+  { id: "pm-3", step: 3, title: "Retinol / Retinoid", desc: "Anti-aging, reduces acne and dark spots" },
+  { id: "pm-4", step: 4, title: "Moisturizer", desc: "Hydrate and lock in previous products" },
 ];
-
-// --- Exercise Timer Hook ---
-function useTimer(totalSeconds) {
-  const [remaining, setRemaining] = useState(totalSeconds);
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef(null);
-
-  useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(() => {
-        setRemaining((r) => {
-          if (r <= 1) {
-            setRunning(false);
-            return 0;
-          }
-          return r - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [running]);
-
-  const start = () => {
-    setRemaining(totalSeconds);
-    setRunning(true);
-  };
-  const stop = () => {
-    setRunning(false);
-  };
-  const reset = () => {
-    setRunning(false);
-    setRemaining(totalSeconds);
-  };
-
-  const minutes = Math.floor(remaining / 60);
-  const seconds = remaining % 60;
-  const display = `${minutes}:${String(seconds).padStart(2, "0")}`;
-  const progress =
-    totalSeconds > 0 ? ((totalSeconds - remaining) / totalSeconds) * 100 : 0;
-
-  return {
-    remaining,
-    running,
-    display,
-    progress,
-    start,
-    stop,
-    reset,
-    finished: remaining === 0,
-  };
-}
-
-// --- Completion Pop Animation ---
-function CompletionBurst({ active }) {
-  if (!active) return null;
-  return (
-    <motion.div
-      initial={{ scale: 0, opacity: 1 }}
-      animate={{ scale: 2.5, opacity: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="absolute inset-0 rounded-full bg-primary/30 pointer-events-none"
-    />
-  );
-}
-
-// --- Exercise Card Component ---
-function ExerciseCard({
-  ex,
-  index,
-  isExpanded,
-  onToggleExpand,
-  isDone,
-  onToggleComplete,
-}) {
-  const timer = useTimer(ex.timerSeconds || 60);
-  const [showAR, setShowAR] = useState(false);
-  const [showBurst, setShowBurst] = useState(false);
-
-  const handleComplete = () => {
-    if (!isDone) {
-      setShowBurst(true);
-      setTimeout(() => setShowBurst(false), 600);
-    }
-    onToggleComplete();
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
-      layout
-    >
-      <div
-        className={`glass rounded-[2rem] transition-all overflow-hidden relative group hover:border-primary/20 ${isDone ? "opacity-60 bg-surface-lowest grayscale hover:grayscale-[50%]" : ""} ${isExpanded ? "border-primary/30 shadow-[0_10px_30px_rgba(34,197,94,0.1)]" : ""}`}
-      >
-        <div>
-          {/* Collapsed Header — always visible */}
-          <button
-            className="w-full p-4 text-left flex items-start gap-3"
-            onClick={onToggleExpand}
-          >
-            {/* Animated Checkbox */}
-            <button
-              type="button"
-              className="relative mt-0.5 shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleComplete();
-              }}
-            >
-              <motion.div
-                animate={isDone ? { scale: [1, 1.3, 1] } : {}}
-                transition={{ duration: 0.3 }}
-              >
-                <Checkbox checked={isDone} className="pointer-events-none" />
-              </motion.div>
-              <CompletionBurst active={showBurst} />
-            </button>
-
-            {/* Exercise Thumbnail */}
-            <div className="w-10 h-10 rounded-lg bg-primary/10 overflow-hidden shrink-0">
-              {ex.image ? (
-                <img
-                  src={ex.image}
-                  alt={ex.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="w-full h-full flex items-center justify-center text-lg">
-                  {ex.icon || "🏋️"}
-                </span>
-              )}
-            </div>
-
-            {/* Exercise Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <p
-                  className={`text-sm font-medium truncate ${isDone ? "line-through text-muted-foreground" : "text-foreground"}`}
-                >
-                  {ex.name}
-                </p>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge variant="outline" className="text-[10px] shrink-0">
-                    {ex.duration}
-                  </Badge>
-                  <motion.div
-                    animate={{ rotate: isExpanded ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </motion.div>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                {ex.description}
-              </p>
-            </div>
-          </button>
-
-          {/* Expanded Detail */}
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="overflow-hidden"
-              >
-                <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
-                  {/* Demonstration Image */}
-                  {ex.image && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.1 }}
-                      className="rounded-lg overflow-hidden border border-border bg-muted/30"
-                    >
-                      <img
-                        src={ex.image}
-                        alt={`How to do ${ex.name}`}
-                        className="w-full h-48 object-contain"
-                      />
-                      <div className="px-3 py-1.5 bg-muted/50 border-t border-border">
-                        <p className="text-[10px] text-muted-foreground text-center">
-                          Visual guide -- {ex.name}
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Target muscles */}
-                  {ex.target && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground">
-                        Target:
-                      </span>
-                      <Badge variant="secondary" className="text-[10px]">
-                        {ex.target}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Step-by-step instructions */}
-                  {ex.steps && (
-                    <div className="space-y-1.5">
-                      <p className="text-xs font-medium text-foreground">
-                        How to perform:
-                      </p>
-                      {ex.steps.map((step, i) => (
-                        <div key={i} className="flex items-start gap-2.5 pl-1">
-                          <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                            {i + 1}
-                          </span>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {step}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Timer */}
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Timer className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-bold text-foreground font-mono">
-                          {timer.display}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        {!timer.running && !timer.finished && (
-                          <Button
-                            size="sm"
-                            variant="default"
-                            className="h-7 text-xs gap-1"
-                            onClick={timer.start}
-                          >
-                            <Play className="h-3 w-3" /> Start
-                          </Button>
-                        )}
-                        {timer.running && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="h-7 text-xs gap-1"
-                            onClick={timer.stop}
-                          >
-                            <Square className="h-3 w-3" /> Stop
-                          </Button>
-                        )}
-                        {timer.finished && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs"
-                            onClick={timer.reset}
-                          >
-                            Reset
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    <Progress value={timer.progress} className="h-1.5" />
-                    {timer.finished && (
-                      <motion.p
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xs text-success font-medium mt-2 text-center"
-                      >
-                        Exercise complete!
-                      </motion.p>
-                    )}
-                  </div>
-
-                  {/* AR Live Practice Toggle */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs gap-2 h-8"
-                    onClick={() => setShowAR(!showAR)}
-                  >
-                    <Camera className="h-3.5 w-3.5" />
-                    {showAR ? "Hide Live Practice" : "Live Practice (AR)"}
-                  </Button>
-
-                  <AnimatePresence>
-                    {showAR && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                      >
-                        <LivePractice
-                          exerciseName={ex.name}
-                          onClose={() => setShowAR(false)}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// --- Skincare Step Component ---
-function SkincareStepCard({ item, isDone, onToggle }) {
-  return (
-    <motion.div
-      layout
-      onClick={onToggle}
-      className={`flex items-start gap-5 p-5 rounded-[2rem] cursor-pointer transition-all border border-white/5 group ${isDone ? "opacity-50 bg-surface-lowest grayscale hover:grayscale-[50%]" : "glass hover:bg-surface-highest hover:border-info/30 hover:shadow-[0_10px_30px_rgba(59,130,246,0.15)]"}`}
-    >
-      <div className="relative mt-1 shrink-0">
-        <div
-          className={`w-7 h-7 rounded-2xl flex items-center justify-center transition-all ${
-            isDone
-              ? "bg-info text-info-foreground shadow-[0_0_10px_rgba(59,130,246,0.6)]"
-              : "bg-surface-high border border-info/20 text-info group-hover:scale-110"
-          }`}
-        >
-          {isDone && <Check className="w-4 h-4" strokeWidth={3} />}
-        </div>
-      </div>
-      <div className="flex-1 space-y-1">
-        <h3
-          className={`text-[15px] font-bold ${isDone ? "text-muted-foreground" : "text-foreground group-hover:text-info transition-colors"}`}
-        >
-          Step {item.step}: {item.title}
-        </h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-        <p className="text-[10px] text-info font-black uppercase tracking-widest mt-2 bg-info/10 py-1 px-3 rounded-lg inline-block border border-info/20">
-          Tip: {item.tip}
-        </p>
-      </div>
-    </motion.div>
-  );
-}
 
 // --- Main Page ---
 export default function FaceCarePage() {
-  const [activeTab, setActiveTab] = useState("skincare");
-  const todayDate = new Date().toLocaleDateString("en-CA");
-  const [completedExercises, setCompletedExercises] = useState(() => {
-    try {
-      const saved = localStorage.getItem("fitwise_face_ex_" + todayDate);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [completedSkincare, setCompletedSkincare] = useState(() => {
-    try {
-      const saved = localStorage.getItem("fitwise_skin_" + todayDate);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(
-      "fitwise_face_ex_" + todayDate,
-      JSON.stringify(completedExercises),
-    );
-  }, [completedExercises, todayDate]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "fitwise_skin_" + todayDate,
-      JSON.stringify(completedSkincare),
-    );
-  }, [completedSkincare, todayDate]);
-  const [expandedExercise, setExpandedExercise] = useState(null);
-  const [milestoneGlow, setMilestoneGlow] = useState(false);
-
-  const toggleExercise = (name) => {
-    setCompletedExercises((prev) => {
-      const next = prev.includes(name)
-        ? prev.filter((n) => n !== name)
-        : [...prev, name];
-      // Trigger glow at milestones (every 3rd completion)
-      if (next.length > prev.length && next.length % 3 === 0) {
-        setMilestoneGlow(true);
-        setTimeout(() => setMilestoneGlow(false), 800);
-      }
-      return next;
-    });
-  };
-
-  const toggleSkincare = (name) => {
-    setCompletedSkincare((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name],
-    );
-  };
-
-  const exerciseProgress =
-    (completedExercises.length / faceExercises.length) * 100;
-
   return (
-    <div className="space-y-6 pb-20">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Face & Skincare
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-          Improve your facial features with targeted exercises and build a
-          consistent skincare routine.
-        </p>
+    <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4 overflow-x-hidden">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
+         <div>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">Daily Rituals</h1>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">Clear skin starts from within</p>
+         </div>
       </div>
 
-      {/* Custom Segmented Control */}
-      <div className="flex p-1.5 glass rounded-full max-w-sm mx-auto">
-        <button
-          className={`flex-1 flex justify-center items-center gap-2 py-3 text-xs font-bold uppercase tracking-widest rounded-full transition-all ${
-            activeTab === "exercises"
-              ? "bg-primary/20 text-primary border border-primary/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
-              : "text-muted-foreground hover:text-foreground/80 hover:bg-surface-highest"
-          }`}
-          onClick={() => setActiveTab("exercises")}
-        >
-          <Sparkles className="h-4 w-4" /> Face Exercises
-        </button>
-        <button
-          className={`flex-1 flex justify-center items-center gap-2 py-3 text-xs font-bold uppercase tracking-widest rounded-full transition-all ${
-            activeTab === "skincare"
-              ? "bg-info/20 text-info border border-info/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]"
-              : "text-muted-foreground hover:text-foreground/80 hover:bg-surface-highest"
-          }`}
-          onClick={() => setActiveTab("skincare")}
-        >
-          <Sun className="h-4 w-4" /> Skincare
-        </button>
+      {/* Hero Central Section */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+         {/* Skin Type Card */}
+         <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-1 rounded-[2rem] bg-surface-low border border-border/30 p-6 hidden md:flex flex-col justify-between relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-colors"></div>
+            <div>
+               <Badge variant="outline" className="border-primary/50 text-primary mb-4 bg-primary/10 tracking-widest text-[10px]">PROFILE</Badge>
+               <h3 className="text-xl font-bold text-white mb-1">Skin Type</h3>
+               <p className="text-sm text-white/50 font-medium">Combination / Oily</p>
+            </div>
+            <div className="mt-8 flex justify-start">
+               <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center bg-primary/5">
+                  <Activity className="w-5 h-5 text-primary opacity-80" />
+               </div>
+            </div>
+         </motion.div>
+
+         {/* Main Circle Hero */}
+         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 rounded-[2rem] bg-[#0c0c0c] border border-border/30 p-8 flex flex-col items-center justify-center relative overflow-hidden min-h-[340px]">
+            {/* Background Glows */}
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-80"></div>
+            
+            {/* Concentric Rings */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 border-[1px] border-dashed border-primary/20 rounded-full animate-[spin_60s_linear_infinite]"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 border-[1px] border-primary/30 rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[11rem] h-[11rem] border-[4px] border-primary/10 rounded-full"></div>
+            
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/20 rounded-full blur-3xl opacity-50 pulse-glow"></div>
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center text-center">
+               <span className="text-[9px] uppercase tracking-widest text-primary font-bold mb-3">Next Active Focus</span>
+               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Cleansing Ritual</h2>
+               
+               <div className="flex items-center gap-2 mt-5 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                  <Clock className="w-3.5 h-3.5 text-primary" />
+                  <span className="font-mono text-xs sm:text-sm font-bold tracking-widest text-white/90">12:30</span>
+               </div>
+               
+               <Button className="mt-8 bg-white text-black hover:bg-neutral-200 rounded-full px-8 py-5 h-auto font-bold text-xs transform hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                  <Play className="w-4 h-4 mr-2 fill-black" /> Begin Session
+               </Button>
+            </div>
+         </motion.div>
+
+         {/* Hydration Card */}
+         <motion.div initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-1 rounded-[2rem] bg-surface-low border border-border/30 p-6 hidden md:flex flex-col justify-between relative overflow-hidden group">
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] group-hover:bg-blue-500/10 transition-colors"></div>
+            <div>
+               <Badge variant="outline" className="border-blue-500/50 text-blue-400 mb-4 bg-blue-500/10 tracking-widest text-[10px]">STATUS</Badge>
+               <h3 className="text-xl font-bold text-white mb-1">Hydration</h3>
+               <p className="text-sm text-blue-400/80 font-bold tracking-tight">Optimal Level</p>
+            </div>
+            <div className="mt-8 flex justify-start">
+               <div className="w-12 h-12 rounded-full border border-blue-500/20 flex items-center justify-center bg-blue-500/5">
+                  <Droplet className="w-5 h-5 text-blue-400 opacity-80" />
+               </div>
+            </div>
+         </motion.div>
       </div>
 
-      <AnimatePresence mode="wait">
-        {activeTab === "exercises" && (
-          <motion.div
-            key="exercises"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-4"
-          >
-            {/* Progress Header */}
-            <div className="p-5 rounded-[2rem] glass">
-              <div className="flex justify-between items-center mb-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-foreground">
-                  Today's Progress
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {completedExercises.length}/{faceExercises.length}
-                </p>
-              </div>
-              <div className="relative">
-                <motion.div
-                  animate={
-                    milestoneGlow
-                      ? {
-                          boxShadow: [
-                            "0 0 0 0 hsl(var(--primary)/0)",
-                            "0 0 12px 4px hsl(var(--primary)/0.4)",
-                            "0 0 0 0 hsl(var(--primary)/0)",
-                          ],
-                        }
-                      : {}
-                  }
-                  transition={{ duration: 0.8 }}
-                  className="rounded-full"
-                >
-                  <Progress value={exerciseProgress} className="h-2.5" />
-                </motion.div>
-              </div>
-              {completedExercises.length === faceExercises.length && (
-                <motion.p
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-xs text-success font-medium mt-2 text-center"
-                >
-                  All exercises complete! Great job!
-                </motion.p>
-              )}
+      {/* Bottom Section - Horizontal Routines */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-8">
+         <div className="flex items-center justify-between mb-4 px-2">
+            <div>
+               <h3 className="text-lg font-bold text-foreground">Curated Routines</h3>
+               <p className="text-xs text-muted-foreground mt-1">Schedules perfect for your skin type</p>
             </div>
+            <Button variant="ghost" className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
+               View All <MoveRight className="w-3.5 h-3.5 ml-2"/>
+            </Button>
+         </div>
+         
+         <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x pt-2">
+             <RoutineCard 
+               title="Morning Refresh" 
+               desc="Wake up your skin" 
+               time="5 min" 
+               steps={morningRoutine.length} 
+               icon={<Sun className="w-5 h-5 text-orange-400" />}
+               gradient="from-orange-500/20 to-transparent" 
+             />
+             <RoutineCard 
+               title="Evening Repair" 
+               desc="Deep restoration step" 
+               time="15 min" 
+               steps={eveningRoutine.length} 
+               icon={<Moon className="w-5 h-5 text-indigo-400" />}
+               gradient="from-indigo-500/20 to-transparent" 
+             />
+             <RoutineCard 
+               title="Face Yoga Focus" 
+               desc="Tone facial muscles" 
+               time="10 min" 
+               steps={faceExercises.length} 
+               icon={<Sparkles className="w-5 h-5 text-primary" />}
+               gradient="from-primary/20 to-transparent" 
+             />
+             <RoutineCard 
+               title="Quick Cleanse" 
+               desc="Post-workout refresh" 
+               time="3 min" 
+               steps={3} 
+               icon={<Droplet className="w-5 h-5 text-cyan-400" />}
+               gradient="from-cyan-500/20 to-transparent" 
+             />
+         </div>
+      </motion.div>
 
-            {/* Exercise Cards */}
-            {faceExercises.map((ex, i) => (
-              <ExerciseCard
-                key={ex.name}
-                ex={ex}
-                index={i}
-                isExpanded={expandedExercise === ex.name}
-                onToggleExpand={() =>
-                  setExpandedExercise(
-                    expandedExercise === ex.name ? null : ex.name,
-                  )
-                }
-                isDone={completedExercises.includes(ex.name)}
-                onToggleComplete={() => toggleExercise(ex.name)}
-              />
-            ))}
-          </motion.div>
-        )}
-
-        {activeTab === "skincare" && (
-          <motion.div
-            key="skincare"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
-          >
-            {/* Morning Routine */}
-            <div className="glass rounded-[2rem] overflow-hidden">
-              <div className="bg-surface-highest/50 px-6 py-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center border border-warning/20 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                  <Sun className="h-5 w-5 text-warning" />
-                </div>
-                <h2 className="text-lg font-bold uppercase tracking-widest text-foreground">
-                  Morning Routine
-                </h2>
-              </div>
-              <div className="p-6 space-y-4 bg-surface-lowest/30">
-                {morningRoutine.map((step) => (
-                  <SkincareStepCard
-                    key={step.id}
-                    item={step}
-                    isDone={completedSkincare.includes(step.id)}
-                    onToggle={() => toggleSkincare(step.id)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Evening Routine */}
-            <div className="glass rounded-[2rem] overflow-hidden">
-              <div className="bg-surface-highest/50 px-6 py-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                  <Moon className="h-5 w-5 text-info" />
-                </div>
-                <h2 className="text-lg font-bold uppercase tracking-widest text-foreground">
-                  Evening Routine
-                </h2>
-              </div>
-              <div className="p-6 space-y-4 bg-surface-lowest/30">
-                {eveningRoutine.map((step) => (
-                  <SkincareStepCard
-                    key={step.id}
-                    item={step}
-                    isDone={completedSkincare.includes(step.id)}
-                    onToggle={() => toggleSkincare(step.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
+}
+
+// ──────────────────────────────────────────────
+// STYLED ROUTINE CARD
+// ──────────────────────────────────────────────
+function RoutineCard({ title, desc, time, steps, icon, gradient }) {
+    return (
+        <div className="min-w-[260px] sm:min-w-[300px] snap-center rounded-[2rem] bg-surface-low border border-border/30 p-1 relative overflow-hidden group hover:border-border/60 transition-colors cursor-pointer shrink-0">
+           {/* Inner Gradient Banner */}
+           <div className={`w-full h-32 rounded-[1.75rem] bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between relative overflow-hidden`}>
+               {/* Decorative Icon inside banner */}
+               <div className="absolute -right-4 -bottom-4 opacity-10 transform -rotate-12 scale-150">
+                   {icon}
+               </div>
+
+               <div className="w-10 h-10 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 flex items-center justify-center relative z-10">
+                   {icon}
+               </div>
+               
+               <div className="flex justify-between items-end relative z-10">
+                   <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                       <span className="text-[10px] font-bold text-white/90">{time}</span>
+                   </div>
+               </div>
+           </div>
+
+           {/* Content Below Banner */}
+           <div className="p-5">
+               <h4 className="font-bold text-foreground text-md mb-1">{title}</h4>
+               <p className="text-xs text-muted-foreground font-medium mb-4">{desc}</p>
+               
+               <div className="flex items-center justify-between">
+                   <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{steps} Steps</span>
+                   <div className="w-8 h-8 rounded-full bg-surface-highest flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
+                       <MoveRight className="w-3.5 h-3.5" />
+                   </div>
+               </div>
+           </div>
+        </div>
+    );
 }

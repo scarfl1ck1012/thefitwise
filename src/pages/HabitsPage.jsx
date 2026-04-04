@@ -80,87 +80,111 @@ export default function HabitsPage() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="glass rounded-[2rem] overflow-hidden relative border border-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
-          <div className="p-8">
-            <div className="flex flex-col md:flex-row items-center gap-8 justify-between">
-              <div className="flex-1 flex flex-col md:items-start items-center text-center md:text-left">
-                <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                  Total Experience
+          {/* Dark gradient background with ambient glow */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="p-8 lg:p-10 flex flex-col items-center text-center relative">
+            {/* TOTAL XP Label */}
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80 mb-6">
+              Total XP
+            </span>
+            
+            {/* Circular Progress Ring */}
+            <div className="relative w-48 h-48 mb-4">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
+                {/* Background ring */}
+                <circle
+                  cx="100" cy="100" r="85"
+                  fill="none"
+                  stroke="hsl(var(--surface-highest))"
+                  strokeWidth="6"
+                  strokeOpacity="0.3"
+                />
+                {/* Progress ring */}
+                <motion.circle
+                  cx="100" cy="100" r="85"
+                  fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 85}
+                  initial={{ strokeDashoffset: 2 * Math.PI * 85 }}
+                  animate={{ strokeDashoffset: 2 * Math.PI * 85 * (1 - xpInLevel / 500) }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  style={{
+                    filter: "drop-shadow(0 0 8px rgba(34, 197, 94, 0.5))"
+                  }}
+                />
+              </svg>
+              {/* Center content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <motion.p 
+                  className="text-6xl font-black text-foreground tracking-tight"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                >
+                  {xp}
+                </motion.p>
+                <span className="text-xs font-bold text-primary uppercase tracking-widest">
+                  Level {level}
                 </span>
-                <p className="text-6xl font-black text-foreground drop-shadow-xl tracking-tight mb-1">
-                  {xp} <span className="text-lg text-muted-foreground font-medium uppercase tracking-widest">XP</span>
-                </p>
-                <div className="mt-6 w-full max-w-sm space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[15px] font-bold text-foreground uppercase tracking-widest">
-                      Level {level}
-                    </span>
-                    <span className="text-xs font-bold text-muted-foreground">
-                      {xpInLevel}/500 XP
-                    </span>
-                  </div>
-                  <div className="h-3 w-full bg-surface-highest/50 rounded-full overflow-hidden shadow-inner">
-                    <motion.div 
-                      className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full shadow-[0_0_15px_rgba(34,197,94,0.6)]"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(xpInLevel / 500) * 100}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                    />
-                  </div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest text-right mt-2">
-                    {xpToNext} XP To Next Level
-                  </p>
-                </div>
               </div>
-              <motion.div
-                animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="w-32 h-32 rounded-[2rem] bg-gradient-to-tr from-primary/30 to-primary/5 flex items-center justify-center border border-primary/20 shadow-[0_0_40px_rgba(34,197,94,0.2)] backdrop-blur-xl shrink-0"
-              >
-                <Zap className="h-16 w-16 text-primary drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
-              </motion.div>
             </div>
+            
+            {/* XP to next level text */}
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+              {xpToNext} XP to next level • {xpInLevel}/500 XP
+            </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Streaks */}
-      <div className="grid grid-cols-2 gap-4">
-        <motion.div
-          initial={{ opacity: 0, x: -15 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="glass rounded-[2rem] p-6 text-center h-full flex flex-col justify-center items-center relative overflow-hidden group hover:border-accent/30 transition-all hover:shadow-[0_10px_40px_rgba(251,146,60,0.15)]">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
-            <motion.div
-              animate={streak > 0 ? { scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] } : {}}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-accent/20 to-transparent flex items-center justify-center border border-accent/20 mb-4 shadow-[0_0_20px_rgba(251,146,60,0.2)]"
-            >
-              <Flame
-                className={`h-8 w-8 ${streak > 0 ? "text-accent drop-shadow-[0_0_10px_rgba(251,146,60,0.8)]" : "text-muted-foreground"}`}
-              />
-            </motion.div>
-            <p className="text-4xl font-black text-foreground mb-1">{streak}</p>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Current Streak</p>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: 15 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          <div className="glass rounded-[2rem] p-6 text-center h-full flex flex-col justify-center items-center relative overflow-hidden group hover:border-info/30 transition-all hover:shadow-[0_10px_40px_rgba(59,130,246,0.15)]">
-            <div className="absolute top-0 left-0 w-24 h-24 bg-info/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-info/20 to-transparent flex items-center justify-center border border-info/20 mb-4 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
-              <Target className="h-8 w-8 text-info drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+      {/* Streaks - Combined horizontal card like Stitch */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <div className="glass rounded-[2rem] p-5 flex items-center justify-between relative overflow-hidden border border-white/5">
+          <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-transparent to-info/5 pointer-events-none" />
+          
+          {/* Current Streak */}
+          <div className="flex items-center gap-3 relative">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20">
+              <Flame className={`h-5 w-5 ${streak > 0 ? "text-accent" : "text-muted-foreground"}`} />
             </div>
-            <p className="text-4xl font-black text-foreground mb-1">{longestStreak}</p>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">Best Streak</p>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Current Streak</p>
+              <p className="text-2xl font-black text-foreground leading-tight">
+                {streak} <span className="text-xs font-bold text-muted-foreground">days</span>
+              </p>
+            </div>
           </div>
-        </motion.div>
-      </div>
+
+          {/* Center flame divider */}
+          <motion.div
+            animate={streak > 0 ? { scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] } : {}}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-12 h-12 rounded-full bg-gradient-to-tr from-accent/20 to-accent/5 flex items-center justify-center border border-accent/20 shadow-[0_0_20px_rgba(251,146,60,0.3)] relative"
+          >
+            <Flame className="h-6 w-6 text-accent drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]" />
+          </motion.div>
+
+          {/* Best Streak */}
+          <div className="flex items-center gap-3 relative text-right">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1 justify-end">
+                <Target className="h-3 w-3 text-info" /> Best Streak
+              </p>
+              <p className="text-2xl font-black text-foreground leading-tight">
+                {longestStreak} <span className="text-xs font-bold text-muted-foreground">days</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Badges */}
       <div className="glass rounded-[2rem] p-6 lg:p-8">
@@ -216,13 +240,12 @@ export default function HabitsPage() {
           </h2>
         </div>
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-2">
             {[
-              { action: "Log a Meal", xp: "+10 XP", icon: "🍽️" },
-              { action: "AI Recipe Analysis", xp: "+15 XP per item", icon: "✨" },
-              { action: "Log Weight", xp: "+15 XP", icon: "⚖️" },
-              { action: "Complete Workout", xp: "+50 XP", icon: "🏋️" },
-              { action: "Daily Challenge", xp: "+20-50 XP", icon: "🎯" },
+              { action: "Complete any Workout Session", xp: "+50 XP", icon: "🏋️" },
+              { action: "Log Daily Meals", xp: "+30 XP", icon: "🍽️" },
+              { action: "Track 2L Water Intake", xp: "+10 XP", icon: "💧" },
+              { action: "Hit Daily Step Goal (10k)", xp: "+30 XP", icon: "🏃" },
             ].map((item) => (
               <div
                 key={item.action}
@@ -230,9 +253,9 @@ export default function HabitsPage() {
               >
                 <div className="flex items-center gap-3">
                   <span className="text-lg opacity-80 group-hover:scale-110 transition-transform">{item.icon}</span>
-                  <span className="text-[13px] font-bold text-foreground uppercase tracking-wide">{item.action}</span>
+                  <span className="text-[13px] font-bold text-foreground">{item.action}</span>
                 </div>
-                <span className="text-xs font-black text-warning bg-warning/10 px-3 py-1 rounded-lg border border-warning/20">
+                <span className="text-xs font-black text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
                   {item.xp}
                 </span>
               </div>

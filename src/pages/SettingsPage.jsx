@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
-import { useProfile, calculateCalories } from "@/hooks/useProfile";
+import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { getLocalDate } from "@/lib/utils";
 
 import {
@@ -14,16 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   User,
   Save,
   CheckCircle2,
   Plus,
   Minus,
-  Flame,
-  Zap,
-  Target,
   Sofa,
   Footprints,
   Bike,
@@ -33,11 +31,14 @@ import {
   Scale as ScaleIcon,
   TrendingUp,
   Trophy,
-  Download,
-  Trash2,
   Shield,
-  AlertTriangle,
-  Mail,
+  ChevronRight,
+  Moon,
+  Globe,
+  Cloud,
+  Bell,
+  Megaphone,
+  UserCog
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -205,8 +206,7 @@ function SelectableCards({ options, value, onChange, label }) {
 
 // --- Main Page ---
 export default function SettingsPage() {
-  const { profile } = useProfile();
-  const { updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile();
   const { user } = useAuth();
 
   const [name, setName] = useState(profile?.full_name || "");
@@ -214,9 +214,7 @@ export default function SettingsPage() {
   const [gender, setGender] = useState(profile?.gender || "");
   const [height, setHeight] = useState(profile?.height_cm?.toString() || "");
   const [weight, setWeight] = useState(profile?.weight_kg?.toString() || "");
-  const [activity, setActivity] = useState(
-    profile?.activity_level || "moderate",
-  );
+  const [activity, setActivity] = useState(profile?.activity_level || "moderate");
   const [goal, setGoal] = useState(profile?.goal || "maintain");
   const [saved, setSaved] = useState(false);
 
@@ -235,7 +233,7 @@ export default function SettingsPage() {
 
   // Dirty state detection
   const isDirty = useMemo(() => {
-    if (!profile) return true; // Always allow new users to save their initial profile
+    if (!profile) return true;
     return (
       name !== (profile.full_name || "") ||
       age !== (profile.age?.toString() || "") ||
@@ -246,39 +244,6 @@ export default function SettingsPage() {
       goal !== (profile.goal || "maintain")
     );
   }, [name, age, gender, height, weight, activity, goal, profile]);
-
-  // Live calorie calculation
-  const liveCalories = useMemo(() => {
-    const w = parseFloat(weight);
-    const h = parseFloat(height);
-    const a = parseInt(age);
-    if (!w || !h || !a || !gender) return null;
-
-    // BMR (Mifflin-St Jeor)
-    let bmr;
-    if (gender === "male") {
-      bmr = 10 * w + 6.25 * h - 5 * a + 5;
-    } else {
-      bmr = 10 * w + 6.25 * h - 5 * a - 161;
-    }
-
-    const activityOption = ACTIVITY_OPTIONS.find((o) => o.value === activity);
-    const multiplier = activityOption?.multiplier || 1.55;
-    const tdee = bmr * multiplier;
-
-    const goalOption = GOAL_OPTIONS.find((o) => o.value === goal);
-    const adjust = goalOption?.adjust || 0;
-    const total = Math.round(tdee + adjust);
-    const activeCals = Math.round(tdee - bmr);
-
-    return {
-      bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
-      activeCals,
-      adjust,
-      total,
-    };
-  }, [weight, height, age, gender, activity, goal]);
 
   const handleSave = () => {
     updateProfile.mutate({
@@ -295,318 +260,210 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleExport = () => {
-    if (!profile) return;
-    const blob = new Blob([JSON.stringify(profile, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `fitwise-profile-${getLocalDate()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Profile data exported!");
-  };
-
-  const handleDeleteAccount = async () => {
-    if (
-      !window.confirm(
-        "Are you sure? This will permanently delete your account and all data. This action cannot be undone.",
-      )
-    )
-      return;
+  const handleLogOut = async () => {
     try {
-      // Delete profile data first
-      await supabase.from("profiles").delete().eq("user_id", user.id);
       await supabase.auth.signOut();
-      toast.success("Account deleted. Sorry to see you go.");
+      toast.success("Logged out successfully");
     } catch {
-      toast.error("Failed to delete account. Please try again.");
+      toast.error("Failed to log out");
     }
   };
 
   return (
-    <div className="space-y-6 pb-24">
-      <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+    <div className="space-y-6 pb-24 max-w-2xl mx-auto pl-4 lg:pl-0 pr-4">
+      <h1 className="text-2xl font-bold text-foreground">Settings & Profile</h1>
 
-      {/* Profile Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="glass rounded-[2rem] p-6 lg:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
-              <User className="h-5 w-5 text-primary" />
+      {/* Profile Header */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center pt-8 pb-10">
+         <div className="relative mb-6">
+            <div className="w-28 h-28 rounded-full bg-surface border-2 border-primary/40 shadow-[0_0_25px_rgba(34,197,94,0.2)] flex items-center justify-center overflow-hidden shrink-0">
+                <User className="h-12 w-12 text-muted-foreground/50" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/10 pointer-events-none"></div>
             </div>
-            <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
-              Profile
-            </h2>
-          </div>
-          <div className="space-y-5">
-            {/* Name & Gender */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Full Name</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Gender</Label>
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-4 border-background shadow-md">
+                <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
             </div>
-
-            {/* Number Steppers */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <NumberStepper
-                label="Age"
-                value={age}
-                onChange={setAge}
-                min={10}
-                max={100}
-                step={1}
-                unit="yrs"
-              />
-              <NumberStepper
-                label="Height"
-                value={height}
-                onChange={setHeight}
-                min={100}
-                max={250}
-                step={1}
-                unit="cm"
-              />
-              <NumberStepper
-                label="Weight"
-                value={weight}
-                onChange={setWeight}
-                min={30}
-                max={300}
-                step={0.5}
-                unit="kg"
-              />
-            </div>
-
-            {/* Activity Level Cards */}
-            <SelectableCards
-              label="Activity Level"
-              options={ACTIVITY_OPTIONS}
-              value={activity}
-              onChange={setActivity}
-            />
-
-            {/* Goal Cards */}
-            <SelectableCards
-              label="Goal"
-              options={GOAL_OPTIONS}
-              value={goal}
-              onChange={setGoal}
-            />
-
-            {/* Inline Save Button */}
-            {isDirty && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="pt-2"
-              >
-                <Button
-                  onClick={handleSave}
-                  disabled={updateProfile.isPending}
-                  className="w-full gap-2 shadow-sm"
-                >
-                  {saved ? (
-                    <>
-                      <CheckCircle2 className="h-4 w-4" /> Saved!
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" /> Save Profile
-                    </>
-                  )}
-                </Button>
-              </motion.div>
-            )}
-          </div>
-        </div>
+         </div>
+         <h2 className="text-3xl font-bold tracking-tight mb-2">{name || user?.email?.split('@')[0] || "User"}</h2>
+         <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-[0.2em] uppercase flex items-center gap-1.5 shadow-sm">
+           <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+           Pro Member
+         </div>
       </motion.div>
 
-      {/* Calorie Hero Card */}
-      {liveCalories && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="glass rounded-[2rem] overflow-hidden border border-primary/30 shadow-[0_0_30px_rgba(34,197,94,0.15)] relative">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-primary/20 via-primary/5 to-transparent pointer-events-none" />
-
-            <div className="relative p-6 lg:p-8">
-                <div className="flex items-center gap-2 mb-3">
-                  <Flame className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Daily Calorie Goal
-                  </span>
+      {/* ACCOUNT */}
+      <div className="space-y-3 pt-2">
+        <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-3 pl-2">Account</h3>
+        
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="personal-info" className="border-none rounded-2xl bg-surface-low/80 hover:bg-surface-low transition-colors mb-2 overflow-hidden px-4">
+             <AccordionTrigger className="hover:no-underline py-5 lg:py-6">
+                <div className="flex items-center gap-4">
+                   <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                      <UserCog className="h-5 w-5 text-primary" />
+                   </div>
+                   <div className="text-left">
+                     <p className="text-sm font-semibold text-foreground">Personal Information</p>
+                     <p className="text-[11px] text-muted-foreground mt-1">Update your details & biometric data</p>
+                   </div>
                 </div>
-
-                {/* Big number */}
-                <motion.div
-                  key={liveCalories.total}
-                  initial={{ scale: 0.95, opacity: 0.7 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <p className="text-4xl font-bold text-foreground tracking-tight">
-                    {liveCalories.total}
-                    <span className="text-lg font-normal text-muted-foreground ml-1">
-                      cal
-                    </span>
-                  </p>
-                </motion.div>
-
-                <p className="text-xs text-muted-foreground mt-1 mb-4">
-                  Mifflin-St Jeor &middot; Updated live
-                </p>
-
-                {/* BMR + Active breakdown */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">BMR (at rest)</span>
-                    <span className="font-medium text-foreground">
-                      {liveCalories.bmr} cal
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className="h-2 rounded-full bg-primary/40"
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${(liveCalories.bmr / liveCalories.tdee) * 100}%`,
-                      }}
-                      transition={{ duration: 0.4 }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      Active calories
-                    </span>
-                    <span className="font-medium text-primary">
-                      +{liveCalories.activeCals} cal
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                    <motion.div
-                      className="h-2 rounded-full bg-primary"
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${(liveCalories.activeCals / liveCalories.tdee) * 100}%`,
-                      }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
-                    />
-                  </div>
-                  {liveCalories.adjust !== 0 && (
-                    <div className="flex items-center justify-between text-xs pt-1 border-t border-border">
-                      <span className="text-muted-foreground">
-                        Goal adjustment
-                      </span>
-                      <span
-                        className={`font-medium ${liveCalories.adjust < 0 ? "text-destructive" : "text-success"}`}
-                      >
-                        {liveCalories.adjust > 0 ? "+" : ""}
-                        {liveCalories.adjust} cal
-                      </span>
+             </AccordionTrigger>
+             <AccordionContent className="pt-2 pb-8 px-2 lg:px-4">
+                <div className="space-y-6">
+                  {/* Name & Gender */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Full Name</Label>
+                      <Input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        className="bg-surface border-border/50"
+                      />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Gender</Label>
+                      <Select value={gender} onValueChange={setGender}>
+                        <SelectTrigger className="bg-surface border-border/50">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Number Steppers */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <NumberStepper label="Age" value={age} onChange={setAge} min={10} max={100} step={1} unit="yrs" />
+                    <NumberStepper label="Height" value={height} onChange={setHeight} min={100} max={250} step={1} unit="cm" />
+                    <NumberStepper label="Weight" value={weight} onChange={setWeight} min={30} max={300} step={0.5} unit="kg" />
+                  </div>
+
+                  {/* Activity Level Cards */}
+                  <div className="bg-surface/50 p-4 rounded-xl">
+                     <SelectableCards label="Activity Level" options={ACTIVITY_OPTIONS} value={activity} onChange={setActivity} />
+                  </div>
+
+                  {/* Goal Cards */}
+                  <div className="bg-surface/50 p-4 rounded-xl">
+                    <SelectableCards label="Goal" options={GOAL_OPTIONS} value={goal} onChange={setGoal} />
+                  </div>
+
+                  {/* Save Button */}
+                  {isDirty && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="pt-2">
+                      <Button onClick={handleSave} disabled={updateProfile.isPending} className="w-full gap-2 shadow-sm rounded-xl py-6">
+                        {saved ? <><CheckCircle2 className="h-4 w-4" /> Saved!</> : <><Save className="h-4 w-4" /> Save Profile</>}
+                      </Button>
+                    </motion.div>
                   )}
                 </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Account Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <div className="glass rounded-[2rem] p-6 lg:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-              <Shield className="h-5 w-5 text-info" />
-            </div>
-            <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
-              Account
-            </h2>
-          </div>
-          <div className="space-y-4">
-            {/* Email */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
-              <div>
-                <p className="text-xs text-muted-foreground">Signed in as</p>
-                <p className="text-sm font-medium text-foreground">
-                  {user?.email}
-                </p>
+             </AccordionContent>
+          </AccordionItem>
+          
+          <div className="w-full rounded-2xl bg-surface-low/80 hover:bg-surface-low transition-colors mb-2 px-4 py-5 lg:py-6 cursor-pointer flex justify-between items-center group">
+             <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                    <Shield className="h-5 w-5 text-primary" />
+                 </div>
+                 <div className="text-left">
+                   <p className="text-sm font-semibold text-foreground">Security</p>
+                   <p className="text-[11px] text-muted-foreground mt-1">Password, 2FA, and login history</p>
+                 </div>
               </div>
-            </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors mr-2" />
           </div>
-        </div>
-      </motion.div>
+        </Accordion>
+      </div>
 
-      {/* Danger Zone */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="glass rounded-[2rem] p-6 lg:p-8 border border-destructive/30 shadow-[0_0_30px_rgba(239,68,68,0.15)] bg-destructive/5">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center border border-destructive/40 shadow-[0_0_15px_rgba(239,68,68,0.3)] text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <h2 className="text-lg uppercase tracking-widest font-bold text-destructive">
-              Danger Zone
-            </h2>
-          </div>
-          <div className="space-y-4">
-            <p className="text-xs text-muted-foreground">
-              These actions are permanent and cannot be undone.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 text-xs"
-                onClick={handleExport}
-              >
-                <Download className="h-3.5 w-3.5" /> Export My Data
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 text-xs border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={handleDeleteAccount}
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Delete Account
-              </Button>
-            </div>
-          </div>
+      {/* PREFERENCES */}
+      <div className="space-y-3 pt-6">
+        <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-3 pl-2">Preferences</h3>
+        
+        <div className="w-full rounded-2xl bg-surface-low/80 overflow-hidden">
+           <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                    <Moon className="h-5 w-5 text-primary" />
+                 </div>
+                 <div className="text-left">
+                   <p className="text-sm font-semibold text-foreground">Dark Mode</p>
+                 </div>
+              </div>
+              <div className="mr-2"><Switch checked={true} /></div>
+           </div>
+           
+           <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30 hover:bg-surface-low cursor-pointer transition-colors">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                    <Globe className="h-5 w-5 text-primary" />
+                 </div>
+                 <div className="text-left">
+                   <p className="text-sm font-semibold text-foreground">Language</p>
+                   <p className="text-[11px] text-muted-foreground mt-1">English (US)</p>
+                 </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground mr-2" />
+           </div>
+
+           <div className="px-4 py-5 lg:py-6 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                    <Cloud className="h-5 w-5 text-primary" />
+                 </div>
+                 <div className="text-left">
+                   <p className="text-sm font-semibold text-foreground">Cloud Sync</p>
+                 </div>
+              </div>
+              <div className="mr-2"><Switch checked={true} /></div>
+           </div>
         </div>
-      </motion.div>
+      </div>
+
+      {/* NOTIFICATIONS */}
+      <div className="space-y-3 pt-6">
+        <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-3 pl-2">Notifications</h3>
+        
+        <div className="w-full rounded-2xl bg-surface-low/80 overflow-hidden">
+           <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                    <Bell className="h-5 w-5 text-primary" />
+                 </div>
+                 <div className="text-left">
+                   <p className="text-sm font-semibold text-foreground">Workout Reminders</p>
+                 </div>
+              </div>
+              <div className="mr-2"><Switch checked={true} /></div>
+           </div>
+           
+           <div className="px-4 py-5 lg:py-6 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                    <Megaphone className="h-5 w-5 text-primary" />
+                 </div>
+                 <div className="text-left">
+                   <p className="text-sm font-semibold text-foreground">Marketing & Newsletter</p>
+                 </div>
+              </div>
+              <div className="mr-2"><Switch checked={false} /></div>
+           </div>
+        </div>
+      </div>
+
+      {/* LOG OUT */}
+      <div className="pt-10 flex flex-col items-center justify-center gap-4">
+         <Button onClick={handleLogOut} variant="outline" className="w-full max-w-sm rounded-xl py-6 border-white/5 bg-[#2a1c1c]/50 text-[#ffb4b4] hover:bg-[#3a2020] hover:text-[#ffb4b4] border transition-colors opacity-80 hover:opacity-100 font-semibold shadow-sm">
+            Log Out
+         </Button>
+         <p className="text-[10px] text-muted-foreground mb-4">App Version 4.2.0 (Build 991)</p>
+      </div>
+
     </div>
   );
 }
+

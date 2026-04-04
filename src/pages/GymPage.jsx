@@ -1,416 +1,21 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useWorkouts } from "@/hooks/useWorkouts";
-import { useProfile } from "@/hooks/useProfile";
 import { useUserStats } from "@/hooks/useUserStats";
-import { useAccurateTimer } from "@/hooks/useAccurateTimer";
 import {
   gymExercises,
-  cardioTypes,
-  estimateCalories,
-  aiWorkoutTemplates,
   DAYS_OF_WEEK,
   DAY_LABELS,
 } from "@/lib/gymExercises";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { getLocalDate } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Dumbbell,
-  CheckCircle2,
-  Timer,
-  Play,
-  Pause,
-  Square,
   Plus,
-  Search,
-  Zap,
-  X,
-  ChevronRight,
-  Trash2,
-  Moon,
-  Sparkles,
-  Flame,
+  ArrowRight,
+  Moon
 } from "lucide-react";
 import { toast } from "sonner";
-
-// ──────────────────────────────────────────────
-// SECTION 1: CHECK-IN
-// ──────────────────────────────────────────────
-
-function CheckInSection({ checkins, addCheckin, addXP }) {
-  const today = getLocalDate();
-  const checkedIn = checkins.some((c) => c.logged_at === today);
-
-  const handleCheckIn = () => {
-    addCheckin.mutate({
-      workout_type: "gym",
-      duration_min: 60,
-      notes: "Gym session",
-    });
-    addXP.mutate(25);
-    toast.success("Checked in! +25 XP");
-  };
-
-  return (
-    <div className="glass rounded-[2rem] p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${checkedIn ? "bg-success/10 border-success/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "bg-primary/10 border-primary/30"}`}
-          >
-            {checkedIn ? (
-              <CheckCircle2 className="h-6 w-6 text-success drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-            ) : (
-              <Dumbbell className="h-6 w-6 text-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-            )}
-          </div>
-          <div>
-            <p className="text-sm font-bold uppercase tracking-widest text-foreground">
-              {checkedIn ? "Checked In" : "Today's Session"}
-            </p>
-            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
-              {checkedIn
-                ? "Keep up the consistency"
-                : "Log your gym session for XP"}
-            </p>
-          </div>
-        </div>
-        {!checkedIn && (
-          <Button onClick={handleCheckIn} className="gap-2 shrink-0 h-10 w-full sm:w-auto">
-            <CheckCircle2 className="h-4 w-4" /> Check In Now
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ──────────────────────────────────────────────
-// SECTION 2: LIVE TIMER
-// ──────────────────────────────────────────────
-
-function LiveTimer({ onComplete }) {
-  const timer = useAccurateTimer();
-
-  const handleEnd = () => {
-    const mins = timer.minutes;
-    timer.reset();
-    onComplete(mins);
-    toast.success(`Workout ended: ${mins} minutes logged`);
-  };
-
-  if (!timer.isRunning && timer.totalSeconds === 0) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={timer.start}
-        className="gap-1.5 text-xs"
-      >
-        <Timer className="h-3.5 w-3.5" /> Start Live Timer
-      </Button>
-    );
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-primary/30 bg-primary/5 p-4"
-    >
-      <p className="text-[10px] text-muted-foreground text-center mb-2">
-        Active Session
-      </p>
-      <motion.p
-        className="text-3xl font-mono font-bold text-center text-foreground tracking-widest"
-        animate={
-          timer.isRunning
-            ? {
-                textShadow: [
-                  "0 0 8px hsl(var(--primary)/0.3)",
-                  "0 0 16px hsl(var(--primary)/0.5)",
-                  "0 0 8px hsl(var(--primary)/0.3)",
-                ],
-              }
-            : {}
-        }
-        transition={timer.isRunning ? { duration: 2, repeat: Infinity } : {}}
-      >
-        {timer.formatted}
-      </motion.p>
-      <div className="flex items-center justify-center gap-2 mt-3">
-        {timer.isRunning ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={timer.pause}
-            className="gap-1 text-xs"
-          >
-            <Pause className="h-3 w-3" /> Pause
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={timer.resume}
-            className="gap-1 text-xs"
-          >
-            <Play className="h-3 w-3" /> Resume
-          </Button>
-        )}
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleEnd}
-          className="gap-1 text-xs"
-        >
-          <Square className="h-3 w-3" /> End Workout
-        </Button>
-      </div>
-    </motion.div>
-  );
-}
-
-// ──────────────────────────────────────────────
-// SECTION 3: CARDIO TRACKER
-// ──────────────────────────────────────────────
-
-function CardioTracker({ profile }) {
-  const [sessions, setSessions] = useState(() => {
-    try {
-      const saved = localStorage.getItem("fitwise_cardio_sessions");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem("fitwise_cardio_sessions", JSON.stringify(sessions));
-  }, [sessions]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedType, setSelectedType] = useState("");
-  const [duration, setDuration] = useState("");
-  const [distance, setDistance] = useState("");
-  const [calories, setCalories] = useState("");
-
-  const weekMinutes = sessions.reduce((s, ses) => s + ses.duration, 0);
-  const weeklyGoal = 150;
-
-  const selectedCardio = cardioTypes.find((c) => c.id === selectedType);
-  const estCalories =
-    selectedCardio && duration
-      ? estimateCalories(
-          selectedCardio.met,
-          profile?.weight_kg,
-          parseInt(duration),
-        )
-      : 0;
-
-  const handleSave = () => {
-    if (!selectedType || !duration) {
-      toast.error("Select a type and enter duration");
-      return;
-    }
-    const cal = Math.max(0, parseInt(calories) || estCalories);
-    setSessions((prev) => [
-      {
-        id: crypto.randomUUID(),
-        type: selectedType,
-        label: selectedCardio?.label,
-        icon: selectedCardio?.icon,
-        duration: Math.max(1, parseInt(duration) || 1),
-        distance: Math.max(0, parseFloat(distance) || 0),
-        calories: cal,
-        date: new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        }),
-      },
-      ...prev,
-    ]);
-    toast.success("Cardio session logged!");
-    setSelectedType("");
-    setDuration("");
-    setDistance("");
-    setCalories("");
-    setShowForm(false);
-  };
-
-  const handleTimerComplete = (mins) => {
-    setDuration(String(mins));
-    setShowForm(true);
-  };
-
-  return (
-    <div className="glass rounded-[2rem] p-6 lg:p-8">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20 shadow-[0_0_15px_rgba(251,146,60,0.2)]">
-          <Flame className="h-5 w-5 text-accent" />
-        </div>
-        <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
-          Cardio Tracker
-        </h2>
-      </div>
-      <div className="space-y-4">
-        {/* Weekly overview */}
-        <div className="p-3 rounded-lg bg-muted/30">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-muted-foreground">
-              Active Minutes This Week
-            </span>
-            <span className="text-sm font-bold text-foreground">
-              {weekMinutes}/{weeklyGoal}
-            </span>
-          </div>
-          <Progress
-            value={Math.min((weekMinutes / weeklyGoal) * 100, 100)}
-            className="h-2"
-          />
-          <p className="text-[9px] text-muted-foreground mt-1">
-            AHA recommends 150 min/week
-          </p>
-        </div>
-
-        {/* Live timer */}
-        <LiveTimer onComplete={handleTimerComplete} />
-
-        {/* Log button / Form */}
-        {!showForm ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            className="w-full gap-1.5 text-xs"
-          >
-            <Plus className="h-3.5 w-3.5" /> Log Cardio Session
-          </Button>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="space-y-3 border border-border rounded-lg p-3"
-          >
-            {/* Type chips */}
-            <div>
-              <Label className="text-xs">Type</Label>
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {cardioTypes.map((ct) => (
-                  <button
-                    key={ct.id}
-                    onClick={() => setSelectedType(ct.id)}
-                    className={`px-2.5 py-1.5 rounded-full text-xs flex items-center gap-1 border transition-all ${
-                      selectedType === ct.id
-                        ? "border-primary bg-primary/10 text-foreground shadow-[0_0_8px_hsl(var(--primary)/0.2)]"
-                        : "border-border bg-muted/30 text-muted-foreground hover:border-muted-foreground/40"
-                    }`}
-                  >
-                    <span>{ct.icon}</span> {ct.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Inputs */}
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <Label className="text-[10px]">Duration (min) *</Label>
-                <Input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  placeholder="30"
-                  className="h-8 text-xs"
-                />
-              </div>
-              <div>
-                <Label className="text-[10px]">Distance (km)</Label>
-                <Input
-                  type="number"
-                  value={distance}
-                  onChange={(e) => setDistance(e.target.value)}
-                  placeholder="5"
-                  className="h-8 text-xs"
-                />
-              </div>
-              <div>
-                <Label className="text-[10px]">Calories</Label>
-                <Input
-                  type="number"
-                  value={calories}
-                  onChange={(e) => setCalories(e.target.value)}
-                  placeholder="Auto"
-                  className="h-8 text-xs"
-                />
-                {!calories && estCalories > 0 && (
-                  <p className="text-[9px] text-muted-foreground mt-0.5">
-                    Est: ~{estCalories} kcal
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleSave}
-                className="gap-1 text-xs flex-1"
-              >
-                Save
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowForm(false)}
-                className="text-xs"
-              >
-                Cancel
-              </Button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Session history */}
-        {sessions.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-[10px] text-muted-foreground font-medium">
-              Recent Sessions
-            </p>
-            {sessions.map((ses) => (
-              <div
-                key={ses.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30"
-              >
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">
-                  {ses.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground">
-                    {ses.label}
-                  </p>
-                  <p className="text-[9px] text-muted-foreground">{ses.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold text-foreground">
-                    {ses.duration} min
-                  </p>
-                  <p className="text-[9px] text-primary">{ses.calories} kcal</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ──────────────────────────────────────────────
-// SECTION 4: WORKOUT BUILDER
-// ──────────────────────────────────────────────
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const emptyWeek = () => ({
   monday: [],
@@ -422,8 +27,12 @@ const emptyWeek = () => ({
   sunday: [],
 });
 
-function WorkoutBuilder({ profile }) {
-  const [mode, setMode] = useState("gym"); // "gym" | "home"
+export default function GymPage() {
+  const { checkins, addCheckin } = useWorkouts();
+  const { addXP } = useUserStats();
+  const today = getLocalDate();
+  const checkedIn = checkins.some((c) => c.logged_at === today);
+
   const [weeklyPlan, setWeeklyPlan] = useState(() => {
     try {
       const saved = localStorage.getItem("fitwise_weekly_plan");
@@ -432,6 +41,7 @@ function WorkoutBuilder({ profile }) {
       return emptyWeek();
     }
   });
+
   const [restDays, setRestDays] = useState(() => {
     try {
       const saved = localStorage.getItem("fitwise_weekly_rest");
@@ -443,503 +53,227 @@ function WorkoutBuilder({ profile }) {
 
   useEffect(() => {
     localStorage.setItem("fitwise_weekly_plan", JSON.stringify(weeklyPlan));
-  }, [weeklyPlan]);
-
-  useEffect(() => {
     localStorage.setItem("fitwise_weekly_rest", JSON.stringify(restDays));
-  }, [restDays]);
+  }, [weeklyPlan, restDays]);
+
   const [selectedDay, setSelectedDay] = useState("monday");
-  const [search, setSearch] = useState("");
-  const [showAI, setShowAI] = useState(false);
-  const [aiGoal, setAiGoal] = useState("strength");
-  const [aiDays, setAiDays] = useState("5");
-  const [aiInjuries, setAiInjuries] = useState("");
 
-  // Search exercises
-  const filteredExercises = useMemo(() => {
-    if (!search || search.length < 2) return [];
-    const q = search.toLowerCase();
-    return gymExercises
-      .filter((e) => (mode === "home" ? e.type === "home" : true))
-      .filter(
-        (e) =>
-          e.name.toLowerCase().includes(q) ||
-          e.muscle.toLowerCase().includes(q),
-      )
-      .slice(0, 8);
-  }, [search, mode]);
-
-  // Add exercise to a day with UUID instance
-  const addExercise = useCallback((day, exercise) => {
-    const instance = {
-      instanceId: crypto.randomUUID(),
-      exerciseId: exercise.id,
-      name: exercise.name,
-      muscle: exercise.muscle,
-      sets: 3,
-      reps: 10,
-    };
-    setWeeklyPlan((prev) => ({
-      ...prev,
-      [day]: [...prev[day], instance],
-    }));
-    setSearch("");
-    toast.success(`${exercise.name} added to ${DAY_LABELS[day]}`);
-  }, []);
-
-  // Remove exercise
-  const removeExercise = useCallback((day, instanceId) => {
-    setWeeklyPlan((prev) => ({
-      ...prev,
-      [day]: prev[day].filter((e) => e.instanceId !== instanceId),
-    }));
-  }, []);
-
-  // Add custom exercise
-  const addCustomExercise = useCallback((day, name) => {
-    const instance = {
-      instanceId: crypto.randomUUID(),
-      exerciseId: `custom-${Date.now()}`,
-      name: name,
-      muscle: "Custom",
-      sets: 3,
-      reps: 10,
-    };
-    setWeeklyPlan((prev) => ({
-      ...prev,
-      [day]: [...prev[day], instance],
-    }));
-    setSearch("");
-    toast.success(`Custom exercise added to ${DAY_LABELS[day]}`);
-  }, []);
-
-  // Update sets/reps
-  const updateExercise = useCallback((day, instanceId, field, value) => {
-    setWeeklyPlan((prev) => ({
-      ...prev,
-      [day]: prev[day].map((e) =>
-        e.instanceId === instanceId
-          ? { ...e, [field]: Math.max(0, parseInt(value) || 0) }
-          : e,
-      ),
-    }));
-  }, []);
-
-  // Toggle rest day
-  const toggleRestDay = useCallback(
-    (day) => {
-      setRestDays((prev) => ({ ...prev, [day]: !prev[day] }));
-      if (!restDays[day]) {
-        setWeeklyPlan((prev) => ({ ...prev, [day]: [] }));
-      }
-    },
-    [restDays],
-  );
-
-  // Move exercise between days (drag-and-drop logic, using buttons for now)
-  const moveExercise = useCallback((fromDay, toDay, instanceId) => {
-    setWeeklyPlan((prev) => {
-      const fromArr = [...prev[fromDay]];
-      const toArr = [...prev[toDay]];
-      const idx = fromArr.findIndex((e) => e.instanceId === instanceId);
-      if (idx === -1) return prev;
-      const [item] = fromArr.splice(idx, 1);
-      toArr.push(item);
-      return { ...prev, [fromDay]: fromArr, [toDay]: toArr };
-    });
-    toast.success(`Moved to ${DAY_LABELS[toDay]}`);
-  }, []);
-
-  // AI Generate
-  const generateAIPlan = () => {
-    const template = aiWorkoutTemplates[aiGoal] || aiWorkoutTemplates.strength;
-    const newPlan = {};
-    const newRest = {};
-    for (const day of DAYS_OF_WEEK) {
-      const exercises = template[day] || [];
-      newRest[day] = exercises.length === 0;
-      newPlan[day] = exercises.map((e) => ({
-        instanceId: crypto.randomUUID(),
-        exerciseId: gymExercises.find((g) => g.name === e.name)?.id || 0,
-        name: e.name,
-        muscle: gymExercises.find((g) => g.name === e.name)?.muscle || "",
-        sets: e.sets,
-        reps: e.reps,
-      }));
+  const handleStartSession = () => {
+    if (checkedIn) {
+      toast.error("Already completed a session today.");
+      return;
     }
-    setWeeklyPlan(newPlan);
-    setRestDays(newRest);
-    setShowAI(false);
-    toast.success("AI workout plan generated!");
+    addCheckin.mutate({
+      workout_type: "gym",
+      duration_min: 60,
+      notes: "Gym session",
+    });
+    addXP.mutate(25);
+    toast.success("Session Started! +25 XP");
   };
 
   const dayExercises = weeklyPlan[selectedDay] || [];
 
   return (
-    <div className="glass rounded-[2rem] p-6 lg:p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center border border-info/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-            <Dumbbell className="h-5 w-5 text-info" />
-          </div>
-          <h2 className="text-lg uppercase tracking-widest font-bold text-foreground">
-            Plan
-          </h2>
-        </div>
-        {/* Home / Gym toggle */}
-        <div className="flex bg-surface-lowest rounded-xl p-1 border border-white/5">
-          {["home", "gym"].map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className={`px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${mode === m ? "bg-info text-info-foreground shadow-[0_0_10px_rgba(59,130,246,0.4)]" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              {m === "home" ? "Home" : "Gym"}
-            </button>
-          ))}
-        </div>
+    <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-4">
+         <div>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">Hypertrophy Program</h1>
+            <p className="text-sm text-muted-foreground mt-1 font-medium">Phase 2: Volume Accumulation</p>
+         </div>
+         <div className="flex gap-3">
+            <Button variant="outline" className="border-border bg-surface-low rounded-full px-6 hover:bg-surface-high font-bold text-xs h-12">
+              Workout Builder
+            </Button>
+            <Button onClick={handleStartSession} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-6 h-12 shadow-[0_0_20px_rgba(34,197,94,0.3)] border-none text-xs">
+              {checkedIn ? "Session Completed" : "Start Session"}
+            </Button>
+         </div>
       </div>
-      <div className="space-y-5">
-        {/* AI Generate button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAI(true)}
-          className="w-full gap-2 text-xs border-primary/30 hover:bg-primary/5 relative overflow-hidden"
-        >
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-          <Sparkles className="h-3.5 w-3.5 text-primary relative z-10" />
-          <span className="relative z-10">Generate AI Plan</span>
-        </Button>
 
-        {/* Day tabs */}
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-          {DAYS_OF_WEEK.map((day) => (
-            <button
-              key={day}
-              onClick={() => setSelectedDay(day)}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
-                selectedDay === day
-                  ? "bg-primary text-primary-foreground"
-                  : restDays[day]
-                    ? "bg-muted/50 text-muted-foreground/60 line-through"
-                    : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
-              }`}
-            >
-              {DAY_LABELS[day]}
-              {weeklyPlan[day].length > 0 && (
-                <span className="ml-1 text-[9px] opacity-70">
-                  ({weeklyPlan[day].length})
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+      {/* Top Banner Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+         {/* Rest Day Focus */}
+         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-2 rounded-[2rem] bg-surface-low border border-border/30 overflow-hidden relative min-h-[240px] flex items-end p-8 group cursor-pointer">
+             <div className="absolute inset-0 bg-gradient-to-br from-[#0a1610] to-[#111111] z-0"></div>
+             
+             {/* Neon Abstract Element (Pure CSS approximation) */}
+             <div className="absolute right-[-10%] top-[-10%] w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary/30 transition-colors duration-700"></div>
+             <div className="absolute right-10 bottom-10 w-32 h-32 rounded-full border border-primary/30 transform rotate-12 blur-[1px]"></div>
+             <div className="absolute right-16 bottom-16 w-24 h-24 rounded-full border-2 border-primary/50 transform rotate-45 blur-[2px]"></div>
 
-        {/* Rest day toggle */}
-        <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-          <div className="flex items-center gap-2">
-            <Moon className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Rest Day</span>
-          </div>
-          <button
-            onClick={() => toggleRestDay(selectedDay)}
-            className={`w-10 h-5 rounded-full transition-colors relative ${restDays[selectedDay] ? "bg-primary" : "bg-muted"}`}
-          >
-            <span
-              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${restDays[selectedDay] ? "left-5" : "left-0.5"}`}
-            />
-          </button>
-        </div>
+             <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <Badge variant="outline" className="border-primary/50 text-primary mb-4 bg-primary/10 tracking-widest text-[10px]">RECOVERY</Badge>
+                    <h3 className="text-2xl font-black text-white mb-1 tracking-tight">Rest Day Focus</h3>
+                    <p className="text-sm text-white/60 font-medium">Active recovery and mobility routine.</p>
+                </div>
+                <Button variant="outline" className="text-white hover:bg-white/10 rounded-full bg-white/5 border border-white/10 shrink-0 font-bold px-6">
+                  Explore <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+             </div>
+         </motion.div>
 
-        {/* Exercises for selected day */}
-        {!restDays[selectedDay] && (
-          <>
-            {/* Search bar */}
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={`Search ${mode} exercises...`}
-                className="pl-8 h-8 text-xs"
-              />
-            </div>
+         {/* Cardiovascular Conditioning */}
+         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-1 rounded-[2rem] bg-surface-low p-6 lg:p-8 border border-border/30 flex flex-col relative overflow-hidden">
+             {/* subtle glow */}
+             <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-[40px]"></div>
 
-            {/* Search results */}
-            <AnimatePresence>
-              {search.trim().length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-1 max-h-48 overflow-y-auto mb-3"
-                >
-                  {filteredExercises.map((ex) => (
-                    <button
-                      key={ex.id}
-                      onClick={() => addExercise(selectedDay, ex)}
-                      className="w-full flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Plus className="h-3 w-3 text-primary" />
-                        <span className="text-xs text-foreground">
-                          {ex.name}
-                        </span>
+             <div className="relative z-10">
+                 <h3 className="font-bold text-foreground text-sm">Cardiovascular Conditioning</h3>
+                 <p className="text-[11px] text-muted-foreground mt-0.5 tracking-widest uppercase">Weekly targets</p>
+             </div>
+
+             <div className="flex justify-around items-center flex-1 mt-6 relative z-10">
+                {/* Ring 1 - Zone 2 */}
+                <div className="flex flex-col items-center gap-3">
+                   <div className="relative w-[84px] h-[84px]">
+                      <svg className="w-full h-full transform -rotate-90">
+                          {/* Background Track */}
+                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-surface-high" strokeWidth="6" />
+                          {/* Progress Track */}
+                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-primary" strokeWidth="6" strokeDasharray="226" strokeDashoffset="75" strokeLinecap="round" />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                         <span className="text-xl font-bold text-foreground">45</span>
+                         <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Min</span>
                       </div>
-                      <Badge variant="outline" className="text-[9px]">
-                        {ex.muscle}
-                      </Badge>
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => addCustomExercise(selectedDay, search)}
-                    className="w-full flex items-center justify-between p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/20 mt-1"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Plus className="h-3 w-3 text-primary" />
-                      <span className="text-xs text-primary font-medium">
-                        Add "{search}"
-                      </span>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] border-primary/30 text-primary"
-                    >
-                      Custom
-                    </Badge>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                   </div>
+                   <span className="text-[11px] font-bold text-foreground tracking-widest uppercase">Zone 2</span>
+                </div>
 
-            {/* Exercise list */}
-            <div className="space-y-1.5">
-              {dayExercises.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">
-                  No exercises added. Search above to add.
-                </p>
-              )}
-              {dayExercises.map((ex, idx) => (
-                <motion.div
-                  key={ex.instanceId}
-                  layout
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-card"
-                >
-                  <span className="text-[10px] text-muted-foreground w-4">
-                    {idx + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground truncate">
-                      {ex.name}
-                    </p>
-                    <p className="text-[9px] text-muted-foreground">
-                      {ex.muscle}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Input
-                      type="number"
-                      value={ex.sets}
-                      onChange={(e) =>
-                        updateExercise(
-                          selectedDay,
-                          ex.instanceId,
-                          "sets",
-                          e.target.value,
-                        )
-                      }
-                      className="w-10 h-6 text-[10px] text-center p-0"
-                    />
-                    <span className="text-[9px] text-muted-foreground">x</span>
-                    <Input
-                      type="number"
-                      value={ex.reps}
-                      onChange={(e) =>
-                        updateExercise(
-                          selectedDay,
-                          ex.instanceId,
-                          "reps",
-                          e.target.value,
-                        )
-                      }
-                      className="w-10 h-6 text-[10px] text-center p-0"
-                    />
-                  </div>
-                  {/* Move to another day */}
-                  <select
-                    className="h-6 text-[9px] bg-muted text-muted-foreground border-none rounded px-1"
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value)
-                        moveExercise(
-                          selectedDay,
-                          e.target.value,
-                          ex.instanceId,
-                        );
-                    }}
-                  >
-                    <option value="">Move</option>
-                    {DAYS_OF_WEEK.filter(
-                      (d) => d !== selectedDay && !restDays[d],
-                    ).map((d) => (
-                      <option key={d} value={d}>
-                        {DAY_LABELS[d]}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => removeExercise(selectedDay, ex.instanceId)}
-                    className="p-1 hover:bg-destructive/10 rounded"
-                  >
-                    <Trash2 className="h-3 w-3 text-destructive/60" />
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {restDays[selectedDay] && (
-          <div className="text-center py-6">
-            <Moon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Rest Day</p>
-            <p className="text-[10px] text-muted-foreground/60">
-              Recovery is part of the plan
-            </p>
-          </div>
-        )}
+                {/* Ring 2 - HIIT */}
+                <div className="flex flex-col items-center gap-3">
+                   <div className="relative w-[84px] h-[84px]">
+                      <svg className="w-full h-full transform -rotate-90">
+                          {/* Background Track */}
+                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-surface-high" strokeWidth="6" />
+                          {/* Progress Track */}
+                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-accent" strokeWidth="6" strokeDasharray="226" strokeDashoffset="150" strokeLinecap="round" />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                         <span className="text-xl font-bold text-foreground">15</span>
+                         <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Min</span>
+                      </div>
+                   </div>
+                   <span className="text-[11px] font-bold tracking-widest uppercase text-accent">HIIT</span>
+                </div>
+             </div>
+         </motion.div>
       </div>
 
-      {/* AI Modal */}
-      <AnimatePresence>
-        {showAI && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            onClick={() => setShowAI(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-card border border-border rounded-2xl w-full max-w-sm p-5 space-y-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" /> AI Workout Plan
-                </h3>
-                <button onClick={() => setShowAI(false)}>
-                  <X className="h-4 w-4 text-muted-foreground" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs">Primary Goal</Label>
-                  <div className="flex gap-2 mt-1.5">
-                    {[
-                      { v: "strength", l: "Build Muscle" },
-                      { v: "lose", l: "Lose Fat" },
-                    ].map((o) => (
+      {/* Workout Builder Main Section */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-[2rem] bg-surface-low/80 p-6 lg:p-8 border border-border/30">
+          
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+             <div>
+                <h3 className="text-lg font-bold text-foreground">Workout Builder</h3>
+                <p className="text-xs text-muted-foreground mt-1">Configure your weekly routine</p>
+             </div>
+             
+             {/* Day Tabs matching the image */}
+             <div className="flex gap-2">
+                {DAYS_OF_WEEK.map((day) => {
+                   const isSelected = selectedDay === day;
+                   const isRest = restDays[day];
+                   const label = DAY_LABELS[day].charAt(0);
+                   return (
                       <button
-                        key={o.v}
-                        onClick={() => setAiGoal(o.v)}
-                        className={`flex-1 p-2 rounded-lg text-xs border transition-all ${aiGoal === o.v ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground"}`}
+                        key={day}
+                        onClick={() => setSelectedDay(day)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                          isSelected 
+                            ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(34,197,94,0.3)]" 
+                            : isRest
+                              ? "bg-transparent text-muted-foreground/30 hover:bg-white/5"
+                              : "bg-surface-high text-muted-foreground hover:bg-white/10"
+                        }`}
                       >
-                        {o.l}
+                         {label}
                       </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs">Days per week</Label>
-                  <div className="flex gap-1.5 mt-1.5">
-                    {["3", "4", "5", "6"].map((d) => (
-                      <button
-                        key={d}
-                        onClick={() => setAiDays(d)}
-                        className={`w-9 h-9 rounded-lg text-xs font-medium border transition-all ${aiDays === d ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground"}`}
-                      >
-                        {d}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-xs">
-                    Injuries or limitations (optional)
-                  </Label>
-                  <Input
-                    value={aiInjuries}
-                    onChange={(e) => setAiInjuries(e.target.value)}
-                    placeholder="e.g., bad knee, shoulder pain"
-                    className="h-8 text-xs mt-1.5"
-                  />
-                </div>
-              </div>
+                   );
+                })}
+             </div>
+          </div>
 
-              <Button onClick={generateAIPlan} className="w-full gap-2 text-xs">
-                <Zap className="h-3.5 w-3.5" /> Generate Plan
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Exercise List */}
+          <div className="space-y-3">
+             {restDays[selectedDay] ? (
+                 <div className="py-12 flex flex-col items-center justify-center text-center opacity-50">
+                    <Moon className="h-8 w-8 mb-4 text-muted-foreground" />
+                    <p className="font-bold text-foreground">Rest Day Scheduled</p>
+                    <p className="text-xs text-muted-foreground mt-1">Focus on recovery and mobility.</p>
+                 </div>
+             ) : (
+                 <>
+                   {/* Fallback items if empty (to match UI strictly) */}
+                   {dayExercises.length === 0 ? (
+                      <>
+                        <ExerciseRow name="Barbell Bench Press" sets="4" repRange="8-10" weight="85kg" type="Chest" />
+                        <ExerciseRow name="Incline Dumbbell Press" sets="3" repRange="10-12" weight="35kg" type="Chest" />
+                        <ExerciseRow name="Cable Crossovers" sets="3" repRange="12-15" weight="20kg" type="Chest" />
+                      </>
+                   ) : (
+                      dayExercises.map((ex) => (
+                         <ExerciseRow 
+                            key={ex.instanceId} 
+                            name={ex.name} 
+                            sets={String(ex.sets)} 
+                            repRange={String(ex.reps)} 
+                            weight="-" 
+                            type={ex.muscle} 
+                         />
+                      ))
+                   )}
+
+                   {/* Add new button */}
+                   <Button variant="outline" className="w-full rounded-xl border-dashed border-white/10 bg-transparent hover:bg-white/5 py-6 mt-4 opacity-50 hover:opacity-100 transition-opacity">
+                      <Plus className="h-4 w-4 mr-2" /> Add Exercise
+                   </Button>
+                 </>
+             )}
+          </div>
+      </motion.div>
     </div>
   );
 }
 
 // ──────────────────────────────────────────────
-// MAIN PAGE
+// STYLED EXERCISE ROW
 // ──────────────────────────────────────────────
+function ExerciseRow({ name, sets, repRange, weight, type }) {
+   return (
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface hover:bg-surface-high transition-colors border border-transparent group">
+         <div className="flex items-center gap-4 mb-3 sm:mb-0">
+            {/* Grab handle placeholder */}
+            <div className="flex flex-col gap-[2px] opacity-20 group-hover:opacity-100 transition-opacity cursor-grab">
+               <div className="w-1 h-1 rounded-full bg-white"></div>
+               <div className="w-1 h-1 rounded-full bg-white"></div>
+               <div className="w-1 h-1 rounded-full bg-white"></div>
+            </div>
+            
+            <div>
+               <div className="flex items-center gap-2 mb-1">
+                 <div className="w-1.5 h-1.5 rounded-full bg-primary/70"></div>
+                 <span className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">{type}</span>
+               </div>
+               <p className="text-sm font-bold text-foreground">{name}</p>
+            </div>
+         </div>
 
-export default function GymPage() {
-  const { checkins, addCheckin } = useWorkouts();
-  const { profile } = useProfile();
-  const { addXP } = useUserStats();
-
-  const fadeUp = {
-    initial: { opacity: 0, y: 15 },
-    animate: { opacity: 1, y: 0 },
-  };
-
-  return (
-    <div className="space-y-5 pb-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Gym</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Your training command center
-        </p>
+         <div className="flex items-center gap-2 pl-8 sm:pl-0">
+            <div className="px-3 py-1.5 rounded-lg border border-white/5 bg-surface-lowest flex items-center justify-center">
+               <span className="text-xs font-bold text-white">{sets} <span className="text-white/50 font-medium">Sets</span></span>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg border border-white/5 bg-surface-lowest flex items-center justify-center">
+               <span className="text-xs font-bold text-white">{repRange} <span className="text-white/50 font-medium">Reps</span></span>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg border border-white/5 bg-surface-lowest flex items-center justify-center">
+               <span className="text-xs font-bold text-primary">{weight}</span>
+            </div>
+         </div>
       </div>
-
-      {/* Check-in */}
-      <motion.div {...fadeUp}>
-        <CheckInSection
-          checkins={checkins}
-          addCheckin={addCheckin}
-          addXP={addXP}
-        />
-      </motion.div>
-
-      {/* Cardio Tracker */}
-      <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
-        <CardioTracker profile={profile} />
-      </motion.div>
-
-      {/* Workout Builder */}
-      <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-        <WorkoutBuilder profile={profile} />
-      </motion.div>
-    </div>
-  );
+   );
 }

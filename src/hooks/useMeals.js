@@ -10,14 +10,22 @@ export function useMeals(date) {
   const { data: meals = [], isLoading } = useQuery({
     queryKey: ["meals", user?.id, today],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("meal_logs")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("logged_at", today)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from("meal_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("logged_at", today)
+          .order("created_at", { ascending: false });
+        if (error) {
+           console.error("Supabase meal_logs fetch error:", error);
+           return [];
+        }
+        return data || [];
+      } catch (err) {
+        console.error("Unexpected error fetching meal_logs:", err);
+        return [];
+      }
     },
     enabled: !!user,
   });
@@ -25,15 +33,23 @@ export function useMeals(date) {
     queryKey: ["meals_monthly", user?.id, today.slice(0, 7)],
     queryFn: async () => {
       const month = today.slice(0, 7);
-      const { data, error } = await supabase
-        .from("meal_logs")
-        .select("*")
-        .eq("user_id", user.id)
-        .gte("logged_at", `${month}-01`)
-        .lte("logged_at", `${month}-31`)
-        .order("logged_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from("meal_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("logged_at", `${month}-01`)
+          .lte("logged_at", `${month}-31`)
+          .order("logged_at", { ascending: false });
+        if (error) {
+           console.error("Supabase monthly meal_logs fetch error:", error);
+           return [];
+        }
+        return data || [];
+      } catch (err) {
+        console.error("Unexpected error fetching monthly meals:", err);
+        return [];
+      }
     },
     enabled: !!user,
   });

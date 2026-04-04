@@ -9,14 +9,22 @@ export function useWorkouts() {
   const { data: checkins = [] } = useQuery({
     queryKey: ["workout_checkins", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("workout_checkins")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("logged_at", { ascending: false })
-        .limit(365);
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from("workout_checkins")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("logged_at", { ascending: false })
+          .limit(365);
+        if (error) {
+           console.error("Supabase workout_checkins fetch error:", error);
+           return [];
+        }
+        return data || [];
+      } catch (err) {
+        console.error("Unexpected error fetching workout checkins:", err);
+        return [];
+      }
     },
     enabled: !!user,
   });
