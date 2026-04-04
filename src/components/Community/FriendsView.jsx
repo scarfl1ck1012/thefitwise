@@ -69,7 +69,7 @@ export default function FriendsView({
     <div className="flex flex-col gap-6 relative">
       {/* Search Bar */}
       <div className="relative z-20">
-        <div className="relative flex items-center glass rounded-2xl px-5 py-3 focus-within:ring-2 focus-within:ring-info focus-within:border-info transition-all shadow-[0_0_20px_rgba(0,0,0,0.2)]">
+        <div className="relative flex items-center bg-[#111] border border-border/30 rounded-2xl px-5 py-3 focus-within:ring-2 focus-within:ring-info focus-within:border-info transition-all">
           <Search className="w-5 h-5 text-muted-foreground mr-3" />
           <input
             type="text"
@@ -82,7 +82,7 @@ export default function FriendsView({
 
         {/* Search Dropdown Results */}
         {searchQuery.trim() && (
-          <div className="absolute top-full left-0 right-0 mt-3 glass rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
+          <div className="absolute top-full left-0 right-0 mt-3 bg-[#111] border border-border/30 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden py-2 animate-in fade-in slide-in-from-top-2">
             {searchResults.length === 0 ? (
               <div className="px-4 py-3 text-sm text-muted-foreground text-center">
                 No users found.
@@ -132,7 +132,7 @@ export default function FriendsView({
 
       {/* Pending Requests */}
       {pendingRequests.length > 0 && (
-        <div className="glass rounded-[2rem] overflow-hidden">
+        <div className="bg-[#111] border border-border/30 rounded-[2rem] overflow-hidden">
           <button
             className="w-full flex items-center justify-between p-4 hover:bg-card/80 transition-colors"
             onClick={() => setShowRequests(!showRequests)}
@@ -210,7 +210,7 @@ export default function FriendsView({
             {friendsList.map((friend) => (
               <div
                 key={friend.id}
-                className="glass rounded-[2rem] p-5 flex flex-col hover:border-info/30 hover:shadow-[0_10px_30px_rgba(59,130,246,0.1)] transition-all group"
+                className="bg-[#111] border border-border/30 rounded-[2rem] p-5 flex flex-col hover:border-info/30 transition-all group"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">

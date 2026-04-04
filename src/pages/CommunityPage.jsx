@@ -87,12 +87,12 @@ export default function CommunityPage() {
       </div>
 
       {/* Segmented Control */}
-      <div className="flex glass p-1.5 rounded-full max-w-md mx-auto relative overflow-hidden">
+      <div className="flex bg-[#111] border border-border/30 p-1.5 rounded-full max-w-md mx-auto relative overflow-hidden">
         <button
           onClick={() => setActiveTab("leaderboard")}
           className={`flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
             activeTab === "leaderboard"
-              ? "text-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]"
+              ? "text-primary"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -103,7 +103,7 @@ export default function CommunityPage() {
           onClick={() => setActiveTab("friends")}
           className={`flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
             activeTab === "friends"
-              ? "text-info drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+              ? "text-info"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -138,7 +138,7 @@ export default function CommunityPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="glass rounded-[2rem] p-5 lg:p-6">
+            <div className="bg-[#111] border border-border/30 rounded-[2rem] p-5 lg:p-6 min-h-[500px]">
               {activeTab === "leaderboard" ? (
                 <LeaderboardView
                   users={users}
