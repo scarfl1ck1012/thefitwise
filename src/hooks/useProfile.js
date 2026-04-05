@@ -74,10 +74,10 @@ export function useProfile() {
       const merged = { ...profile, ...updates };
       const calories = calculateCalories(merged);
       
-      // Build the upsert payload
+      // Build the upsert payload with all fields to prevent data loss
       const payload = {
+        ...merged,
         user_id: user.id,
-        ...updates,
         daily_calories: calories,
       };
 

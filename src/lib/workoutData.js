@@ -297,7 +297,7 @@ export const faceExercises = [
   {
     name: "Neck Tilts",
     duration: "3x10 each side",
-    icon: "🦒",
+    step: 1,
     image: "/exercises/neck-tilts.png",
     description: "Tilt head side to side slowly. Reduces neck tension.",
     target: "Sternocleidomastoid, Neck",
@@ -313,7 +313,7 @@ export const faceExercises = [
   {
     name: "Chin Lifts",
     duration: "3x15 reps",
-    icon: "👆",
+    step: 2,
     image: "/exercises/chin-lifts.png",
     description: "Look up, push jaw forward, hold 3s. Reduces double chin.",
     target: "Platysma, Submental",
@@ -329,7 +329,7 @@ export const faceExercises = [
   {
     name: "Eye Squeeze",
     duration: "3x15 reps",
-    icon: "👁️",
+    step: 3,
     image: "/exercises/eye-squeeze.png",
     description:
       "Squeeze eyes shut tightly, hold 3s, release. Reduces crow's feet.",
@@ -345,7 +345,7 @@ export const faceExercises = [
   {
     name: "Forehead Smoother",
     duration: "3x10 reps",
-    icon: "🤚",
+    step: 4,
     image: "/exercises/forehead-smoother.png",
     description: "Place fingers on forehead, raise brows against resistance.",
     target: "Frontalis, Forehead",
@@ -361,7 +361,7 @@ export const faceExercises = [
   {
     name: "Neck Rotations",
     duration: "2x5 each direction",
-    icon: "🔄",
+    step: 5,
     image: "/exercises/neck-rotations.png",
     description: "Slowly rotate head in circles. Relieves tension.",
     target: "Trapezius, Neck",
@@ -377,7 +377,7 @@ export const faceExercises = [
   {
     name: "Tongue Press",
     duration: "3x10s hold",
-    icon: "👅",
+    step: 6,
     image: "/exercises/tongue-press.png",
     description: "Press tongue to roof of mouth. Defines jawline underneath.",
     target: "Mylohyoid, Submental",
@@ -392,7 +392,7 @@ export const faceExercises = [
   {
     name: "Smile & Hold",
     duration: "3x10s",
-    icon: "😊",
+    step: 7,
     image: "/exercises/smile-hold.png",
     description: "Wide smile, hold 10 seconds. Lifts cheeks naturally.",
     target: "Zygomaticus, Cheeks",

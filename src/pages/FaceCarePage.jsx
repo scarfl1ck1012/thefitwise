@@ -134,7 +134,7 @@ function FaceYogaCard({ ex, idx, isExpanded, onToggleExpand, isDone, onToggleCom
                 : "bg-surface border border-border/40 text-primary"
             }`}
           >
-            {isDone ? <Check className="w-5 h-5" /> : <span className="text-xl">{ex.icon}</span>}
+            {isDone ? <Check className="w-5 h-5" /> : <span className="text-sm font-bold">{ex.step || idx + 1}</span>}
           </div>
         </div>
 
