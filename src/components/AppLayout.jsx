@@ -21,6 +21,7 @@ import {
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import FitwiseChat from "@/components/FitwiseChat";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/meals", icon: UtensilsCrossed, label: "Meals" },
@@ -155,6 +156,7 @@ export default function AppLayout() {
       </main>
 
       <FitwiseChat />
+      <OnboardingTutorial />
     </div>
   );
 }
