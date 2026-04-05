@@ -223,7 +223,7 @@ function FaceYogaCard({ ex, idx, isExpanded, onToggleExpand, isDone, onToggleCom
                       </div>
                     </div>
                     <div className="h-1.5 w-full bg-surface-high rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: \`\${timer.progress}%\` }}></div>
+                      <div className="h-full bg-primary" style={{ width: `${timer.progress}%` }}></div>
                     </div>
                     {timer.finished && (
                       <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-[10px] text-primary font-bold uppercase tracking-widest mt-3 text-center">
@@ -342,7 +342,7 @@ export default function FaceCarePage() {
           className={`absolute top-1.5 bottom-1.5 rounded-full transition-all duration-300 ease-out z-0 border bg-gradient-to-r ${tabColors[activeTab].bg} ${tabColors[activeTab].ring}`}
           style={{
             width: "calc(33.333% - 4px)",
-            transform: \`translateX(\${TABS.findIndex((t) => t.key === activeTab) * 100}%)\`,
+            transform: `translateX(${TABS.findIndex((t) => t.key === activeTab) * 100}%)`,
             boxShadow:
               activeTab === "morning"
                 ? "0 0 15px rgba(251,146,60,0.15)"
@@ -383,7 +383,7 @@ export default function FaceCarePage() {
                   : "bg-primary shadow-[0_0_10px_rgba(34,197,94,0.5)]"
             }`}
             initial={{ width: 0 }}
-            animate={{ width: \`\${progress}%\` }}
+            animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           />
         </div>
@@ -437,7 +437,7 @@ export default function FaceCarePage() {
                       className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0 transition-all ${
                         isDone
                           ? "bg-primary border border-primary text-primary-foreground shadow-[0_0_12px_rgba(34,197,94,0.3)]"
-                          : \`bg-surface border border-border/40 \${tabColors[activeTab].text}\`
+                          : `bg-surface border border-border/40 ${tabColors[activeTab].text}`
                       }`}
                     >
                       {isDone ? (
