@@ -269,6 +269,46 @@ export default function SettingsPage() {
     }
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      toast.loading("Uploading photo...", { id: "upload" });
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+        
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      
+      updateProfile.mutate({ avatar_url: data.publicUrl });
+      toast.success("Profile photo updated!", { id: "upload" });
+    } catch (error) {
+      toast.error("Error uploading photo. Make sure 'avatars' storage bucket exists.", { id: "upload" });
+      console.error(error);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const newPassword = fd.get("newPassword");
+    if (!newPassword) return;
+    try {
+       const { error } = await supabase.auth.updateUser({ password: newPassword });
+       if (error) throw error;
+       toast.success("Password updated successfully");
+       e.target.reset();
+    } catch (error) {
+       toast.error("Failed to update password: " + error.message);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-24 max-w-2xl mx-auto pl-4 lg:pl-0 pr-4">
       <h1 className="text-2xl font-bold text-foreground">Settings & Profile</h1>
@@ -276,11 +316,18 @@ export default function SettingsPage() {
       {/* Profile Header */}
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center pt-8 pb-10">
          <div className="relative mb-6">
-            <div className="w-28 h-28 rounded-full bg-surface border-2 border-primary/40 shadow-[0_0_25px_rgba(34,197,94,0.2)] flex items-center justify-center overflow-hidden shrink-0">
-                <User className="h-12 w-12 text-muted-foreground/50" />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/10 pointer-events-none"></div>
+            <div className="w-28 h-28 rounded-full bg-surface border-2 border-primary/40 shadow-[0_0_25px_rgba(34,197,94,0.2)] flex items-center justify-center overflow-hidden shrink-0 relative group">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} className="w-full h-full object-cover" alt="Avatar" />
+                ) : (
+                  <User className="h-12 w-12 text-muted-foreground/50 group-hover:scale-110 transition-transform" />
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity pointer-events-none">
+                   <Cloud className="w-6 h-6 text-white" />
+                </div>
+                <input type="file" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
             </div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-4 border-background shadow-md">
+            <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-4 border-background shadow-md pointer-events-none">
                 <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
             </div>
          </div>
@@ -299,7 +346,7 @@ export default function SettingsPage() {
           <AccordionItem value="personal-info" className="border-none rounded-2xl bg-surface-low/80 hover:bg-surface-low transition-colors mb-2 overflow-hidden px-4">
              <AccordionTrigger className="hover:no-underline py-5 lg:py-6">
                 <div className="flex items-center gap-4">
-                   <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                   <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
                       <UserCog className="h-5 w-5 text-primary" />
                    </div>
                    <div className="text-left">
@@ -365,18 +412,28 @@ export default function SettingsPage() {
              </AccordionContent>
           </AccordionItem>
           
-          <div className="w-full rounded-2xl bg-surface-low/80 hover:bg-surface-low transition-colors mb-2 px-4 py-5 lg:py-6 cursor-pointer flex justify-between items-center group">
-             <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
-                    <Shield className="h-5 w-5 text-primary" />
-                 </div>
-                 <div className="text-left">
-                   <p className="text-sm font-semibold text-foreground">Security</p>
-                   <p className="text-[11px] text-muted-foreground mt-1">Password, 2FA, and login history</p>
-                 </div>
-              </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors mr-2" />
-          </div>
+          <AccordionItem value="security" className="border-none rounded-2xl bg-surface-low/80 hover:bg-surface-low transition-colors mb-2 overflow-hidden px-4">
+             <AccordionTrigger className="hover:no-underline py-5 lg:py-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
+                     <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-foreground">Security</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Password, 2FA, and login history</p>
+                  </div>
+               </div>
+             </AccordionTrigger>
+             <AccordionContent className="pt-2 pb-8 px-2 lg:px-4">
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                   <div className="space-y-2">
+                     <Label>New Password</Label>
+                     <Input name="newPassword" type="password" placeholder="Enter new password" required className="bg-surface border-border/50" />
+                   </div>
+                   <Button type="submit" className="w-full">Update Password</Button>
+                </form>
+             </AccordionContent>
+          </AccordionItem>
         </Accordion>
       </div>
 
@@ -387,7 +444,7 @@ export default function SettingsPage() {
         <div className="w-full rounded-2xl bg-surface-low/80 overflow-hidden">
            <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30">
               <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
                     <Moon className="h-5 w-5 text-primary" />
                  </div>
                  <div className="text-left">
@@ -397,9 +454,9 @@ export default function SettingsPage() {
               <div className="mr-2"><Switch checked={true} /></div>
            </div>
            
-           <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30 hover:bg-surface-low cursor-pointer transition-colors">
+           <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30 hover:bg-surface-low cursor-pointer transition-colors relative">
               <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
                     <Globe className="h-5 w-5 text-primary" />
                  </div>
                  <div className="text-left">
@@ -407,12 +464,22 @@ export default function SettingsPage() {
                    <p className="text-[11px] text-muted-foreground mt-1">English (US)</p>
                  </div>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground mr-2" />
+              <Select defaultValue="en">
+                <SelectTrigger className="w-[120px] bg-transparent border-none focus:ring-0 text-right opacity-0 absolute inset-0 cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                   <SelectItem value="en">English (US)</SelectItem>
+                   <SelectItem value="es">Español</SelectItem>
+                   <SelectItem value="fr">Français</SelectItem>
+                </SelectContent>
+              </Select>
+              <ChevronRight className="h-5 w-5 text-muted-foreground mr-2 pointer-events-none" />
            </div>
 
            <div className="px-4 py-5 lg:py-6 flex justify-between items-center">
               <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
+                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
                     <Cloud className="h-5 w-5 text-primary" />
                  </div>
                  <div className="text-left">
@@ -428,36 +495,44 @@ export default function SettingsPage() {
       <div className="space-y-3 pt-6">
         <h3 className="text-[11px] font-bold text-muted-foreground tracking-[0.2em] uppercase mb-3 pl-2">Notifications</h3>
         
-        <div className="w-full rounded-2xl bg-surface-low/80 overflow-hidden">
-           <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30">
-              <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
-                    <Bell className="h-5 w-5 text-primary" />
-                 </div>
-                 <div className="text-left">
-                   <p className="text-sm font-semibold text-foreground">Workout Reminders</p>
-                 </div>
-              </div>
-              <div className="mr-2"><Switch checked={true} /></div>
-           </div>
-           
-           <div className="px-4 py-5 lg:py-6 flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-white/5 shadow-sm">
-                    <Megaphone className="h-5 w-5 text-primary" />
-                 </div>
-                 <div className="text-left">
-                   <p className="text-sm font-semibold text-foreground">Marketing & Newsletter</p>
-                 </div>
-              </div>
-              <div className="mr-2"><Switch checked={false} /></div>
-           </div>
-        </div>
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="notifications" className="border-none rounded-2xl bg-surface-low/80 hover:bg-surface-low transition-colors mb-2 overflow-hidden px-4">
+             <AccordionTrigger className="hover:no-underline py-5 lg:py-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
+                     <Bell className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-foreground">Notification Settings</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">Manage email and push alerts</p>
+                  </div>
+               </div>
+             </AccordionTrigger>
+             <AccordionContent className="pt-2 pb-8 px-2 lg:px-4">
+                <div className="space-y-6">
+                   <div className="flex justify-between items-center">
+                       <div>
+                         <p className="text-sm font-medium">Workout Reminders</p>
+                         <p className="text-[11px] text-muted-foreground">Push notifications for daily check-ins</p>
+                       </div>
+                       <Switch checked={true} />
+                   </div>
+                   <div className="flex justify-between items-center">
+                       <div>
+                         <p className="text-sm font-medium">Marketing & Newsletter</p>
+                         <p className="text-[11px] text-muted-foreground">Weekly fit tips via Email</p>
+                       </div>
+                       <Switch checked={false} />
+                   </div>
+                </div>
+             </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
 
       {/* LOG OUT */}
       <div className="pt-10 flex flex-col items-center justify-center gap-4">
-         <Button onClick={handleLogOut} variant="outline" className="w-full max-w-sm rounded-xl py-6 border-white/5 bg-[#2a1c1c]/50 text-[#ffb4b4] hover:bg-[#3a2020] hover:text-[#ffb4b4] border transition-colors opacity-80 hover:opacity-100 font-semibold shadow-sm">
+         <Button onClick={handleLogOut} variant="outline" className="w-full max-w-sm rounded-xl py-6 border-border/30 bg-[#2a1c1c]/50 text-[#ffb4b4] hover:bg-[#3a2020] hover:text-[#ffb4b4] border transition-colors opacity-80 hover:opacity-100 font-semibold shadow-sm">
             Log Out
          </Button>
          <p className="text-[10px] text-muted-foreground mb-4">App Version 4.2.0 (Build 991)</p>

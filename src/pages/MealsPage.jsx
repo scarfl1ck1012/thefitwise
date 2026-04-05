@@ -244,9 +244,9 @@ REFERENCE VALUES (per standard serving):
     );
   };
   const macroData = [
-    { name: "Protein", value: Math.round(totalProtein) || 0, color: "hsl(var(--primary))" },
-    { name: "Carbs", value: Math.round(totalCarbs) || 0, color: "hsl(var(--info))" },
-    { name: "Fat", value: Math.round(totalFat) || 0, color: "hsl(var(--accent))" },
+    { name: "Protein", value: Math.round(totalProtein) || 0, color: "#3b82f6" },
+    { name: "Carbs", value: Math.round(totalCarbs) || 0, color: "#f59e0b" },
+    { name: "Fat", value: Math.round(totalFat) || 0, color: "#f43f5e" },
   ];
   const hasData = macroData.some((d) => d.value > 0);
   const emptyData = [{ name: "Empty", value: 1, color: "hsl(var(--muted))" }];
@@ -278,7 +278,7 @@ REFERENCE VALUES (per standard serving):
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Master Calories & Macros (Spans 2 cols) */}
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 rounded-[2rem] bg-[#0c0c0c] border border-border/30 p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group">
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 rounded-[2rem] bg-surface-lowest border border-border/30 p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-info/5 opacity-50"></div>
             <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-primary/10 rounded-full blur-[50px] pointer-events-none" />
@@ -309,7 +309,7 @@ REFERENCE VALUES (per standard serving):
                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-[10px] uppercase tracking-widest text-primary font-bold mb-1">INTAKE</span>
                   <span className="text-4xl font-black text-white">{totalCalories}</span>
-                  <span className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full border border-white/10">/{calorieGoal} KCAL</span>
+                  <span className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full border border-border/40">/{calorieGoal} KCAL</span>
                </div>
             </div>
 
@@ -317,9 +317,9 @@ REFERENCE VALUES (per standard serving):
             <div className="flex flex-col flex-1 w-full gap-5 z-10">
                 {/* Macros */}
                 <div className="grid grid-cols-3 gap-3">
-                    <MacroPill label="Protein" val={Math.round(totalProtein)} color="bg-primary/20 text-primary border-primary/30" unit="g" />
-                    <MacroPill label="Carbs" val={Math.round(totalCarbs)} color="bg-info/20 text-info border-info/30" unit="g" />
-                    <MacroPill label="Fat" val={Math.round(totalFat)} color="bg-accent/20 text-accent border-accent/30" unit="g" />
+                    <MacroPill label="Protein" val={Math.round(totalProtein)} color="bg-blue-500/20 text-blue-400 border-blue-500/30" unit="g" />
+                    <MacroPill label="Carbs" val={Math.round(totalCarbs)} color="bg-amber-500/20 text-amber-500 border-amber-500/30" unit="g" />
+                    <MacroPill label="Fat" val={Math.round(totalFat)} color="bg-rose-500/20 text-rose-500 border-rose-500/30" unit="g" />
                 </div>
 
                 <div className="h-px w-full bg-border/40"></div>
@@ -360,7 +360,7 @@ REFERENCE VALUES (per standard serving):
                 </div>
 
                 <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold rounded-xl bg-[#111] hover:bg-[#1a1a1a] border-white/5 hover:border-info/30" onClick={() => { addWater.mutate(500); toast.success("+500ml 💧"); }} disabled={!isToday}>
+                    <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold rounded-xl bg-surface-low hover:bg-surface border-border/30 hover:border-info/30" onClick={() => { addWater.mutate(500); toast.success("+500ml 💧"); }} disabled={!isToday}>
                         +500 ML
                     </Button>
                     <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-muted/50 hover:bg-destructive/20 hover:text-destructive" onClick={() => { removeLastWater.mutate(); toast("Undo"); }} disabled={!isToday || totalWaterMl === 0}>
@@ -379,7 +379,7 @@ REFERENCE VALUES (per standard serving):
                        <span className={`text-xl font-black ${totalCaffeineMg > caffeineLimit ? "text-destructive" : "text-white"}`}>{totalCaffeineMg}mg</span>
                    </div>
                    
-                   <div className="w-full bg-black/40 rounded-full h-1.5 mb-4 border border-white/5">
+                   <div className="w-full bg-black/40 rounded-full h-1.5 mb-4 border border-border/30">
                      <div
                        className={`h-1.5 rounded-full transition-all ${totalCaffeineMg > caffeineLimit ? "bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-warning shadow-[0_0_10px_rgba(245,158,11,0.5)]"}`}
                        style={{ width: `${Math.min((totalCaffeineMg / caffeineLimit) * 100, 100)}%` }}
@@ -388,7 +388,7 @@ REFERENCE VALUES (per standard serving):
                 </div>
 
                 <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold rounded-xl bg-[#111] hover:bg-[#1a1a1a] border-white/5 hover:border-warning/30" onClick={() => { addCaffeine.mutate({ amount_mg: 95, drink_type: "coffee" }); toast.success("+1 Coffee ☕"); }} disabled={!isToday}>
+                    <Button variant="outline" size="sm" className="flex-1 h-9 text-xs font-bold rounded-xl bg-surface-low hover:bg-surface border-border/30 hover:border-warning/30" onClick={() => { addCaffeine.mutate({ amount_mg: 95, drink_type: "coffee" }); toast.success("+1 Coffee ☕"); }} disabled={!isToday}>
                         + COFFEE
                     </Button>
                     <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl bg-muted/50 hover:bg-destructive/20 hover:text-destructive" onClick={() => { removeLastCaffeine.mutate(); toast("Undo"); }} disabled={!isToday || totalCaffeineMg === 0}>
@@ -411,20 +411,20 @@ REFERENCE VALUES (per standard serving):
               </Button>
             </DialogTrigger>
             
-            <DialogContent className="sm:max-w-md bg-[#111] border-border/40 rounded-[2rem]">
+            <DialogContent className="sm:max-w-md bg-surface-low border-border/40 rounded-[2rem]">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold tracking-tight">Manual Log</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
-                <Input placeholder="Meal name (e.g., Protein Shake)" value={customName} onChange={(e) => setCustomName(e.target.value)} className="bg-surface-lowest border-white/10" />
-                <Input placeholder="Serving size in grams" type="number" value={customGrams} onChange={(e) => setCustomGrams(e.target.value)} className="bg-surface-lowest border-white/10" />
+                <Input placeholder="Meal name (e.g., Protein Shake)" value={customName} onChange={(e) => setCustomName(e.target.value)} className="bg-surface-lowest border-border/40" />
+                <Input placeholder="Serving size in grams" type="number" value={customGrams} onChange={(e) => setCustomGrams(e.target.value)} className="bg-surface-lowest border-border/40" />
                 <div className="grid grid-cols-2 gap-3 pb-2 border-b border-border/40">
-                  <Input placeholder="Calories" type="number" value={customCalories} onChange={(e) => setCustomCalories(e.target.value)} className="bg-surface-lowest border-white/10 font-mono" />
-                  <Input placeholder="Protein (g)" type="number" value={customProtein} onChange={(e) => setCustomProtein(e.target.value)} className="bg-surface-lowest border-white/10 text-primary font-mono" />
-                  <Input placeholder="Carbs (g)" type="number" value={customCarbs} onChange={(e) => setCustomCarbs(e.target.value)} className="bg-surface-lowest border-white/10 text-info font-mono" />
-                  <Input placeholder="Fat (g)" type="number" value={customFat} onChange={(e) => setCustomFat(e.target.value)} className="bg-surface-lowest border-white/10 text-accent font-mono" />
-                  <Input placeholder="Sodium (mg)" type="number" value={customSodium} onChange={(e) => setCustomSodium(e.target.value)} className="bg-surface-lowest border-white/10 text-destructive font-mono" />
-                  <Input placeholder="Potassium (mg)" type="number" value={customPotassium} onChange={(e) => setCustomPotassium(e.target.value)} className="bg-surface-lowest border-white/10 text-primary font-mono" />
+                  <Input placeholder="Calories" type="number" value={customCalories} onChange={(e) => setCustomCalories(e.target.value)} className="bg-surface-lowest border-border/40 font-mono" />
+                  <Input placeholder="Protein (g)" type="number" value={customProtein} onChange={(e) => setCustomProtein(e.target.value)} className="bg-surface-lowest border-border/40 text-blue-400 font-mono" />
+                  <Input placeholder="Carbs (g)" type="number" value={customCarbs} onChange={(e) => setCustomCarbs(e.target.value)} className="bg-surface-lowest border-border/40 text-amber-500 font-mono" />
+                  <Input placeholder="Fat (g)" type="number" value={customFat} onChange={(e) => setCustomFat(e.target.value)} className="bg-surface-lowest border-border/40 text-rose-500 font-mono" />
+                  <Input placeholder="Sodium (mg)" type="number" value={customSodium} onChange={(e) => setCustomSodium(e.target.value)} className="bg-surface-lowest border-border/40 text-destructive font-mono" />
+                  <Input placeholder="Potassium (mg)" type="number" value={customPotassium} onChange={(e) => setCustomPotassium(e.target.value)} className="bg-surface-lowest border-border/40 text-primary font-mono" />
                 </div>
                 <Button onClick={logCustomMeal} disabled={!customName.trim() || !customCalories} className="w-full h-12 bg-white text-black font-bold rounded-xl hover:bg-neutral-200">
                   Save Meal
@@ -434,7 +434,7 @@ REFERENCE VALUES (per standard serving):
           </Dialog>
 
           {/* AI Analyzer Toggle */}
-          <Button variant="outline" className={`flex-1 h-12 rounded-xl font-bold gap-2 border-white/10 ${showAI ? 'bg-primary/20 text-primary border-primary/30' : 'bg-surface-low hover:bg-surface-highest hover:text-white'}`} onClick={() => setShowAI(!showAI)}>
+          <Button variant="outline" className={`flex-1 h-12 rounded-xl font-bold gap-2 border-border/40 ${showAI ? 'bg-primary/20 text-primary border-primary/30' : 'bg-surface-low hover:bg-surface-highest hover:text-white'}`} onClick={() => setShowAI(!showAI)}>
             <Sparkles className={`h-4 w-4 ${showAI ? 'animate-pulse' : ''}`} /> {showAI ? 'Hide Analyzer' : 'AI Analyzer'}
           </Button>
         </motion.div>
@@ -444,7 +444,7 @@ REFERENCE VALUES (per standard serving):
       <AnimatePresence>
         {isToday && showAI && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-            <div className="rounded-[2rem] bg-[#0f1712] border border-primary/20 shadow-[0_0_30px_rgba(34,197,94,0.05)] p-6 relative">
+            <div className="rounded-[2rem] bg-surface-lowest border border-primary/20 shadow-[0_0_30px_rgba(34,197,94,0.05)] p-6 relative">
                <div className="absolute top-0 right-0 p-4 opacity-10">
                    <Sparkles className="w-16 h-16 text-primary" />
                </div>
@@ -456,7 +456,7 @@ REFERENCE VALUES (per standard serving):
                  Describe your meal in natural language. We'll extract the macros, calories, and micronutrients automatically.
                </p>
                
-               <Textarea placeholder="E.g., I had 3 boiled eggs, 2 slices of whole wheat toast, and a medium banana." value={aiInput} onChange={(e) => setAiInput(e.target.value)} rows={3} className="bg-black/50 border-white/10 rounded-xl resize-none focus-visible:ring-primary/40 text-sm font-medium mb-4 shadow-inner" />
+               <Textarea placeholder="E.g., I had 3 boiled eggs, 2 slices of whole wheat toast, and a medium banana." value={aiInput} onChange={(e) => setAiInput(e.target.value)} rows={3} className="bg-black/50 border-border/40 rounded-xl resize-none focus-visible:ring-primary/40 text-sm font-medium mb-4 shadow-inner" />
                
                <Button onClick={analyzeWithAI} disabled={aiLoading || !aiInput.trim()} className="w-full sm:w-auto h-10 px-8 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90">
                  {aiLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deep Analysis...</> : "Analyze & Extract"}
@@ -483,12 +483,12 @@ REFERENCE VALUES (per standard serving):
                    placeholder="Search millions of foods..."
                    value={search}
                    onChange={(e) => setSearch(e.target.value)}
-                   className="pl-10 h-12 rounded-xl bg-[#111] border-white/10 placeholder:text-muted-foreground focus-visible:ring-primary/30 text-sm font-medium"
+                   className="pl-10 h-12 rounded-xl bg-surface-low border-border/40 placeholder:text-muted-foreground focus-visible:ring-primary/30 text-sm font-medium"
                  />
                </div>
 
                {search.length > 1 && (
-                 <div className="flex items-center justify-between bg-black/30 p-3 rounded-xl border border-white/5 mb-3 shrink-0">
+                 <div className="flex items-center justify-between bg-black/30 p-3 rounded-xl border border-border/30 mb-3 shrink-0">
                    <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Portion</span>
                    <div className="flex items-center gap-3">
                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm bg-surface-lowest hover:bg-muted" onClick={() => setServings(Math.max(0.5, servings - 0.5))}>
@@ -504,15 +504,15 @@ REFERENCE VALUES (per standard serving):
 
                <div className="flex-1 overflow-y-auto pr-2 space-y-2 scrollbar-hide">
                  {results.length > 0 ? results.map((food) => (
-                   <div key={food.name} className="w-full text-left p-3 rounded-xl bg-[#111] hover:bg-[#1a1a1a] transition-colors border border-white/5 focus-within:border-primary/50 group flex flex-col cursor-pointer" onClick={() => logFood(food)}>
+                   <div key={food.name} className="w-full text-left p-3 rounded-xl bg-surface-low hover:bg-surface transition-colors border border-border/30 focus-within:border-primary/50 group flex flex-col cursor-pointer" onClick={() => logFood(food)}>
                      <div className="flex justify-between items-start mb-2">
                        <p className="text-sm font-bold text-white group-hover:text-primary transition-colors line-clamp-1">{food.name}</p>
                        <span className="text-xs font-black text-primary shrink-0 bg-primary/10 px-2 py-0.5 rounded-sm">{Math.round(food.calories * servings)} KCAL</span>
                      </div>
                      <div className="flex gap-1.5 flex-wrap">
-                       <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80 bg-primary/5 px-1.5 py-0.5 rounded">P {Math.round(food.protein * servings)}g</span>
-                       <span className="text-[9px] font-bold uppercase tracking-widest text-info/80 bg-info/5 px-1.5 py-0.5 rounded">C {Math.round(food.carbs * servings)}g</span>
-                       <span className="text-[9px] font-bold uppercase tracking-widest text-accent/80 bg-accent/5 px-1.5 py-0.5 rounded">F {Math.round(food.fat * servings)}g</span>
+                       <span className="text-[9px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">P {Math.round(food.protein * servings)}g</span>
+                       <span className="text-[9px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">C {Math.round(food.carbs * servings)}g</span>
+                       <span className="text-[9px] font-bold uppercase tracking-widest text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">F {Math.round(food.fat * servings)}g</span>
                      </div>
                    </div>
                  )) : search.length > 1 ? (
@@ -533,7 +533,7 @@ REFERENCE VALUES (per standard serving):
           )}
 
           {/* Right Column: Logged Timeline */}
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} className={`rounded-[2rem] bg-[#111] border border-border/30 p-6 flex flex-col ${isToday ? 'h-[400px]' : 'h-auto min-h-[400px] col-span-1 lg:col-span-2'}`}>
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} className={`rounded-[2rem] bg-surface-low border border-border/30 p-6 flex flex-col ${isToday ? 'h-[400px]' : 'h-auto min-h-[400px] col-span-1 lg:col-span-2'}`}>
               <div className="flex items-center justify-between mb-6 shrink-0">
                   <h2 className="text-xs uppercase tracking-widest font-bold text-white">
                     {isToday ? "Today's Consumption Timeline" : `Logs for ${new Date(selectedDate + "T12:00:00").toLocaleDateString()}`}
@@ -551,12 +551,12 @@ REFERENCE VALUES (per standard serving):
                     meals.map((meal, idx) => (
                       <div key={meal.id} className="relative pl-6 before:absolute before:left-[11px] before:top-4 before:bottom-[-20px] before:w-0.5 before:bg-white/5 last:before:hidden group">
                            {/* Timeline Dot */}
-                           <div className="absolute left-0 top-3.5 w-6 h-6 rounded-full bg-[#111] border-[3px] border-[#1a1a1a] flex items-center justify-center z-10 group-hover:border-primary/50 transition-colors">
+                           <div className="absolute left-0 top-3.5 w-6 h-6 rounded-full bg-surface-low border-[3px] border-[#1a1a1a] flex items-center justify-center z-10 group-hover:border-primary/50 transition-colors">
                               <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />
                            </div>
 
                            {/* Card */}
-                           <div className="bg-[#1a1a1a] border border-white/5 p-4 rounded-2xl hover:border-white/10 transition-colors relative overflow-hidden group/card mt-0">
+                           <div className="bg-surface border border-border/30 p-4 rounded-2xl hover:border-border/40 transition-colors relative overflow-hidden group/card mt-0">
                                
                                <div className="flex justify-between items-start mb-2">
                                   <h4 className="text-sm font-bold text-white leading-tight pr-8">{meal.recipe_title}</h4>
@@ -567,10 +567,10 @@ REFERENCE VALUES (per standard serving):
 
                                {meal.servings > 1 && <p className="text-[10px] text-muted-foreground font-medium mb-3">Multiplier: {meal.servings}x portion</p>}
 
-                               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 pt-3 border-t border-white/5">
-                                 <NutrientStat label="Pro" val={meal.protein} srv={meal.servings} color="text-primary" />
-                                 <NutrientStat label="Crb" val={meal.carbs} srv={meal.servings} color="text-info" />
-                                 <NutrientStat label="Fat" val={meal.fat} srv={meal.servings} color="text-accent" />
+                               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 pt-3 border-t border-border/30">
+                                 <NutrientStat label="Pro" val={meal.protein} srv={meal.servings} color="text-blue-400" />
+                                 <NutrientStat label="Crb" val={meal.carbs} srv={meal.servings} color="text-amber-500" />
+                                 <NutrientStat label="Fat" val={meal.fat} srv={meal.servings} color="text-rose-500" />
                                  <NutrientStat label="Na" val={meal.sodium} srv={meal.servings} color="text-destructive" sufix="mg" />
                                </div>
 
@@ -609,7 +609,7 @@ function MacroPill({ label, val, color, unit }) {
 function MicroBar({ label, val, limit, unit, isWarning }) {
     const percentage = Math.min((val / limit) * 100, 100) || 0;
     return (
-        <div className="bg-[#111] border border-white/5 p-3 rounded-xl flex items-center justify-between gap-4">
+        <div className="bg-surface-low border border-border/30 p-3 rounded-xl flex items-center justify-between gap-4">
              <div className="w-20 shrink-0">
                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{label}</p>
                  <p className={`text-xs font-black mt-0.5 ${isWarning ? 'text-destructive' : 'text-primary'}`}>{Math.round(val)} <span className="text-[10px] opacity-70">/ {limit}{unit}</span></p>

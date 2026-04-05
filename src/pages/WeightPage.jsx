@@ -64,6 +64,42 @@ function addRollingAverage(data) {
   });
 }
 
+function calculatePrediction(logs, goalWeight) {
+  if (!logs || logs.length < 3 || !goalWeight) return null;
+  
+  // Use up to last 30 logs for recent trend
+  const recentLogs = logs.slice(-30);
+  const xs = recentLogs.map(l => new Date(l.logged_at).getTime());
+  const ys = recentLogs.map(l => Number(l.weight_kg));
+  
+  const n = xs.length;
+  const meanX = xs.reduce((a, b) => a + b, 0) / n;
+  const meanY = ys.reduce((a, b) => a + b, 0) / n;
+  
+  let num = 0;
+  let den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (xs[i] - meanX) * (ys[i] - meanY);
+    den += Math.pow(xs[i] - meanX, 2);
+  }
+  
+  if (den === 0) return null;
+  const slope = num / den; 
+  const intercept = meanY - slope * meanX;
+  
+  const targetTimeMs = (goalWeight - intercept) / slope;
+  
+  const latestWeight = ys[ys.length - 1];
+  if (goalWeight < latestWeight && slope >= 0) return null; 
+  if (goalWeight > latestWeight && slope <= 0) return null;
+
+  const predictedDate = new Date(targetTimeMs);
+  const daysAway = Math.round((targetTimeMs - Date.now()) / (1000 * 60 * 60 * 24));
+  if (daysAway < 0 || daysAway > 365 * 3) return null; 
+  
+  return predictedDate;
+}
+
 function ActualDot(props) {
   const { cx, cy, payload } = props;
   if (!payload.isActual) return null;
@@ -139,7 +175,12 @@ export default function WeightPage() {
   const latest = logs.length > 0 ? Number(logs[logs.length - 1].weight_kg) : null;
   const previous = logs.length > 1 ? Number(logs[logs.length - 2].weight_kg) : null;
   const diff = latest && previous ? Math.round((latest - previous) * 10) / 10 : 0;
-  const goalWeight = profile?.goal === "lose" && latest ? Math.round(latest * 0.9) : null;
+  
+  let goalWeight = null;
+  if(profile?.goal === "lose" && latest) goalWeight = Math.round(latest * 0.9);
+  if((profile?.goal === "gain" || profile?.goal === "bulk") && latest) goalWeight = Math.round(latest * 1.1);
+
+  const predictedDate = useMemo(() => calculatePrediction(logs, goalWeight), [logs, goalWeight]);
 
   const fadeUp = {
     initial: { opacity: 0, y: 15 },
@@ -248,13 +289,19 @@ export default function WeightPage() {
             {goalWeight ? (
               <div className="glass rounded-[2rem] p-6 text-center relative overflow-hidden group hover:border-success/30 hover:shadow-[0_10px_40px_rgba(34,197,94,0.1)] transition-all">
                 <div className="absolute top-0 left-0 w-24 h-24 bg-success/5 rounded-full blur-2xl pointer-events-none" />
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-success/20 to-success/5 flex items-center justify-center border border-success/20 mb-3 mx-auto shadow-[0_0_15px_rgba(34,197,94,0.15)]">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-success/20 to-success/5 flex items-center justify-center border border-success/20 mb-3 mx-auto shadow-[0_0_15px_rgba(34,197,94,0.15)] group-hover:scale-105 transition-transform">
                   <Target className="h-6 w-6 text-success" />
                 </div>
                 <p className="text-3xl font-black text-foreground mb-1">{goalWeight}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Goal (kg)
-                </p>
+                {predictedDate ? (
+                   <p className="text-[9px] font-bold uppercase tracking-widest text-success bg-success/10 py-1 px-2 rounded-full inline-block mt-0.5">
+                     Goal: {predictedDate.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                   </p>
+                ) : (
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                     Goal (kg)
+                   </p>
+                )}
               </div>
             ) : (
               <div className="glass rounded-[2rem] p-6 text-center relative overflow-hidden group hover:border-surface-highest/60 transition-all">
@@ -432,7 +479,7 @@ export default function WeightPage() {
                 .map((l) => (
                   <div
                     key={l.id}
-                    className="flex justify-between items-center p-4 rounded-2xl bg-surface-lowest/40 border border-white/5 hover:bg-surface-lowest/60 transition-colors"
+                    className="flex justify-between items-center p-4 rounded-2xl bg-surface-lowest/40 border border-border/30 hover:bg-surface-lowest/60 transition-colors"
                   >
                     <span className="text-[13px] font-medium text-muted-foreground">
                       {new Date(l.logged_at + "T12:00:00").toLocaleDateString(

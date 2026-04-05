@@ -5,54 +5,26 @@ import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { Zap, Flame, Star, Target, Award } from "lucide-react";
 const BADGES = [
-  {
-    name: "First Steps",
-    icon: "🏃",
-    description: "Log your first workout",
-    condition: (xp, streak, workouts) => workouts >= 1,
-  },
-  {
-    name: "Meal Tracker",
-    icon: "🍽️",
-    description: "Log 10 meals",
-    condition: (xp) => xp >= 150,
-  },
-  {
-    name: "Consistency King",
-    icon: "👑",
-    description: "3-day streak",
-    condition: (_, streak) => streak >= 3,
-  },
-  {
-    name: "Iron Will",
-    icon: "💪",
-    description: "7-day streak",
-    condition: (_, streak) => streak >= 7,
-  },
-  {
-    name: "Century Club",
-    icon: "💯",
-    description: "Reach 1000 XP",
-    condition: (xp) => xp >= 1000,
-  },
-  {
-    name: "Fitness Pro",
-    icon: "🏆",
-    description: "Reach Level 5",
-    condition: (xp) => xp >= 2500,
-  },
-  {
-    name: "Workout Warrior",
-    icon: "⚔️",
-    description: "Complete 10 workouts",
-    condition: (xp, streak, workouts) => workouts >= 10,
-  },
-  {
-    name: "Health Master",
-    icon: "🌟",
-    description: "Reach Level 10",
-    condition: (xp) => xp >= 5000,
-  },
+  { name: "First Steps", icon: "🏃", description: "Log your first workout", condition: (xp, streak, workouts) => workouts > 0 },
+  { name: "Meal Tracker", icon: "🍽️", description: "Log 10 meals", condition: (xp) => xp >= 150 },
+  { name: "Consistency King", icon: "👑", description: "3-day streak", condition: (_, streak) => streak >= 3 },
+  { name: "Iron Will", icon: "💪", description: "7-day streak", condition: (_, streak) => streak >= 7 },
+  { name: "Zen Master", icon: "🧘", description: "14-day streak", condition: (_, streak) => streak >= 14 },
+  { name: "Marathon", icon: "♾️", description: "30-day streak", condition: (_, streak) => streak >= 30 },
+  { name: "Century Club", icon: "💯", description: "Reach 1000 XP", condition: (xp) => xp >= 1000 },
+  { name: "Fitness Pro", icon: "🏆", description: "Reach Level 5", condition: (xp) => xp >= 2500 },
+  { name: "Health Master", icon: "🌟", description: "Reach Level 10", condition: (xp) => xp >= 5000 },
+  { name: "Legendary", icon: "🐉", description: "Reach Level 20", condition: (xp) => xp >= 10000 },
+  { name: "Workout Warrior", icon: "⚔️", description: "Complete 10 workouts", condition: (xp, streak, workouts) => workouts >= 10 },
+  { name: "Iron Legend", icon: "🗿", description: "Complete 50 workouts", condition: (xp, streak, workouts) => workouts >= 50 },
+  { name: "Hydration Hero", icon: "💧", description: "Stay hydrated for 7 days", condition: (xp) => xp >= 400 },
+  { name: "Meal Prep Pro", icon: "🍱", description: "Log 50 meals", condition: (xp) => xp >= 800 },
+  { name: "Night Owl", icon: "🦉", description: "7-day evening routine", condition: (xp) => xp >= 300 },
+  { name: "Early Bird", icon: "🌅", description: "7 AM morning workouts", condition: (xp) => xp >= 600 },
+  { name: "Social Butterfly", icon: "🦋", description: "Connect with 5 friends", condition: (xp) => xp >= 500 },
+  { name: "Skin Guru", icon: "✨", description: "Complete 10 face routines", condition: (xp) => xp >= 700 },
+  { name: "Weight Warrior", icon: "⚖️", description: "Log weight 30 times", condition: (xp) => xp >= 900 },
+  { name: "Nutrition Nerd", icon: "🧠", description: "Hit macros 7 days in a row", condition: (xp) => xp >= 1200 },
 ];
 export default function HabitsPage() {
   const { stats } = useUserStats();
@@ -79,7 +51,7 @@ export default function HabitsPage() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="glass rounded-[2rem] overflow-hidden relative border border-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+        <div className="glass rounded-[2rem] overflow-hidden relative border border-border/30 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
           {/* Dark gradient background with ambient glow */}
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary/8 rounded-full blur-[100px] pointer-events-none" />
@@ -147,7 +119,7 @@ export default function HabitsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <div className="glass rounded-[2rem] p-5 flex items-center justify-between relative overflow-hidden border border-white/5">
+        <div className="glass rounded-[2rem] p-5 flex items-center justify-between relative overflow-hidden border border-border/30">
           <div className="absolute inset-0 bg-gradient-to-r from-accent/5 via-transparent to-info/5 pointer-events-none" />
           
           {/* Current Streak */}
@@ -207,7 +179,7 @@ export default function HabitsPage() {
                 className={`text-center p-4 rounded-2xl transition-all border relative overflow-hidden group ${
                   badge.earned
                     ? "bg-surface-highest/40 border-accent/20 shadow-[0_8px_30px_rgba(251,146,60,0.1)] hover:border-accent/40"
-                    : "bg-surface-lowest/50 border-white/5 opacity-50 grayscale hover:grayscale-0 hover:opacity-80"
+                    : "bg-surface-lowest/50 border-border/30 opacity-50 grayscale hover:grayscale-0 hover:opacity-80"
                 }`}
               >
                 {badge.earned && (
@@ -223,7 +195,7 @@ export default function HabitsPage() {
                 <p className="text-[13px] font-bold text-foreground uppercase tracking-wide">
                   {badge.name}
                 </p>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mt-1 bg-surface-lowest/80 py-1 px-2 rounded-lg inline-block border border-white/5">
+                <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mt-1 bg-surface-lowest/80 py-1 px-2 rounded-lg inline-block border border-border/30">
                   {badge.description}
                 </p>
               </motion.div>
@@ -249,7 +221,7 @@ export default function HabitsPage() {
             ].map((item) => (
               <div
                 key={item.action}
-                className="flex items-center justify-between p-4 rounded-xl bg-surface-lowest/50 border border-white/5 hover:bg-surface-highest/50 transition-colors group"
+                className="flex items-center justify-between p-4 rounded-xl bg-surface-lowest/50 border border-border/30 hover:bg-surface-highest/50 transition-colors group"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-lg opacity-80 group-hover:scale-110 transition-transform">{item.icon}</span>

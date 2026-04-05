@@ -11,11 +11,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   ArrowRight,
-  Moon
+  Moon,
+  Search,
+  Check,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const emptyWeek = () => ({
   monday: [],
@@ -57,6 +62,44 @@ export default function GymPage() {
   }, [weeklyPlan, restDays]);
 
   const [selectedDay, setSelectedDay] = useState("monday");
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const [restModalOpen, setRestModalOpen] = useState(false);
+  const [searchEx, setSearchEx] = useState("");
+
+  const [zone2Min, setZone2Min] = useState(() => parseInt(localStorage.getItem("fitwise_zone2") || "45"));
+  const [hiitMin, setHiitMin] = useState(() => parseInt(localStorage.getItem("fitwise_hiit") || "15"));
+
+  const handleZone2Click = () => {
+    const newMin = zone2Min >= 90 ? 0 : zone2Min + 15;
+    setZone2Min(newMin);
+    localStorage.setItem("fitwise_zone2", newMin.toString());
+  };
+
+  const handleHiitClick = () => {
+    const newMin = hiitMin >= 45 ? 0 : hiitMin + 5;
+    setHiitMin(newMin);
+    localStorage.setItem("fitwise_hiit", newMin.toString());
+  };
+
+  const toggleRestDay = (day) => {
+    setRestDays(prev => ({ ...prev, [day]: !prev[day] }));
+  };
+
+  const handleAddExercise = (ex) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      [selectedDay]: [...(prev[selectedDay] || []), { ...ex, instanceId: Date.now().toString() }]
+    }));
+    toast.success("Added to " + DAY_LABELS[selectedDay]);
+    setBuilderOpen(false);
+  };
+
+  const dayExercises = weeklyPlan[selectedDay] || [];
+  
+  const filteredExercises = useMemo(() => {
+    if (!searchEx) return [];
+    return gymExercises.filter(ex => ex.name.toLowerCase().includes(searchEx.toLowerCase()) || ex.muscle.toLowerCase().includes(searchEx.toLowerCase())).slice(0, 10);
+  }, [searchEx]);
 
   const handleStartSession = () => {
     if (checkedIn) {
@@ -72,7 +115,7 @@ export default function GymPage() {
     toast.success("Session Started! +25 XP");
   };
 
-  const dayExercises = weeklyPlan[selectedDay] || [];
+
 
   return (
     <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4">
@@ -95,7 +138,7 @@ export default function GymPage() {
       {/* Top Banner Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
          {/* Rest Day Focus */}
-         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-2 rounded-[2rem] bg-surface-low border border-border/30 overflow-hidden relative min-h-[240px] flex items-end p-8 group cursor-pointer">
+         <motion.div onClick={() => setRestModalOpen(true)} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-2 rounded-[2rem] bg-surface-low border border-border/30 overflow-hidden relative min-h-[240px] flex items-end p-8 group cursor-pointer">
              <div className="absolute inset-0 bg-gradient-to-br from-[#0a1610] to-[#111111] z-0"></div>
              
              {/* Neon Abstract Element (Pure CSS approximation) */}
@@ -109,7 +152,7 @@ export default function GymPage() {
                     <h3 className="text-2xl font-black text-white mb-1 tracking-tight">Rest Day Focus</h3>
                     <p className="text-sm text-white/60 font-medium">Active recovery and mobility routine.</p>
                 </div>
-                <Button variant="outline" className="text-white hover:bg-white/10 rounded-full bg-white/5 border border-white/10 shrink-0 font-bold px-6">
+                <Button variant="outline" className="text-white hover:bg-white/10 rounded-full bg-white/5 border border-border/40 shrink-0 font-bold px-6">
                   Explore <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
              </div>
@@ -127,37 +170,37 @@ export default function GymPage() {
 
              <div className="flex justify-around items-center flex-1 mt-6 relative z-10">
                 {/* Ring 1 - Zone 2 */}
-                <div className="flex flex-col items-center gap-3">
-                   <div className="relative w-[84px] h-[84px]">
+                <div className="flex flex-col items-center gap-3 cursor-pointer group" onClick={handleZone2Click}>
+                   <div className="relative w-[84px] h-[84px] group-hover:scale-105 transition-transform">
                       <svg className="w-full h-full transform -rotate-90">
                           {/* Background Track */}
                           <circle cx="42" cy="42" r="36" fill="none" className="stroke-surface-high" strokeWidth="6" />
                           {/* Progress Track */}
-                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-primary" strokeWidth="6" strokeDasharray="226" strokeDashoffset="75" strokeLinecap="round" />
+                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-primary transition-all duration-500" strokeWidth="6" strokeDasharray="226" strokeDashoffset={226 - (zone2Min / 90) * 226} strokeLinecap="round" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                         <span className="text-xl font-bold text-foreground">45</span>
+                         <span className="text-xl font-bold text-foreground">{zone2Min}</span>
                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Min</span>
                       </div>
                    </div>
-                   <span className="text-[11px] font-bold text-foreground tracking-widest uppercase">Zone 2</span>
+                   <span className="text-[11px] font-bold text-foreground tracking-widest uppercase group-hover:text-primary transition-colors">Zone 2</span>
                 </div>
 
                 {/* Ring 2 - HIIT */}
-                <div className="flex flex-col items-center gap-3">
-                   <div className="relative w-[84px] h-[84px]">
+                <div className="flex flex-col items-center gap-3 cursor-pointer group" onClick={handleHiitClick}>
+                   <div className="relative w-[84px] h-[84px] group-hover:scale-105 transition-transform">
                       <svg className="w-full h-full transform -rotate-90">
                           {/* Background Track */}
                           <circle cx="42" cy="42" r="36" fill="none" className="stroke-surface-high" strokeWidth="6" />
                           {/* Progress Track */}
-                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-accent" strokeWidth="6" strokeDasharray="226" strokeDashoffset="150" strokeLinecap="round" />
+                          <circle cx="42" cy="42" r="36" fill="none" className="stroke-accent transition-all duration-500" strokeWidth="6" strokeDasharray="226" strokeDashoffset={226 - (hiitMin / 45) * 226} strokeLinecap="round" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                         <span className="text-xl font-bold text-foreground">15</span>
+                         <span className="text-xl font-bold text-foreground">{hiitMin}</span>
                          <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Min</span>
                       </div>
                    </div>
-                   <span className="text-[11px] font-bold tracking-widest uppercase text-accent">HIIT</span>
+                   <span className="text-[11px] font-bold tracking-widest uppercase text-accent group-hover:brightness-125 transition-all">HIIT</span>
                 </div>
              </div>
          </motion.div>
@@ -229,13 +272,75 @@ export default function GymPage() {
                    )}
 
                    {/* Add new button */}
-                   <Button variant="outline" className="w-full rounded-xl border-dashed border-white/10 bg-transparent hover:bg-white/5 py-6 mt-4 opacity-50 hover:opacity-100 transition-opacity">
+                   <Button onClick={() => setBuilderOpen(true)} variant="outline" className="w-full rounded-xl border-dashed border-border/40 bg-transparent hover:bg-white/5 py-6 mt-4 opacity-50 hover:opacity-100 transition-opacity">
                       <Plus className="h-4 w-4 mr-2" /> Add Exercise
                    </Button>
                  </>
              )}
           </div>
       </motion.div>
+
+      {/* Modals */}
+      <Dialog open={builderOpen} onOpenChange={setBuilderOpen}>
+         <DialogContent className="sm:max-w-md bg-surface-low border-border/30 rounded-[2rem]">
+            <DialogHeader>
+               <DialogTitle className="text-xl font-bold text-foreground flex items-center justify-between">
+                  Workout Builder
+               </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+               <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                     placeholder="Search exercise..." 
+                     value={searchEx} 
+                     onChange={(e) => setSearchEx(e.target.value)} 
+                     className="pl-10 h-12 rounded-xl bg-surface-lowest border-border/40" 
+                     autoFocus
+                  />
+               </div>
+               <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
+                  {filteredExercises.map(ex => (
+                     <div key={ex.id} onClick={() => handleAddExercise(ex)} className="p-3 rounded-xl bg-surface border border-border/30 flex items-center justify-between cursor-pointer hover:border-primary/50 group transition-all">
+                        <div>
+                           <p className="font-bold text-sm text-foreground">{ex.name}</p>
+                           <p className="text-muted-foreground text-xs">{ex.muscle}</p>
+                        </div>
+                        <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                     </div>
+                  ))}
+                  {searchEx && filteredExercises.length === 0 && (
+                     <p className="text-center text-sm text-muted-foreground py-4">No exercises found.</p>
+                  )}
+               </div>
+            </div>
+         </DialogContent>
+      </Dialog>
+
+      <Dialog open={restModalOpen} onOpenChange={setRestModalOpen}>
+         <DialogContent className="sm:max-w-md bg-surface-low border-border/30 rounded-[2rem]">
+            <DialogHeader>
+               <DialogTitle className="text-xl font-bold text-foreground">Rest Day Configuration</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+               <p className="text-sm text-muted-foreground">Select days to mark as rest days. Rest days focus on active recovery instead of hypertrophy.</p>
+               <div className="grid grid-cols-2 gap-2">
+                  {DAYS_OF_WEEK.map(day => (
+                     <Button 
+                        key={day} 
+                        variant="outline" 
+                        onClick={() => toggleRestDay(day)}
+                        className={`justify-start h-12 rounded-xl border-border/30 ${restDays[day] ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-surface-lowest text-muted-foreground hover:bg-surface'}`}
+                     >
+                        {restDays[day] ? <Check className="h-4 w-4 mr-2" /> : <div className="w-4 h-4 mr-2" />}
+                        {DAY_LABELS[day]}
+                     </Button>
+                  ))}
+               </div>
+            </div>
+         </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
@@ -264,13 +369,13 @@ function ExerciseRow({ name, sets, repRange, weight, type }) {
          </div>
 
          <div className="flex items-center gap-2 pl-8 sm:pl-0">
-            <div className="px-3 py-1.5 rounded-lg border border-white/5 bg-surface-lowest flex items-center justify-center">
+            <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
                <span className="text-xs font-bold text-white">{sets} <span className="text-white/50 font-medium">Sets</span></span>
             </div>
-            <div className="px-3 py-1.5 rounded-lg border border-white/5 bg-surface-lowest flex items-center justify-center">
+            <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
                <span className="text-xs font-bold text-white">{repRange} <span className="text-white/50 font-medium">Reps</span></span>
             </div>
-            <div className="px-3 py-1.5 rounded-lg border border-white/5 bg-surface-lowest flex items-center justify-center">
+            <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
                <span className="text-xs font-bold text-primary">{weight}</span>
             </div>
          </div>

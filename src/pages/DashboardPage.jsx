@@ -159,7 +159,7 @@ function NextActionBanner({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-[2rem] bg-[#0c0c0c] border border-border/30 group mb-2"
+      className="relative overflow-hidden rounded-[2rem] bg-surface-lowest border border-border/30 group mb-2"
     >
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-50" />
       <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -326,7 +326,7 @@ function RecipeCarousel({ dateStr }) {
 
   return (
     <>
-      <div className="bg-[#111] border border-border/30 overflow-hidden rounded-[2rem] h-full flex flex-col relative group">
+      <div className="bg-surface-low border border-border/30 overflow-hidden rounded-[2rem] h-full flex flex-col relative group">
         <div
           className="relative group cursor-pointer flex-1 min-h-[220px]"
           onClick={() => setSelectedRecipe(recipe)}
@@ -350,7 +350,7 @@ function RecipeCarousel({ dateStr }) {
               e.stopPropagation();
               prev();
             }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-black/80 hover:border-white/30"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-border/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-black/80 hover:border-white/30"
           >
             <ChevronLeft className="h-5 w-5 text-white" />
           </button>
@@ -359,7 +359,7 @@ function RecipeCarousel({ dateStr }) {
               e.stopPropagation();
               next();
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-black/80 hover:border-white/30"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-border/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-black/80 hover:border-white/30"
           >
             <ChevronRight className="h-5 w-5 text-white" />
           </button>
@@ -508,10 +508,10 @@ export default function DashboardPage() {
         {/* Nutrition Cell */}
         <motion.div {...fadeUp} transition={{ delay: 0.05 }} className="h-full">
           <Link to="/meals" className="block h-full cursor-pointer group">
-            <div className="bg-[#111] border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full flex flex-col relative overflow-hidden transition-all group-hover:border-primary/40 group-hover:shadow-[0_0_30px_rgba(34,197,94,0.05)]">
+            <div className="bg-surface-low border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full flex flex-col relative overflow-hidden transition-all group-hover:border-primary/40 group-hover:shadow-[0_0_30px_rgba(34,197,94,0.05)]">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none group-hover:bg-primary/20 transition-colors" />
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-white/5 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <span className="text-[10px] uppercase tracking-widest font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-border/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   Nutrition
                 </span>
                 <UtensilsCrossed className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -535,7 +535,7 @@ export default function DashboardPage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-10 text-right">
                       {m.label}
                     </span>
-                    <div className="flex-1 bg-black rounded-full h-1.5 overflow-hidden border border-white/5 relative">
+                    <div className="flex-1 bg-black rounded-full h-1.5 overflow-hidden border border-border/30 relative">
                       <motion.div
                         className={`absolute inset-y-0 left-0 rounded-full ${m.color}`}
                         initial={{ width: 0 }}
@@ -560,7 +560,7 @@ export default function DashboardPage() {
 
         {/* XP & Streak Cell */}
         <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="col-span-1 md:col-span-2 lg:col-span-1 h-full">
-          <div className="bg-[#111] border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full flex flex-col relative overflow-hidden">
+          <div className="bg-surface-low border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full flex flex-col relative overflow-hidden">
             <div className="absolute bottom-0 right-0 w-40 h-40 bg-accent/5 rounded-full blur-[50px] pointer-events-none" />
             
             <div className="flex items-center justify-between mb-6">
@@ -571,7 +571,7 @@ export default function DashboardPage() {
             
             <div className="flex flex-col justify-center flex-1 gap-6 relative z-10">
               {/* Streak Card */}
-              <div className="flex items-center gap-5 bg-[#1a1a1a] border border-white/5 p-5 rounded-[1.5rem] group hover:border-accent/30 transition-colors cursor-default">
+              <div className="flex items-center gap-5 bg-surface border border-border/30 p-5 rounded-[1.5rem] group hover:border-accent/30 transition-colors cursor-default">
                 <div className="w-14 h-14 rounded-[1rem] bg-gradient-to-tr from-accent/20 to-accent/5 flex items-center justify-center shrink-0 border border-accent/20 shadow-[0_0_20px_rgba(251,146,60,0.15)] relative overflow-hidden">
                   <div className="absolute inset-0 bg-accent/20 mix-blend-overlay" />
                   <Flame className="h-7 w-7 text-accent relative z-10 group-hover:scale-110 transition-transform" />
@@ -585,16 +585,16 @@ export default function DashboardPage() {
               </div>
               
               {/* Level Card */}
-              <div className="bg-[#1a1a1a] border border-white/5 p-5 rounded-[1.5rem]">
+              <div className="bg-surface border border-border/30 p-5 rounded-[1.5rem]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-black text-white uppercase tracking-widest border border-white/10 px-2.5 py-0.5 rounded-md bg-[#111]">
+                  <span className="text-[11px] font-black text-white uppercase tracking-widest border border-border/40 px-2.5 py-0.5 rounded-md bg-surface-low">
                     Lvl {level}
                   </span>
                   <span className="text-[10px] font-bold text-primary tracking-widest uppercase">
                     {xp} Total XP
                   </span>
                 </div>
-                <div className="h-2 w-full bg-black rounded-full overflow-hidden border border-white/5 relative">
+                <div className="h-2 w-full bg-black rounded-full overflow-hidden border border-border/30 relative">
                    <motion.div 
                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary shadow-[0_0_15px_rgba(34,197,94,0.5)]"
                      initial={{ width: 0 }}
@@ -613,8 +613,8 @@ export default function DashboardPage() {
 
       {/* ─── Daily Challenges ─────────────────────── */}
       <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="mb-6 h-full">
-        <div className="bg-[#111] border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+        <div className="bg-surface-low border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/40">
             <h2 className="text-sm uppercase tracking-widest font-bold text-white flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                 <CheckCircle2 className="h-4 w-4 text-primary" /> 
@@ -634,11 +634,11 @@ export default function DashboardPage() {
                   className={`flex flex-col sm:flex-row items-start gap-4 p-5 rounded-2xl transition-all border group relative overflow-hidden ${
                     done 
                       ? "bg-primary/5 border-primary/20" 
-                      : "bg-[#1a1a1a] border-white/5 hover:border-white/20 hover:bg-[#1f1f1f] shadow-sm"
+                      : "bg-surface border-border/30 hover:border-white/20 hover:bg-[#1f1f1f] shadow-sm"
                   }`}
                 >
                   {done && <div className="absolute inset-0 bg-primary/5 mix-blend-overlay pointer-events-none" />}
-                  <div className={`text-2xl shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border ${done ? 'bg-primary/20 border-primary/30 grayscale' : 'bg-black border-white/5'}`}>
+                  <div className={`text-2xl shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border ${done ? 'bg-primary/20 border-primary/30 grayscale' : 'bg-black border-border/30'}`}>
                     {ch.icon}
                   </div>
                   <div className="flex-1 min-w-0 w-full">
@@ -687,8 +687,8 @@ export default function DashboardPage() {
               rel="noopener noreferrer"
               className="min-w-[300px] w-[300px] shrink-0 group block"
             >
-              <div className="bg-[#111] rounded-[2rem] overflow-hidden h-full flex flex-col transition-all group-hover:-translate-y-1 group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.6)] border border-white/5 group-hover:border-primary/30">
-                <div className="h-40 overflow-hidden relative border-b border-white/5">
+              <div className="bg-surface-low rounded-[2rem] overflow-hidden h-full flex flex-col transition-all group-hover:-translate-y-1 group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.6)] border border-border/30 group-hover:border-primary/30">
+                <div className="h-40 overflow-hidden relative border-b border-border/30">
                   <img
                     src={article.thumbnail}
                     alt={article.title}
@@ -701,11 +701,11 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 </div>
-                <div className="p-5 flex-1 flex flex-col bg-[#1a1a1a]">
+                <div className="p-5 flex-1 flex flex-col bg-surface">
                   <p className="text-[15px] font-bold text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors flex-1 mb-4">
                     {article.title}
                   </p>
-                  <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground group-hover:text-white transition-colors uppercase tracking-widest pt-4 border-t border-white/5 mt-auto">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground group-hover:text-white transition-colors uppercase tracking-widest pt-4 border-t border-border/30 mt-auto">
                     <ExternalLink className="h-3.5 w-3.5" /> Read Full Guide
                   </div>
                 </div>

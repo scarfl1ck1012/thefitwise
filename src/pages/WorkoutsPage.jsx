@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useProfile } from "@/hooks/useProfile";
+import { useWaterLogs } from "@/hooks/useWaterLogs";
 import { getLocalDate } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Activity, Plus, Percent, Dumbbell, Droplets, Shield, ChevronRight, User } from "lucide-react";
@@ -30,16 +31,26 @@ export default function WorkoutsPage() {
   const { checkins } = useWorkouts();
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { totalWaterMl } = useWaterLogs();
+
+  const age = profile?.age || 25;
+  const weight = profile?.weight_kg || 70;
+  const height = profile?.height_cm || 175;
+  const gender = profile?.gender === "female" ? 0 : 1;
+  const bmi = weight / Math.pow(height / 100, 2);
+  const bfValue = ((1.20 * bmi) + (0.23 * age) - (10.8 * gender) - 5.4).toFixed(1);
+  const mmValue = (weight * (1 - (bfValue / 100)) * 0.85).toFixed(1);
+  const hydraValue = Math.min(100, Math.round((totalWaterMl / 2500) * 100));
 
   // Build real activity data for the contribution graph
   const { contributionGrid } = useMemo(() => {
     const wDays = new Set();
     checkins.forEach((c) => wDays.add(c.logged_at));
 
-    // Generate last 182 days (26 weeks x 7 days)
+    // Generate last 364 days (52 weeks x 7 days)
     const grid = [];
     const today = new Date();
-    for (let i = 181; i >= 0; i--) {
+    for (let i = 363; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split("T")[0];
@@ -148,7 +159,7 @@ export default function WorkoutsPage() {
             </div>
             <div className="flex items-center gap-3">
                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-sm bg-surface-high border border-white/5"></div>
+                  <div className="w-2.5 h-2.5 rounded-sm bg-surface-high border border-border/30"></div>
                   <span className="text-[10px] text-muted-foreground font-semibold">Rest</span>
                </div>
                <div className="flex items-center gap-1.5">
@@ -163,11 +174,11 @@ export default function WorkoutsPage() {
          </div>
          
          <div className="rounded-[2rem] bg-surface-low/80 p-6 lg:p-8 border border-border/30 overflow-x-auto scrollbar-hide">
-             <div className="flex gap-[3px] w-max min-w-full justify-between">
+             <div className="flex gap-[3px] w-max min-w-full justify-end">
                 {contributionGrid.map((week, wi) => (
                    <div key={wi} className="flex flex-col gap-[3px]">
                       {week.map((intensity, di) => {
-                         let bgClass = "bg-surface-high/50 border border-white/5";
+                         let bgClass = "bg-surface-high/50 border border-border/30";
                          if (intensity === 1) bgClass = "bg-[#22c55e]/40 rounded-[3px]";
                          if (intensity === 2) bgClass = "bg-[#22c55e] shadow-[0_0_6px_rgba(34,197,94,0.6)] rounded-[3px]";
                          return <div key={di} className={`w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-[18px] lg:h-[18px] ${bgClass} transition-colors`} />
@@ -181,13 +192,13 @@ export default function WorkoutsPage() {
       {/* Body Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
          {[
-           { icon: Percent, label: "Body Fat", value: "14.8%", change: "+0.2%", progress: "30%", color: "text-primary" },
-           { icon: Dumbbell, label: "Muscle Mass", value: "62.5 kg", change: "+0.8 kg", progress: "70%", color: "text-primary", segmented: true },
-           { icon: Droplets, label: "Hydration", value: "64.2%", change: "Stable", progress: "64%", color: "text-primary" },
+           { icon: Percent, label: "Body Fat", value: `${bfValue}%`, change: "Computed", progress: `${bfValue}%`, color: "text-primary" },
+           { icon: Dumbbell, label: "Muscle Mass", value: `${mmValue} kg`, change: "Estimated", progress: `70%`, color: "text-primary", segmented: true },
+           { icon: Droplets, label: "Hydration", value: `${hydraValue}%`, change: "Today", progress: `${hydraValue}%`, color: "text-primary" },
          ].map((stat, i) => (
            <motion.div key={i} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + (i*0.05) }} className="rounded-[2rem] bg-surface-low/80 p-6 lg:p-8 border border-border/30 flex flex-col justify-between h-[180px]">
               <div className="flex items-start justify-between">
-                 <div className="w-10 h-10 rounded-full bg-surface-high/50 border border-white/5 flex items-center justify-center">
+                 <div className="w-10 h-10 rounded-full bg-surface-high/50 border border-border/30 flex items-center justify-center">
                     <stat.icon className={`h-4 w-4 ${stat.color}`} />
                  </div>
                  <span className={`text-[10px] font-bold tracking-widest ${stat.change === "Stable" ? "text-muted-foreground" : "text-primary"}`}>
@@ -249,7 +260,7 @@ export default function WorkoutsPage() {
                    <p className="text-[11px] text-muted-foreground">Last synced with Smart Scale Pro 5:24 AM</p>
                 </div>
              </div>
-             <Button variant="outline" className="w-full rounded-full border-white/10 bg-transparent hover:bg-white/5 font-semibold text-xs py-5">
+             <Button variant="outline" className="w-full rounded-full border-border/40 bg-transparent hover:bg-white/5 font-semibold text-xs py-5">
                 Manage Data Sources
              </Button>
          </motion.div>

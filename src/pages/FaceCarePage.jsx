@@ -11,8 +11,12 @@ import {
   MoveRight,
   Sun,
   Moon,
-  Activity
+  Activity,
+  Check,
+  X,
+  Camera
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // --- Skincare Data (Hidden but preserved for structure) ---
 const morningRoutine = [
@@ -32,6 +36,17 @@ const eveningRoutine = [
 
 // --- Main Page ---
 export default function FaceCarePage() {
+  const [activeRoutine, setActiveRoutine] = useState(null);
+  const [completedSteps, setCompletedSteps] = useState({});
+
+  const toggleStep = (id) => {
+    setCompletedSteps(prev => ({...prev, [id]: !prev[id]}));
+  };
+
+  const currentSteps = activeRoutine === 'Morning Refresh' ? morningRoutine : 
+                       activeRoutine === 'Evening Repair' ? eveningRoutine :
+                       activeRoutine === 'Face Yoga Focus' ? faceExercises : [];
+
   return (
     <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4 overflow-x-hidden">
       
@@ -61,7 +76,7 @@ export default function FaceCarePage() {
          </motion.div>
 
          {/* Main Circle Hero */}
-         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 rounded-[2rem] bg-[#0c0c0c] border border-border/30 p-8 flex flex-col items-center justify-center relative overflow-hidden min-h-[340px]">
+         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 rounded-[2rem] bg-surface-lowest border border-border/30 p-8 flex flex-col items-center justify-center relative overflow-hidden min-h-[340px]">
             {/* Background Glows */}
             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-80"></div>
             
@@ -77,13 +92,17 @@ export default function FaceCarePage() {
                <span className="text-[9px] uppercase tracking-widest text-primary font-bold mb-3">Next Active Focus</span>
                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Cleansing Ritual</h2>
                
-               <div className="flex items-center gap-2 mt-5 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+               <div className="flex items-center gap-2 mt-5 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-border/40 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
                   <Clock className="w-3.5 h-3.5 text-primary" />
                   <span className="font-mono text-xs sm:text-sm font-bold tracking-widest text-white/90">12:30</span>
                </div>
                
                <Button className="mt-8 bg-white text-black hover:bg-neutral-200 rounded-full px-8 py-5 h-auto font-bold text-xs transform hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                   <Play className="w-4 h-4 mr-2 fill-black" /> Begin Session
+               </Button>
+               
+               <Button variant="outline" className="mt-3 bg-transparent border-white/20 text-white hover:bg-white/10 rounded-full px-8 py-5 h-auto font-bold text-xs w-full max-w-[200px]" onClick={() => toast.success("AR Skin Analysis coming soon!")}>
+                  <Camera className="w-4 h-4 mr-2" /> AR Skin Analysis
                </Button>
             </div>
          </motion.div>
@@ -124,6 +143,7 @@ export default function FaceCarePage() {
                steps={morningRoutine.length} 
                icon={<Sun className="w-5 h-5 text-orange-400" />}
                gradient="from-orange-500/20 to-transparent" 
+               onClick={() => setActiveRoutine("Morning Refresh")}
              />
              <RoutineCard 
                title="Evening Repair" 
@@ -132,6 +152,7 @@ export default function FaceCarePage() {
                steps={eveningRoutine.length} 
                icon={<Moon className="w-5 h-5 text-indigo-400" />}
                gradient="from-indigo-500/20 to-transparent" 
+               onClick={() => setActiveRoutine("Evening Repair")}
              />
              <RoutineCard 
                title="Face Yoga Focus" 
@@ -140,6 +161,7 @@ export default function FaceCarePage() {
                steps={faceExercises.length} 
                icon={<Sparkles className="w-5 h-5 text-primary" />}
                gradient="from-primary/20 to-transparent" 
+               onClick={() => setActiveRoutine("Face Yoga Focus")}
              />
              <RoutineCard 
                title="Quick Cleanse" 
@@ -152,6 +174,47 @@ export default function FaceCarePage() {
          </div>
       </motion.div>
 
+      {/* Routine Dialog */}
+      <Dialog open={!!activeRoutine} onOpenChange={(open) => !open && setActiveRoutine(null)}>
+         <DialogContent className="sm:max-w-md bg-surface border-border/30 rounded-[2rem]">
+            <DialogHeader>
+               <DialogTitle className="text-xl font-bold text-foreground">
+                  {activeRoutine}
+               </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 pt-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin">
+                {currentSteps.map((step, idx) => {
+                    const id = step.id || step.name;
+                    const isDone = completedSteps[id];
+                    return (
+                        <div 
+                           key={id} 
+                           onClick={() => toggleStep(id)}
+                           className={`p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 ${isDone ? 'bg-primary/10 border-primary/30 opacity-70' : 'bg-surface-low border-border/30 hover:border-border/60'}`}
+                        >
+                            <div className={`w-6 h-6 rounded-full border flex flex-col items-center justify-center shrink-0 mt-0.5 ${isDone ? 'bg-primary border-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}>
+                                {isDone ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">{idx + 1}</span>}
+                            </div>
+                            <div className="flex-1">
+                                <h4 className={`text-sm font-bold ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{step.title || step.name}</h4>
+                                <p className="text-xs text-muted-foreground mt-1">{step.desc || step.description}</p>
+                                {activeRoutine === "Face Yoga Focus" && step.image && (
+                                   <div className="mt-3 w-full h-32 bg-surface-highest rounded-xl overflow-hidden border border-border/30 opacity-80">
+                                      {/* Image placeholder or actual image */}
+                                      <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 text-muted-foreground">
+                                         <Activity className="w-8 h-8 mb-2 opacity-50" />
+                                         <span className="text-[10px] font-mono tracking-widest uppercase">{step.target}</span>
+                                      </div>
+                                   </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+         </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
@@ -159,9 +222,9 @@ export default function FaceCarePage() {
 // ──────────────────────────────────────────────
 // STYLED ROUTINE CARD
 // ──────────────────────────────────────────────
-function RoutineCard({ title, desc, time, steps, icon, gradient }) {
+function RoutineCard({ title, desc, time, steps, icon, gradient, onClick }) {
     return (
-        <div className="min-w-[260px] sm:min-w-[300px] snap-center rounded-[2rem] bg-surface-low border border-border/30 p-1 relative overflow-hidden group hover:border-border/60 transition-colors cursor-pointer shrink-0">
+        <div onClick={onClick} className="min-w-[260px] sm:min-w-[300px] snap-center rounded-[2rem] bg-surface-low border border-border/30 p-1 relative overflow-hidden group hover:border-border/60 transition-colors cursor-pointer shrink-0">
            {/* Inner Gradient Banner */}
            <div className={`w-full h-32 rounded-[1.75rem] bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between relative overflow-hidden`}>
                {/* Decorative Icon inside banner */}
@@ -169,12 +232,12 @@ function RoutineCard({ title, desc, time, steps, icon, gradient }) {
                    {icon}
                </div>
 
-               <div className="w-10 h-10 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 flex items-center justify-center relative z-10">
+               <div className="w-10 h-10 rounded-xl bg-black/20 backdrop-blur-sm border border-border/40 flex items-center justify-center relative z-10">
                    {icon}
                </div>
                
                <div className="flex justify-between items-end relative z-10">
-                   <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                   <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-border/40">
                        <span className="text-[10px] font-bold text-white/90">{time}</span>
                    </div>
                </div>

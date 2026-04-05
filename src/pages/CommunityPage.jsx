@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import LeaderboardView from "../components/Community/LeaderboardView";
 import FriendsView from "../components/Community/FriendsView";
-import { Trophy, Users, Loader2 } from "lucide-react";
+import { Trophy, Users, Loader2, Star, Shield, TrendingUp } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -86,8 +86,40 @@ export default function CommunityPage() {
         </p>
       </div>
 
+      {/* Hero Stats Banner */}
+      {!isLoading && (
+         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="grid grid-cols-3 gap-3 md:gap-4 my-6">
+             <div className="bg-surface-low border border-border/30 rounded-2xl p-4 md:p-6 flex flex-col relative overflow-hidden group hover:border-primary/40 transition-colors">
+                <div className="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full blur-[30px] group-hover:bg-primary/10"></div>
+                <div className="flex items-center gap-2 mb-2">
+                   <Star className="w-4 h-4 text-primary" />
+                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Level</span>
+                </div>
+                <span className="text-3xl font-black text-foreground">{currentUser.level}</span>
+             </div>
+             
+             <div className="bg-surface-low border border-border/30 rounded-2xl p-4 md:p-6 flex flex-col relative overflow-hidden group hover:border-info/40 transition-colors">
+                <div className="absolute right-0 top-0 w-24 h-24 bg-info/5 rounded-full blur-[30px] group-hover:bg-info/10"></div>
+                <div className="flex items-center gap-2 mb-2">
+                   <Users className="w-4 h-4 text-info" />
+                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Friends</span>
+                </div>
+                <span className="text-3xl font-black text-foreground">{friendships.length}</span>
+             </div>
+
+             <div className="bg-surface-low border border-border/30 rounded-2xl p-4 md:p-6 flex flex-col relative overflow-hidden group hover:border-warning/40 transition-colors">
+                <div className="absolute right-0 top-0 w-24 h-24 bg-warning/5 rounded-full blur-[30px] group-hover:bg-warning/10"></div>
+                <div className="flex items-center gap-2 mb-2">
+                   <TrendingUp className="w-4 h-4 text-warning" />
+                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total XP</span>
+                </div>
+                <span className="text-3xl font-black text-foreground">{currentUser.xp}</span>
+             </div>
+         </motion.div>
+      )}
+
       {/* Segmented Control */}
-      <div className="flex bg-[#111] border border-border/30 p-1.5 rounded-full max-w-md mx-auto relative overflow-hidden">
+      <div className="flex bg-surface-low border border-border/30 p-1.5 rounded-full max-w-md mx-auto relative overflow-hidden">
         <button
           onClick={() => setActiveTab("leaderboard")}
           className={`flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
@@ -138,7 +170,7 @@ export default function CommunityPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="bg-[#111] border border-border/30 rounded-[2rem] p-5 lg:p-6 min-h-[500px]">
+            <div className="bg-surface-low border border-border/30 rounded-[2rem] p-5 lg:p-6 min-h-[500px]">
               {activeTab === "leaderboard" ? (
                 <LeaderboardView
                   users={users}
