@@ -86,7 +86,10 @@ export function useProfile() {
         .upsert(payload, { onConflict: "user_id" });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["community_users"] });
+    },
   });
   const isProfileComplete = !!(
     profile?.full_name &&

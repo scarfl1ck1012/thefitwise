@@ -334,8 +334,9 @@ export default function SettingsPage() {
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const timestampedUrl = `${data.publicUrl}?t=${Date.now()}`;
 
-      updateProfile.mutate({ avatar_url: data.publicUrl });
+      updateProfile.mutate({ avatar_url: timestampedUrl });
       toast.success("Profile photo updated!", { id: "upload" });
     } catch (error) {
       toast.error("Error uploading photo. Make sure 'avatars' storage bucket exists.", { id: "upload" });
