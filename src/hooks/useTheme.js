@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 export function useTheme() {
     const [isDark, setIsDark] = useState(() => {
         if (typeof window !== "undefined") {
-            return localStorage.getItem("fitwise-theme") === "dark";
+            const stored = localStorage.getItem("fitwise-theme");
+            // Default to dark if nothing stored
+            return stored ? stored === "dark" : true;
         }
-        return false;
+        return true;
     });
     useEffect(() => {
         const root = document.documentElement;

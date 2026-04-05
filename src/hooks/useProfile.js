@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+
 export function calculateCalories(profile) {
   if (
     !profile.weight_kg ||
@@ -27,6 +28,22 @@ export function calculateCalories(profile) {
   };
   const tdee =
     bmr * (multipliers[profile.activity_level || "moderate"] || 1.55);
+
+  // If goal weight + target date are set, calculate custom adjustment
+  if (profile.goal_weight_kg && profile.target_date) {
+    const daysDiff = Math.max(
+      1,
+      Math.round(
+        (new Date(profile.target_date) - new Date()) / (1000 * 60 * 60 * 24)
+      )
+    );
+    const totalKgChange = profile.goal_weight_kg - profile.weight_kg;
+    const totalCalChange = totalKgChange * 7700;
+    const dailyAdjust = Math.round(totalCalChange / daysDiff);
+    return Math.round(tdee + dailyAdjust);
+  }
+
+  // Fallback to simple goal adjustment
   const goalAdjust = {
     lose: -500,
     maintain: 0,
@@ -35,6 +52,7 @@ export function calculateCalories(profile) {
   };
   return Math.round(tdee + (goalAdjust[profile.goal || "maintain"] || 0));
 }
+
 export function useProfile() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -53,13 +71,19 @@ export function useProfile() {
   });
   const updateProfile = useMutation({
     mutationFn: async (updates) => {
-      const calories = calculateCalories({ ...profile, ...updates });
+      const merged = { ...profile, ...updates };
+      const calories = calculateCalories(merged);
+      
+      // Build the upsert payload
+      const payload = {
+        user_id: user.id,
+        ...updates,
+        daily_calories: calories,
+      };
+
       const { error } = await supabase
         .from("profiles")
-        .upsert(
-          { user_id: user.id, ...updates, daily_calories: calories },
-          { onConflict: "user_id" },
-        );
+        .upsert(payload, { onConflict: "user_id" });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),

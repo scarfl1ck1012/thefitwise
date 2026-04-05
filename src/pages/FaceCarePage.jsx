@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { faceExercises } from "@/lib/workoutData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,254 +7,285 @@ import {
   Sparkles,
   Droplet,
   Clock,
-  Play,
-  MoveRight,
   Sun,
   Moon,
   Activity,
   Check,
-  X,
-  Camera
+  ChevronRight,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-// --- Skincare Data (Hidden but preserved for structure) ---
+// --- Routine Data ---
 const morningRoutine = [
-  { id: "am-1", step: 1, title: "Cleanser", desc: "Gentle face wash to remove dirt and oil" },
-  { id: "am-2", step: 2, title: "Toner", desc: "Balance skin pH and prep for products" },
-  { id: "am-3", step: 3, title: "Vitamin C Serum", desc: "Brightens skin and fights free radicals" },
-  { id: "am-4", step: 4, title: "Moisturizer", desc: "Hydrate and lock in previous products" },
-  { id: "am-5", step: 5, title: "Sunscreen SPF 30+", desc: "Protect from UV damage and aging" },
+  { id: "am-1", step: 1, title: "Cleanser", desc: "Gentle face wash to remove overnight oil and impurities", tip: "Use lukewarm water, not hot" },
+  { id: "am-2", step: 2, title: "Toner", desc: "Balance skin pH and prep for products", tip: "Pat gently, don't rub" },
+  { id: "am-3", step: 3, title: "Vitamin C Serum", desc: "Brightens skin and fights free radicals", tip: "Apply before moisturizer" },
+  { id: "am-4", step: 4, title: "Eye Cream", desc: "Hydrate under-eye area, reduce dark circles", tip: "Use ring finger, lightest pressure" },
+  { id: "am-5", step: 5, title: "Moisturizer", desc: "Hydrate and lock in previous products", tip: "Apply while skin is still slightly damp" },
+  { id: "am-6", step: 6, title: "Sunscreen SPF 30+", desc: "Protect from UV damage and aging", tip: "Reapply every 2 hours if outdoors" },
 ];
 
-const eveningRoutine = [
-  { id: "pm-1", step: 1, title: "Cleanser", desc: "Gentle face wash to remove dirt and oil" },
-  { id: "pm-2", step: 2, title: "Toner", desc: "Balance skin pH and prep for products" },
-  { id: "pm-3", step: 3, title: "Retinol / Retinoid", desc: "Anti-aging, reduces acne and dark spots" },
-  { id: "pm-4", step: 4, title: "Moisturizer", desc: "Hydrate and lock in previous products" },
+const nightRoutine = [
+  { id: "pm-1", step: 1, title: "Oil Cleanser", desc: "Remove makeup and sunscreen thoroughly", tip: "Massage gently for 60 seconds" },
+  { id: "pm-2", step: 2, title: "Water Cleanser", desc: "Deep clean pores and remove remaining residue", tip: "Double cleansing is key at night" },
+  { id: "pm-3", step: 3, title: "Toner", desc: "Balance skin pH after cleansing", tip: "Pat gently, don't rub" },
+  { id: "pm-4", step: 4, title: "Retinol / Retinoid", desc: "Anti-aging, reduces acne and dark spots", tip: "Start 2x/week, build tolerance" },
+  { id: "pm-5", step: 5, title: "Eye Cream", desc: "Hydrate and repair under-eye area overnight", tip: "Use ring finger, lightest pressure" },
+  { id: "pm-6", step: 6, title: "Night Moisturizer", desc: "Rich cream to repair and hydrate overnight", tip: "Apply while skin is damp" },
+];
+
+const TABS = [
+  { key: "morning", label: "Morning", icon: Sun, color: "orange" },
+  { key: "night", label: "Night", icon: Moon, color: "indigo" },
+  { key: "yoga", label: "Face Yoga", icon: Sparkles, color: "primary" },
 ];
 
 // --- Main Page ---
 export default function FaceCarePage() {
-  const [activeRoutine, setActiveRoutine] = useState(null);
-  const [completedSteps, setCompletedSteps] = useState({});
+  const [activeTab, setActiveTab] = useState("morning");
+  const [completedSteps, setCompletedSteps] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_skincare_done");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("fitwise_skincare_done", JSON.stringify(completedSteps));
+  }, [completedSteps]);
 
   const toggleStep = (id) => {
-    setCompletedSteps(prev => ({...prev, [id]: !prev[id]}));
+    setCompletedSteps((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const currentSteps = activeRoutine === 'Morning Refresh' ? morningRoutine : 
-                       activeRoutine === 'Evening Repair' ? eveningRoutine :
-                       activeRoutine === 'Face Yoga Focus' ? faceExercises : [];
+  const currentSteps =
+    activeTab === "morning"
+      ? morningRoutine
+      : activeTab === "night"
+        ? nightRoutine
+        : faceExercises.map((ex, i) => ({
+            id: ex.name,
+            step: i + 1,
+            title: ex.name,
+            desc: ex.description,
+            tip: ex.duration,
+            target: ex.target,
+            icon: ex.icon,
+          }));
+
+  const completedCount = currentSteps.filter(
+    (s) => completedSteps[s.id]
+  ).length;
+  const progress = currentSteps.length
+    ? Math.round((completedCount / currentSteps.length) * 100)
+    : 0;
+
+  const tabColors = {
+    morning: { bg: "from-orange-500/15 to-amber-500/5", ring: "ring-orange-400/30", text: "text-orange-400" },
+    night: { bg: "from-indigo-500/15 to-purple-500/5", ring: "ring-indigo-400/30", text: "text-indigo-400" },
+    yoga: { bg: "from-primary/15 to-emerald-500/5", ring: "ring-primary/30", text: "text-primary" },
+  };
 
   return (
     <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4 overflow-x-hidden">
-      
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
-         <div>
-            <h1 className="text-3xl font-bold text-foreground tracking-tight">Daily Rituals</h1>
-            <p className="text-sm text-muted-foreground mt-1 font-medium">Clear skin starts from within</p>
-         </div>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">
+            Daily Rituals
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 font-medium">
+            Clear skin starts from within
+          </p>
+        </div>
       </div>
 
-      {/* Hero Central Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-         {/* Skin Type Card */}
-         <motion.div initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-1 rounded-[2rem] bg-surface-low border border-border/30 p-6 hidden md:flex flex-col justify-between relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[40px] group-hover:bg-primary/10 transition-colors"></div>
-            <div>
-               <Badge variant="outline" className="border-primary/50 text-primary mb-4 bg-primary/10 tracking-widest text-[10px]">PROFILE</Badge>
-               <h3 className="text-xl font-bold text-white mb-1">Skin Type</h3>
-               <p className="text-sm text-white/50 font-medium">Combination / Oily</p>
-            </div>
-            <div className="mt-8 flex justify-start">
-               <div className="w-12 h-12 rounded-full border border-primary/20 flex items-center justify-center bg-primary/5">
-                  <Activity className="w-5 h-5 text-primary opacity-80" />
-               </div>
-            </div>
-         </motion.div>
+      {/* Tab Selector */}
+      <div className="flex bg-surface-low border border-border/30 p-1.5 rounded-full relative overflow-hidden">
+        {TABS.map((tab, idx) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 flex justify-center items-center gap-2 py-3.5 px-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
+                isActive
+                  ? tabColors[tab.key].text
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          );
+        })}
 
-         {/* Main Circle Hero */}
-         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="md:col-span-2 rounded-[2rem] bg-surface-lowest border border-border/30 p-8 flex flex-col items-center justify-center relative overflow-hidden min-h-[340px]">
-            {/* Background Glows */}
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-80"></div>
-            
-            {/* Concentric Rings */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 border-[1px] border-dashed border-primary/20 rounded-full animate-[spin_60s_linear_infinite]"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 border-[1px] border-primary/30 rounded-full"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[11rem] h-[11rem] border-[4px] border-primary/10 rounded-full"></div>
-            
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/20 rounded-full blur-3xl opacity-50 pulse-glow"></div>
-
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center text-center">
-               <span className="text-[9px] uppercase tracking-widest text-primary font-bold mb-3">Next Active Focus</span>
-               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Cleansing Ritual</h2>
-               
-               <div className="flex items-center gap-2 mt-5 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-border/40 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
-                  <Clock className="w-3.5 h-3.5 text-primary" />
-                  <span className="font-mono text-xs sm:text-sm font-bold tracking-widest text-white/90">12:30</span>
-               </div>
-               
-               <Button className="mt-8 bg-white text-black hover:bg-neutral-200 rounded-full px-8 py-5 h-auto font-bold text-xs transform hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                  <Play className="w-4 h-4 mr-2 fill-black" /> Begin Session
-               </Button>
-               
-               <Button variant="outline" className="mt-3 bg-transparent border-white/20 text-white hover:bg-white/10 rounded-full px-8 py-5 h-auto font-bold text-xs w-full max-w-[200px]" onClick={() => toast.success("AR Skin Analysis coming soon!")}>
-                  <Camera className="w-4 h-4 mr-2" /> AR Skin Analysis
-               </Button>
-            </div>
-         </motion.div>
-
-         {/* Hydration Card */}
-         <motion.div initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} className="md:col-span-1 rounded-[2rem] bg-surface-low border border-border/30 p-6 hidden md:flex flex-col justify-between relative overflow-hidden group">
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] group-hover:bg-blue-500/10 transition-colors"></div>
-            <div>
-               <Badge variant="outline" className="border-blue-500/50 text-blue-400 mb-4 bg-blue-500/10 tracking-widest text-[10px]">STATUS</Badge>
-               <h3 className="text-xl font-bold text-white mb-1">Hydration</h3>
-               <p className="text-sm text-blue-400/80 font-bold tracking-tight">Optimal Level</p>
-            </div>
-            <div className="mt-8 flex justify-start">
-               <div className="w-12 h-12 rounded-full border border-blue-500/20 flex items-center justify-center bg-blue-500/5">
-                  <Droplet className="w-5 h-5 text-blue-400 opacity-80" />
-               </div>
-            </div>
-         </motion.div>
+        {/* Animated Pill */}
+        <div
+          className={`absolute top-1.5 bottom-1.5 rounded-full transition-all duration-300 ease-out z-0 border bg-gradient-to-r ${tabColors[activeTab].bg} ${tabColors[activeTab].ring}`}
+          style={{
+            width: "calc(33.333% - 4px)",
+            transform: `translateX(${TABS.findIndex((t) => t.key === activeTab) * 100}%)`,
+            boxShadow:
+              activeTab === "morning"
+                ? "0 0 15px rgba(251,146,60,0.15)"
+                : activeTab === "night"
+                  ? "0 0 15px rgba(129,140,248,0.15)"
+                  : "0 0 15px rgba(34,197,94,0.15)",
+          }}
+        />
       </div>
 
-      {/* Bottom Section - Horizontal Routines */}
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-8">
-         <div className="flex items-center justify-between mb-4 px-2">
-            <div>
-               <h3 className="text-lg font-bold text-foreground">Curated Routines</h3>
-               <p className="text-xs text-muted-foreground mt-1">Schedules perfect for your skin type</p>
-            </div>
-            <Button variant="ghost" className="text-xs text-muted-foreground font-bold uppercase tracking-widest">
-               View All <MoveRight className="w-3.5 h-3.5 ml-2"/>
-            </Button>
-         </div>
-         
-         <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x pt-2">
-             <RoutineCard 
-               title="Morning Refresh" 
-               desc="Wake up your skin" 
-               time="5 min" 
-               steps={morningRoutine.length} 
-               icon={<Sun className="w-5 h-5 text-orange-400" />}
-               gradient="from-orange-500/20 to-transparent" 
-               onClick={() => setActiveRoutine("Morning Refresh")}
-             />
-             <RoutineCard 
-               title="Evening Repair" 
-               desc="Deep restoration step" 
-               time="15 min" 
-               steps={eveningRoutine.length} 
-               icon={<Moon className="w-5 h-5 text-indigo-400" />}
-               gradient="from-indigo-500/20 to-transparent" 
-               onClick={() => setActiveRoutine("Evening Repair")}
-             />
-             <RoutineCard 
-               title="Face Yoga Focus" 
-               desc="Tone facial muscles" 
-               time="10 min" 
-               steps={faceExercises.length} 
-               icon={<Sparkles className="w-5 h-5 text-primary" />}
-               gradient="from-primary/20 to-transparent" 
-               onClick={() => setActiveRoutine("Face Yoga Focus")}
-             />
-             <RoutineCard 
-               title="Quick Cleanse" 
-               desc="Post-workout refresh" 
-               time="3 min" 
-               steps={3} 
-               icon={<Droplet className="w-5 h-5 text-cyan-400" />}
-               gradient="from-cyan-500/20 to-transparent" 
-             />
-         </div>
+      {/* Progress Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-[2rem] bg-surface-low border border-border/30 p-5 relative overflow-hidden"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] uppercase tracking-widest font-bold ${tabColors[activeTab].text}`}>
+              {activeTab === "morning"
+                ? "Morning Routine"
+                : activeTab === "night"
+                  ? "Night Routine"
+                  : "Face Yoga Session"}
+            </span>
+          </div>
+          <span className="text-xs font-bold text-muted-foreground">
+            {completedCount}/{currentSteps.length} Complete
+          </span>
+        </div>
+        <div className="w-full h-2 rounded-full bg-surface-highest/50 overflow-hidden">
+          <motion.div
+            className={`h-full rounded-full ${
+              activeTab === "morning"
+                ? "bg-orange-400"
+                : activeTab === "night"
+                  ? "bg-indigo-400"
+                  : "bg-primary"
+            }`}
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        </div>
       </motion.div>
 
-      {/* Routine Dialog */}
-      <Dialog open={!!activeRoutine} onOpenChange={(open) => !open && setActiveRoutine(null)}>
-         <DialogContent className="sm:max-w-md bg-surface border-border/30 rounded-[2rem]">
-            <DialogHeader>
-               <DialogTitle className="text-xl font-bold text-foreground">
-                  {activeRoutine}
-               </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 pt-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin">
-                {currentSteps.map((step, idx) => {
-                    const id = step.id || step.name;
-                    const isDone = completedSteps[id];
-                    return (
-                        <div 
-                           key={id} 
-                           onClick={() => toggleStep(id)}
-                           className={`p-4 rounded-2xl border transition-all cursor-pointer flex gap-4 ${isDone ? 'bg-primary/10 border-primary/30 opacity-70' : 'bg-surface-low border-border/30 hover:border-border/60'}`}
-                        >
-                            <div className={`w-6 h-6 rounded-full border flex flex-col items-center justify-center shrink-0 mt-0.5 ${isDone ? 'bg-primary border-primary text-primary-foreground' : 'border-border text-muted-foreground'}`}>
-                                {isDone ? <Check className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">{idx + 1}</span>}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className={`text-sm font-bold ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{step.title || step.name}</h4>
-                                <p className="text-xs text-muted-foreground mt-1">{step.desc || step.description}</p>
-                                {activeRoutine === "Face Yoga Focus" && step.image && (
-                                   <div className="mt-3 w-full h-32 bg-surface-highest rounded-xl overflow-hidden border border-border/30 opacity-80">
-                                      {/* Image placeholder or actual image */}
-                                      <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 text-muted-foreground">
-                                         <Activity className="w-8 h-8 mb-2 opacity-50" />
-                                         <span className="text-[10px] font-mono tracking-widest uppercase">{step.target}</span>
-                                      </div>
-                                   </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-         </DialogContent>
-      </Dialog>
+      {/* Steps List */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.25 }}
+          className="space-y-3"
+        >
+          {currentSteps.map((step, idx) => {
+            const isDone = completedSteps[step.id];
+            return (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.04 }}
+                onClick={() => toggleStep(step.id)}
+                className={`p-5 rounded-2xl border transition-all cursor-pointer group ${
+                  isDone
+                    ? "bg-primary/5 border-primary/20 opacity-70"
+                    : "bg-surface-low border-border/30 hover:border-border/60 hover:bg-surface-low/90"
+                }`}
+              >
+                <div className="flex gap-4">
+                  {/* Step Number / Check */}
+                  <div
+                    className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0 transition-all ${
+                      isDone
+                        ? "bg-primary border border-primary text-primary-foreground shadow-[0_0_12px_rgba(34,197,94,0.3)]"
+                        : `bg-surface border border-border/40 ${tabColors[activeTab].text}`
+                    }`}
+                  >
+                    {isDone ? (
+                      <Check className="w-5 h-5" />
+                    ) : (
+                      <span className="text-sm font-black">{step.step}</span>
+                    )}
+                  </div>
 
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4
+                          className={`text-sm font-bold ${
+                            isDone
+                              ? "line-through text-muted-foreground"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {step.icon && <span className="mr-1.5">{step.icon}</span>}
+                          {step.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                          {step.desc}
+                        </p>
+                      </div>
+                      <ChevronRight className={`w-4 h-4 shrink-0 mt-0.5 transition-transform ${isDone ? "text-primary rotate-90" : "text-muted-foreground/30 group-hover:text-muted-foreground"}`} />
+                    </div>
+
+                    {/* Tip / Target */}
+                    {(step.tip || step.target) && !isDone && (
+                      <div className="mt-3 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-muted-foreground/60">
+                        {step.target ? (
+                          <>
+                            <Activity className="w-3 h-3" />
+                            <span>{step.target}</span>
+                            <span className="mx-1">•</span>
+                            <Clock className="w-3 h-3" />
+                            <span>{step.tip}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Droplet className="w-3 h-3" />
+                            <span>Tip: {step.tip}</span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Reset Button */}
+      {completedCount > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-center pt-2"
+        >
+          <Button
+            variant="outline"
+            onClick={() => {
+              const resetKeys = currentSteps.map((s) => s.id);
+              setCompletedSteps((prev) => {
+                const next = { ...prev };
+                resetKeys.forEach((k) => delete next[k]);
+                return next;
+              });
+            }}
+            className="rounded-full px-8 border-border/30 text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-widest"
+          >
+            Reset {activeTab === "morning" ? "Morning" : activeTab === "night" ? "Night" : "Yoga"} Progress
+          </Button>
+        </motion.div>
+      )}
     </div>
   );
-}
-
-// ──────────────────────────────────────────────
-// STYLED ROUTINE CARD
-// ──────────────────────────────────────────────
-function RoutineCard({ title, desc, time, steps, icon, gradient, onClick }) {
-    return (
-        <div onClick={onClick} className="min-w-[260px] sm:min-w-[300px] snap-center rounded-[2rem] bg-surface-low border border-border/30 p-1 relative overflow-hidden group hover:border-border/60 transition-colors cursor-pointer shrink-0">
-           {/* Inner Gradient Banner */}
-           <div className={`w-full h-32 rounded-[1.75rem] bg-gradient-to-br ${gradient} p-5 flex flex-col justify-between relative overflow-hidden`}>
-               {/* Decorative Icon inside banner */}
-               <div className="absolute -right-4 -bottom-4 opacity-10 transform -rotate-12 scale-150">
-                   {icon}
-               </div>
-
-               <div className="w-10 h-10 rounded-xl bg-black/20 backdrop-blur-sm border border-border/40 flex items-center justify-center relative z-10">
-                   {icon}
-               </div>
-               
-               <div className="flex justify-between items-end relative z-10">
-                   <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-border/40">
-                       <span className="text-[10px] font-bold text-white/90">{time}</span>
-                   </div>
-               </div>
-           </div>
-
-           {/* Content Below Banner */}
-           <div className="p-5">
-               <h4 className="font-bold text-foreground text-md mb-1">{title}</h4>
-               <p className="text-xs text-muted-foreground font-medium mb-4">{desc}</p>
-               
-               <div className="flex items-center justify-between">
-                   <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{steps} Steps</span>
-                   <div className="w-8 h-8 rounded-full bg-surface-highest flex items-center justify-center group-hover:bg-white group-hover:text-black transition-colors">
-                       <MoveRight className="w-3.5 h-3.5" />
-                   </div>
-               </div>
-           </div>
-        </div>
-    );
 }

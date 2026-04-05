@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import LeaderboardView from "../components/Community/LeaderboardView";
 import FriendsView from "../components/Community/FriendsView";
-import { Trophy, Users, Loader2, Star, Shield, TrendingUp } from "lucide-react";
+import { Trophy, Users, Loader2 } from "lucide-react";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -10,7 +10,6 @@ export default function CommunityPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("leaderboard");
 
-  // Real Database Hooks
   const {
     users,
     friendships,
@@ -22,7 +21,6 @@ export default function CommunityPage() {
     removeFriend,
   } = useCommunity();
 
-  // Make sure currentUser is formatted properly if they exist in the users array
   const currentUser = users.find((u) => u.id === user?.id) || {
     id: user?.id,
     name: "Loading...",
@@ -32,9 +30,8 @@ export default function CommunityPage() {
   };
 
   const handleAcceptRequest = (senderId) => {
-    // Find the actual request ID from the sender
     const request = requests.find(
-      (r) => r.sender_id === senderId && r.receiver_id === user.id,
+      (r) => r.sender_id === senderId && r.receiver_id === user.id
     );
     if (request) {
       acceptFriendRequest.mutate({ requestId: request.id, senderId });
@@ -43,7 +40,7 @@ export default function CommunityPage() {
 
   const handleDeclineRequest = (senderId) => {
     const request = requests.find(
-      (r) => r.sender_id === senderId && r.receiver_id === user.id,
+      (r) => r.sender_id === senderId && r.receiver_id === user.id
     );
     if (request) {
       declineFriendRequest.mutate(request.id);
@@ -58,9 +55,6 @@ export default function CommunityPage() {
     sendFriendRequest.mutate(targetId);
   };
 
-  // Formatting state hooks to match the components expectations:
-  // Components expect friendships = [{ userId, friendId }]
-  // and requests = [{ senderId, receiverId }]
   const formattedFriendships = friendships.map((f) => ({
     userId: f.user_id,
     friendId: f.friend_id,
@@ -85,38 +79,6 @@ export default function CommunityPage() {
           Connect, compete, and conquer your goals together.
         </p>
       </div>
-
-      {/* Hero Stats Banner */}
-      {!isLoading && (
-         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="grid grid-cols-3 gap-3 md:gap-4 my-6">
-             <div className="bg-surface-low border border-border/30 rounded-2xl p-4 md:p-6 flex flex-col relative overflow-hidden group hover:border-primary/40 transition-colors">
-                <div className="absolute right-0 top-0 w-24 h-24 bg-primary/5 rounded-full blur-[30px] group-hover:bg-primary/10"></div>
-                <div className="flex items-center gap-2 mb-2">
-                   <Star className="w-4 h-4 text-primary" />
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Level</span>
-                </div>
-                <span className="text-3xl font-black text-foreground">{currentUser.level}</span>
-             </div>
-             
-             <div className="bg-surface-low border border-border/30 rounded-2xl p-4 md:p-6 flex flex-col relative overflow-hidden group hover:border-info/40 transition-colors">
-                <div className="absolute right-0 top-0 w-24 h-24 bg-info/5 rounded-full blur-[30px] group-hover:bg-info/10"></div>
-                <div className="flex items-center gap-2 mb-2">
-                   <Users className="w-4 h-4 text-info" />
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Friends</span>
-                </div>
-                <span className="text-3xl font-black text-foreground">{friendships.length}</span>
-             </div>
-
-             <div className="bg-surface-low border border-border/30 rounded-2xl p-4 md:p-6 flex flex-col relative overflow-hidden group hover:border-warning/40 transition-colors">
-                <div className="absolute right-0 top-0 w-24 h-24 bg-warning/5 rounded-full blur-[30px] group-hover:bg-warning/10"></div>
-                <div className="flex items-center gap-2 mb-2">
-                   <TrendingUp className="w-4 h-4 text-warning" />
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total XP</span>
-                </div>
-                <span className="text-3xl font-black text-foreground">{currentUser.xp}</span>
-             </div>
-         </motion.div>
-      )}
 
       {/* Segmented Control */}
       <div className="flex bg-surface-low border border-border/30 p-1.5 rounded-full max-w-md mx-auto relative overflow-hidden">
@@ -147,15 +109,27 @@ export default function CommunityPage() {
         <div
           className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full transition-all duration-300 ease-out z-0 border"
           style={{
-            transform: activeTab === "friends" ? "translateX(100%)" : "translateX(0)",
-            backgroundColor: activeTab === "friends" ? "rgba(59,130,246,0.15)" : "rgba(34,197,94,0.15)",
-            borderColor: activeTab === "friends" ? "rgba(59,130,246,0.3)" : "rgba(34,197,94,0.3)",
-            boxShadow: activeTab === "friends" ? "0 0 15px rgba(59,130,246,0.2)" : "0 0 15px rgba(34,197,94,0.2)",
+            transform:
+              activeTab === "friends"
+                ? "translateX(100%)"
+                : "translateX(0)",
+            backgroundColor:
+              activeTab === "friends"
+                ? "rgba(59,130,246,0.15)"
+                : "rgba(34,197,94,0.15)",
+            borderColor:
+              activeTab === "friends"
+                ? "rgba(59,130,246,0.3)"
+                : "rgba(34,197,94,0.3)",
+            boxShadow:
+              activeTab === "friends"
+                ? "0 0 15px rgba(59,130,246,0.2)"
+                : "0 0 15px rgba(34,197,94,0.2)",
           }}
         />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         {isLoading ? (
           <div className="flex h-[40vh] flex-col items-center justify-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
