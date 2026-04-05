@@ -80,7 +80,7 @@ export default function WorkoutsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { icon: Percent, label: "Body Fat", value: bodyFat !== null ? `${bodyFat}%` : "—", sub: "Computed", progress: bodyFat ? `${bodyFat}%` : "0%" },
-          { icon: Dumbbell, label: "Muscle Mass", value: muscleMass !== null ? `${muscleMass} kg` : "—", sub: "Estimated", progress: "70%", segmented: true },
+          { icon: Dumbbell, label: "Muscle Mass", value: muscleMass !== null ? `${muscleMass} kg` : "—", sub: "Estimated", progress: muscleMass && profile?.weight_kg ? `${Math.round((muscleMass / profile.weight_kg) * 100)}%` : "0%", segmented: true },
           { icon: Droplets, label: "Hydration", value: `${hydration}%`, sub: "Today", progress: `${hydration}%` },
         ].map((stat, i) => (
           <motion.div

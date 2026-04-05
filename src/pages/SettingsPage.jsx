@@ -170,6 +170,43 @@ export default function SettingsPage() {
   const [loginHistory, setLoginHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // Notification Preferences
+  const [workoutReminders, setWorkoutReminders] = useState(() => localStorage.getItem("fitwise_workout_reminders") === "true");
+  const [routineReminders, setRoutineReminders] = useState(() => localStorage.getItem("fitwise_routine_reminders") === "true");
+
+  const handleNotificationToggle = async (type, checked) => {
+    if (checked) {
+      if ("Notification" in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          toast.success("Notifications enabled!", { id: "notif" });
+          if (type === "workout") {
+            setWorkoutReminders(true);
+            localStorage.setItem("fitwise_workout_reminders", "true");
+            new Notification("Fitwise", { body: "Workout reminders are now active! You'll get notified daily.", icon: "/logo.png" });
+          } else {
+            setRoutineReminders(true);
+            localStorage.setItem("fitwise_routine_reminders", "true");
+            new Notification("Fitwise", { body: "Routine reminders are active! We'll remind you to take care of your skin.", icon: "/logo.png" });
+          }
+        } else {
+          toast.error("Notification permission denied by browser.", { id: "notif" });
+        }
+      } else {
+        toast.error("Your browser does not support notifications.", { id: "notif" });
+      }
+    } else {
+      if (type === "workout") {
+        setWorkoutReminders(false);
+        localStorage.setItem("fitwise_workout_reminders", "false");
+      } else {
+        setRoutineReminders(false);
+        localStorage.setItem("fitwise_routine_reminders", "false");
+      }
+      toast.success("Notifications disabled.", { id: "notif" });
+    }
+  };
+
   // Sync initial values when profile loads
   useEffect(() => {
     if (profile) {
@@ -753,16 +790,16 @@ export default function SettingsPage() {
                       {t("workoutRemindersDesc")}
                     </p>
                   </div>
-                  <Switch checked={true} />
+                  <Switch checked={workoutReminders} onCheckedChange={(checked) => handleNotificationToggle("workout", checked)} />
                 </div>
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-medium">{t("marketing")}</p>
+                    <p className="text-sm font-medium">Routine Reminders</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {t("marketingDesc")}
+                      Morning & night face care nudges
                     </p>
                   </div>
-                  <Switch checked={false} />
+                  <Switch checked={routineReminders} onCheckedChange={(checked) => handleNotificationToggle("routine", checked)} />
                 </div>
               </div>
             </AccordionContent>

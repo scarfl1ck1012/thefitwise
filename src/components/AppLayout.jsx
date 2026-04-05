@@ -77,17 +77,7 @@ export default function AppLayout() {
             Signed in as{" "}
             <span className="font-medium text-foreground">{displayName}</span>
           </div>
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-surface-high/50 hover:text-foreground w-full transition-all"
-          >
-            {isDark ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-            {isDark ? "Light Mode" : "Dark Mode"}
-          </button>
+
           <button
             onClick={signOut}
             className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 w-full transition-all"
@@ -144,17 +134,7 @@ export default function AppLayout() {
                   {item.label}
                 </NavLink>
               ))}
-              <button
-                onClick={toggleTheme}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-surface-high/50 hover:text-foreground w-full"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-                {isDark ? "Light Mode" : "Dark Mode"}
-              </button>
+
               <button
                 onClick={signOut}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 w-full"
