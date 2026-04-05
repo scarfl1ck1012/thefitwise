@@ -20,9 +20,10 @@
 
 ## 📸 Screenshots
 
-![Dashboard](./2123123.png)
-![Weight Page](./122.png)
-![Progress Page](./3123123.png)
+![Dashboard](./dashboard.png)
+![Meals Page](./meals.png)
+![Gym Page](./gym.png)
+![Routine Page](./routine.png)
 ---
 
 ## 🧠 Overview
