@@ -7,7 +7,7 @@ import {
   DAY_LABELS,
 } from "@/lib/gymExercises";
 import { getLocalDate } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Plus,
   ArrowRight,
@@ -17,6 +17,8 @@ import {
   X,
   Home,
   Dumbbell,
+  Activity,
+  Flame,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,14 @@ const emptyWeek = () => ({
   saturday: [],
   sunday: [],
 });
+
+const CARDIO_TYPES = [
+  { id: "incline_walk", label: "Incline Walk", calPerMin: 5, icon: "⛰️" },
+  { id: "run", label: "Running", calPerMin: 11, icon: "🏃" },
+  { id: "swim", label: "Swimming", calPerMin: 10, icon: "🏊" },
+  { id: "cycle", label: "Cycling", calPerMin: 8, icon: "🚴" },
+  { id: "row", label: "Rowing", calPerMin: 9, icon: "🚣" },
+];
 
 export default function GymPage() {
   const { checkins, addCheckin } = useWorkouts();
@@ -77,24 +87,10 @@ export default function GymPage() {
   const [restModalOpen, setRestModalOpen] = useState(false);
   const [searchEx, setSearchEx] = useState("");
 
-  const [zone2Min, setZone2Min] = useState(() =>
-    parseInt(localStorage.getItem("fitwise_zone2") || "45")
-  );
-  const [hiitMin, setHiitMin] = useState(() =>
-    parseInt(localStorage.getItem("fitwise_hiit") || "15")
-  );
-
-  const handleZone2Click = () => {
-    const newMin = zone2Min >= 90 ? 0 : zone2Min + 15;
-    setZone2Min(newMin);
-    localStorage.setItem("fitwise_zone2", newMin.toString());
-  };
-
-  const handleHiitClick = () => {
-    const newMin = hiitMin >= 45 ? 0 : hiitMin + 5;
-    setHiitMin(newMin);
-    localStorage.setItem("fitwise_hiit", newMin.toString());
-  };
+  // Cardio Form State
+  const [cardioType, setCardioType] = useState("incline_walk");
+  const [cardioDuration, setCardioDuration] = useState("30");
+  const [cardioIncline, setCardioIncline] = useState("12");
 
   const toggleRestDay = (day) => {
     setRestDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -123,7 +119,6 @@ export default function GymPage() {
 
   const dayExercises = weeklyPlan[selectedDay] || [];
 
-  // Filter exercises in builder by mode AND search
   const filteredExercises = useMemo(() => {
     if (!searchEx) return [];
     return gymExercises
@@ -136,7 +131,6 @@ export default function GymPage() {
       .slice(0, 12);
   }, [searchEx, mode]);
 
-  // Default placeholder exercises filtered by mode
   const defaultExercises = useMemo(() => {
     if (mode === "home") {
       return [
@@ -164,6 +158,41 @@ export default function GymPage() {
     });
     addXP.mutate(25);
     toast.success("Session Started! +25 XP");
+  };
+
+  const calculateCardioCalories = () => {
+    const mins = parseInt(cardioDuration) || 0;
+    if (cardioType === "incline_walk") {
+      const inc = parseFloat(cardioIncline) || 0;
+      return Math.round(mins * (5 + (inc * 0.3)));
+    }
+    const typeObj = CARDIO_TYPES.find(t => t.id === cardioType);
+    return typeObj ? Math.round(mins * typeObj.calPerMin) : 0;
+  };
+
+  const handleLogCardio = () => {
+    const mins = parseInt(cardioDuration) || 0;
+    if (mins <= 0) return toast.error("Enter a valid duration (minutes)");
+    
+    const calories = calculateCardioCalories();
+    const typeLabel = CARDIO_TYPES.find(t => t.id === cardioType)?.label || "Cardio";
+    
+    // Check if they've checked in, if not log it
+    let notes = `Log: ${typeLabel} for ${mins} mins (~${calories} cal)`;
+    if (cardioType === "incline_walk") {
+      notes += ` at ${cardioIncline}% incline`;
+    }
+
+    addCheckin.mutate({
+      workout_type: "cardio",
+      duration_min: mins,
+      notes: notes,
+    });
+    
+    addXP.mutate(15);
+    toast.success(`Cardio logged! Burned ~${calories} calories.`);
+    setCardioDuration("");
+    setCardioIncline("");
   };
 
   return (
@@ -194,7 +223,7 @@ export default function GymPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex bg-surface-low border border-border/30 p-1.5 rounded-full max-w-xs relative overflow-hidden"
+        className="flex bg-card dark:bg-surface-low border border-border/30 p-1.5 rounded-full max-w-xs relative overflow-hidden"
       >
         <button
           onClick={() => setMode("home")}
@@ -221,25 +250,24 @@ export default function GymPage() {
 
         {/* Animated Background Pill */}
         <div
-          className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full transition-all duration-300 ease-out z-0 bg-primary/15 border border-primary/30"
+          className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full transition-all duration-300 ease-out z-0 bg-primary/10 dark:bg-primary/15 border border-primary/20 dark:border-primary/30"
           style={{
-            transform:
-              mode === "gym" ? "translateX(100%)" : "translateX(0)",
+            transform: mode === "gym" ? "translateX(100%)" : "translateX(0)",
             boxShadow: "0 0 15px rgba(34,197,94,0.2)",
           }}
         />
       </motion.div>
 
       {/* Top Banner Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Rest Day Focus */}
         <motion.div
           onClick={() => setRestModalOpen(true)}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 rounded-[2rem] bg-surface-low border border-border/30 overflow-hidden relative min-h-[240px] flex items-end p-8 group cursor-pointer"
+          className="rounded-[2rem] bg-card dark:bg-[#111] border border-border/30 overflow-hidden relative min-h-[240px] flex items-end p-8 group cursor-pointer shadow-card"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0a1610] to-[#111111] z-0"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1a251f] to-[#111111] z-0"></div>
 
           <div className="absolute right-[-10%] top-[-10%] w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary/30 transition-colors duration-700"></div>
           <div className="absolute right-10 bottom-10 w-32 h-32 rounded-full border border-primary/30 transform rotate-12 blur-[1px]"></div>
@@ -249,7 +277,7 @@ export default function GymPage() {
             <div>
               <Badge
                 variant="outline"
-                className="border-primary/50 text-primary mb-4 bg-primary/10 tracking-widest text-[10px]"
+                className="border-primary/50 text-white dark:text-primary mb-4 bg-primary/20 dark:bg-primary/10 tracking-widest text-[10px]"
               >
                 RECOVERY
               </Badge>
@@ -262,112 +290,100 @@ export default function GymPage() {
             </div>
             <Button
               variant="outline"
-              className="text-white hover:bg-white/10 rounded-full bg-white/5 border border-border/40 shrink-0 font-bold px-6"
+              className="text-white hover:bg-white/10 rounded-full bg-white/5 border border-white/20 shrink-0 font-bold px-6"
             >
               Explore <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </motion.div>
 
-        {/* Cardiovascular Conditioning */}
+        {/* Cardio Tracker */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="lg:col-span-1 rounded-[2rem] bg-surface-low p-6 lg:p-8 border border-border/30 flex flex-col relative overflow-hidden"
+          className="rounded-[2rem] bg-card dark:bg-surface-low p-6 lg:p-8 border border-border/30 flex flex-col relative overflow-hidden shadow-card"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-[40px]"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-[40px] pointer-events-none"></div>
 
-          <div className="relative z-10">
-            <h3 className="font-bold text-foreground text-sm">
-              Cardiovascular Conditioning
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5 tracking-widest uppercase">
-              Weekly targets
-            </p>
+          <div className="relative z-10 mb-4 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center border border-accent/20">
+              <Activity className="h-4 w-4 text-accent" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground text-sm">Log Cardio</h3>
+              <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
+                Activity Box
+              </p>
+            </div>
           </div>
 
-          <div className="flex justify-around items-center flex-1 mt-6 relative z-10">
-            {/* Ring 1 - Zone 2 */}
-            <div
-              className="flex flex-col items-center gap-3 cursor-pointer group"
-              onClick={handleZone2Click}
-            >
-              <div className="relative w-[84px] h-[84px] group-hover:scale-105 transition-transform">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="42"
-                    cy="42"
-                    r="36"
-                    fill="none"
-                    className="stroke-surface-high"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="42"
-                    cy="42"
-                    r="36"
-                    fill="none"
-                    className="stroke-primary transition-all duration-500"
-                    strokeWidth="6"
-                    strokeDasharray="226"
-                    strokeDashoffset={226 - (zone2Min / 90) * 226}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-foreground">
-                    {zone2Min}
-                  </span>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Min
-                  </span>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold text-foreground tracking-widest uppercase group-hover:text-primary transition-colors">
-                Zone 2
-              </span>
+          <div className="flex-1 relative z-10 flex flex-col gap-4 justify-center">
+            {/* Type Selector */}
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+              {CARDIO_TYPES.map((type) => (
+                <button
+                  key={type.id}
+                  onClick={() => setCardioType(type.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors border ${
+                    cardioType === type.id
+                      ? "bg-accent/10 border-accent/40 text-accent"
+                      : "bg-surface-lowest dark:bg-surface border-border/30 text-muted-foreground hover:bg-surface-high/50"
+                  }`}
+                >
+                  <span className="text-sm">{type.icon}</span>
+                  {type.label}
+                </button>
+              ))}
             </div>
 
-            {/* Ring 2 - HIIT */}
-            <div
-              className="flex flex-col items-center gap-3 cursor-pointer group"
-              onClick={handleHiitClick}
-            >
-              <div className="relative w-[84px] h-[84px] group-hover:scale-105 transition-transform">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="42"
-                    cy="42"
-                    r="36"
-                    fill="none"
-                    className="stroke-surface-high"
-                    strokeWidth="6"
+            {/* Inputs */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Duration (min)</p>
+                <div className="relative">
+                  <Input 
+                    type="number" 
+                    value={cardioDuration} 
+                    onChange={(e) => setCardioDuration(e.target.value)}
+                    className="bg-surface-lowest dark:bg-surface border-border/40 font-bold"
+                    placeholder="e.g. 30"
                   />
-                  <circle
-                    cx="42"
-                    cy="42"
-                    r="36"
-                    fill="none"
-                    className="stroke-accent transition-all duration-500"
-                    strokeWidth="6"
-                    strokeDasharray="226"
-                    strokeDashoffset={226 - (hiitMin / 45) * 226}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-foreground">
-                    {hiitMin}
-                  </span>
-                  <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Min
-                  </span>
                 </div>
               </div>
-              <span className="text-[11px] font-bold tracking-widest uppercase text-accent group-hover:brightness-125 transition-all">
-                HIIT
-              </span>
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
+                  {cardioType === "incline_walk" ? "Incline (%)" : "Est. Burn"}
+                </p>
+                {cardioType === "incline_walk" ? (
+                  <Input 
+                    type="number" 
+                    value={cardioIncline} 
+                    onChange={(e) => setCardioIncline(e.target.value)}
+                    className="bg-surface-lowest dark:bg-surface border-border/40 font-bold"
+                    placeholder="e.g. 12"
+                  />
+                ) : (
+                  <div className="h-10 w-full rounded-md border border-transparent bg-transparent px-3 py-2 text-sm font-bold flex items-center gap-1.5 text-accent">
+                    <Flame className="h-4 w-4" /> {calculateCardioCalories()} cal
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Incline Walk specialized calorie display & Submit */}
+            <div className="flex items-center justify-between mt-2">
+              {cardioType === "incline_walk" && (
+                <div className="flex items-center gap-1.5 text-accent font-bold text-sm">
+                  <Flame className="h-4 w-4" /> {calculateCardioCalories()} cal
+                </div>
+              )}
+              <Button 
+                onClick={handleLogCardio} 
+                className="ml-auto w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)] border-none"
+              >
+                Log Activity
+              </Button>
             </div>
           </div>
         </motion.div>
@@ -378,7 +394,7 @@ export default function GymPage() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="rounded-[2rem] bg-surface-low/80 p-6 lg:p-8 border border-border/30"
+        className="rounded-[2rem] bg-card dark:bg-surface-low/80 p-6 lg:p-8 border border-border/30 shadow-card"
       >
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -405,8 +421,8 @@ export default function GymPage() {
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(34,197,94,0.3)]"
                       : isRest
-                        ? "bg-transparent text-muted-foreground/30 hover:bg-white/5"
-                        : "bg-surface-high text-muted-foreground hover:bg-white/10"
+                        ? "bg-transparent text-muted-foreground/30 hover:bg-foreground/5 dark:hover:bg-white/5"
+                        : "bg-surface dark:bg-surface-high text-muted-foreground hover:bg-foreground/10 dark:hover:bg-white/10"
                   }`}
                 >
                   {label}
@@ -458,7 +474,7 @@ export default function GymPage() {
               <Button
                 onClick={() => setBuilderOpen(true)}
                 variant="outline"
-                className="w-full rounded-xl border-dashed border-border/40 bg-transparent hover:bg-white/5 py-6 mt-4 opacity-50 hover:opacity-100 transition-opacity"
+                className="w-full rounded-xl border-dashed border-border/40 bg-transparent hover:bg-foreground/5 dark:hover:bg-white/5 py-6 mt-4 opacity-50 hover:opacity-100 transition-opacity text-foreground"
               >
                 <Plus className="h-4 w-4 mr-2" /> Add Exercise
               </Button>
@@ -469,7 +485,7 @@ export default function GymPage() {
 
       {/* Modals */}
       <Dialog open={builderOpen} onOpenChange={setBuilderOpen}>
-        <DialogContent className="sm:max-w-md bg-surface-low border-border/30 rounded-[2rem]">
+        <DialogContent className="sm:max-w-md bg-card dark:bg-surface-low border-border/30 rounded-[2rem]">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
               {mode === "home" ? (
@@ -487,7 +503,7 @@ export default function GymPage() {
                 placeholder={`Search ${mode} exercises...`}
                 value={searchEx}
                 onChange={(e) => setSearchEx(e.target.value)}
-                className="pl-10 h-12 rounded-xl bg-surface-lowest border-border/40"
+                className="pl-10 h-12 rounded-xl bg-surface-lowest dark:bg-surface-lowest border-border/40"
                 autoFocus
               />
             </div>
@@ -496,7 +512,7 @@ export default function GymPage() {
                 <div
                   key={ex.id}
                   onClick={() => handleAddExercise(ex)}
-                  className="p-3 rounded-xl bg-surface border border-border/30 flex items-center justify-between cursor-pointer hover:border-primary/50 group transition-all"
+                  className="p-3 rounded-xl bg-surface-lowest dark:bg-surface border border-border/30 flex items-center justify-between cursor-pointer hover:border-primary/50 group transition-all"
                 >
                   <div>
                     <p className="font-bold text-sm text-foreground">
@@ -520,7 +536,7 @@ export default function GymPage() {
       </Dialog>
 
       <Dialog open={restModalOpen} onOpenChange={setRestModalOpen}>
-        <DialogContent className="sm:max-w-md bg-surface-low border-border/30 rounded-[2rem]">
+        <DialogContent className="sm:max-w-md bg-card dark:bg-surface-low border-border/30 rounded-[2rem]">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-foreground">
               Rest Day Configuration
@@ -540,7 +556,7 @@ export default function GymPage() {
                   className={`justify-start h-12 rounded-xl border-border/30 ${
                     restDays[day]
                       ? "bg-primary/10 border-primary/30 text-primary"
-                      : "bg-surface-lowest text-muted-foreground hover:bg-surface"
+                      : "bg-surface-lowest text-muted-foreground hover:bg-surface-high/50"
                   }`}
                 >
                   {restDays[day] ? (
@@ -564,13 +580,13 @@ export default function GymPage() {
 // ──────────────────────────────────────────────
 function ExerciseRow({ name, sets, repRange, weight, type, onRemove }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface hover:bg-surface-high transition-colors border border-transparent group">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-low dark:bg-surface hover:bg-surface-high dark:hover:bg-surface-high transition-colors border border-border/30 dark:border-transparent group">
       <div className="flex items-center gap-4 mb-3 sm:mb-0">
         {/* Grab handle */}
         <div className="flex flex-col gap-[2px] opacity-20 group-hover:opacity-100 transition-opacity cursor-grab">
-          <div className="w-1 h-1 rounded-full bg-white"></div>
-          <div className="w-1 h-1 rounded-full bg-white"></div>
-          <div className="w-1 h-1 rounded-full bg-white"></div>
+          <div className="w-1 h-1 rounded-full bg-foreground dark:bg-white"></div>
+          <div className="w-1 h-1 rounded-full bg-foreground dark:bg-white"></div>
+          <div className="w-1 h-1 rounded-full bg-foreground dark:bg-white"></div>
         </div>
 
         <div>
@@ -586,15 +602,15 @@ function ExerciseRow({ name, sets, repRange, weight, type, onRemove }) {
 
       <div className="flex items-center gap-2 pl-8 sm:pl-0">
         <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
-          <span className="text-xs font-bold text-white">
+          <span className="text-xs font-bold text-foreground dark:text-white">
             {sets}{" "}
-            <span className="text-white/50 font-medium">Sets</span>
+            <span className="text-foreground/50 dark:text-white/50 font-medium">Sets</span>
           </span>
         </div>
         <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
-          <span className="text-xs font-bold text-white">
+          <span className="text-xs font-bold text-foreground dark:text-white">
             {repRange}{" "}
-            <span className="text-white/50 font-medium">Reps</span>
+            <span className="text-foreground/50 dark:text-white/50 font-medium">Reps</span>
           </span>
         </div>
         <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
