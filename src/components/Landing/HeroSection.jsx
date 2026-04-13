@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Flame, Droplets, Activity, PieChart, Sparkles } from "lucide-react";
+import { SplineEmbed } from "@/components/ui/SplineEmbed";
 
 export default function HeroSection() {
   const containerRef = useRef(null);
@@ -32,10 +33,22 @@ export default function HeroSection() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
   };
 
+  const heroSpline =
+    "https://community.spline.design/file/3e7deb37-d9b5-4b1b-ba96-602f48048c0d";
+
   return (
     <section ref={containerRef} className="relative pt-36 pb-32 lg:pt-52 lg:pb-40 overflow-hidden perspective-1000">
       {/* Background Deep Space Glow */}
       <motion.div style={{ y: yBg }} className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 blur-[150px] rounded-full pointer-events-none" />
+      <motion.div style={{ y: yBg }} className="absolute inset-x-0 top-20 mx-auto h-[520px] max-w-6xl pointer-events-none opacity-70 hidden md:block">
+        <SplineEmbed
+          src={heroSpline}
+          title="Fitwise hero ambient spline"
+          className="h-full w-full"
+          fallback={<div className="h-full w-full bg-gradient-to-b from-primary/10 via-transparent to-transparent" />}
+          minWidth={1024}
+        />
+      </motion.div>
 
       <div className="relative max-w-7xl mx-auto px-6 z-10 flex flex-col items-center">
         {/* Kinetic Header */}
@@ -45,7 +58,7 @@ export default function HeroSection() {
           animate="visible"
           className="text-center max-w-4xl mx-auto"
         >
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-[1.1]">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-foreground leading-[1.1]">
             <div className="flex justify-center gap-4 flex-wrap">
               {textChars.map((word, i) => (
                 <motion.span key={`w1-${i}`} variants={wordVariants} className="inline-block">
@@ -73,7 +86,7 @@ export default function HeroSection() {
           <motion.div variants={wordVariants} className="mt-12 flex items-center justify-center">
             <Link
               to="/auth"
-              className="group relative inline-flex items-center gap-3 bg-primary text-black font-extrabold text-lg px-8 py-4 rounded-full overflow-hidden transition-all shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_rgba(34,197,94,0.5)] hover:-translate-y-1"
+            className="group relative inline-flex items-center gap-3 bg-primary text-primary-foreground font-extrabold text-lg px-8 py-4 rounded-full overflow-hidden transition-all shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_rgba(34,197,94,0.5)] hover:-translate-y-1"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
               Start Your Journey
@@ -87,7 +100,7 @@ export default function HeroSection() {
           {/* Main Dashboard layer */}
           <motion.div
             style={{ y: yDashboard, rotateX: 10, rotateZ: -1 }}
-            className="absolute inset-x-0 mx-auto w-[90%] md:w-[800px] aspect-[16/10] rounded-2xl border border-white/10 bg-[#121212]/80 backdrop-blur-3xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
+            className="absolute inset-x-0 mx-auto w-[90%] md:w-[800px] aspect-[16/10] rounded-2xl border border-border/40 bg-surface-low/90 backdrop-blur-3xl shadow-[0_30px_100px_rgba(0,0,0,0.25)] dark:shadow-[0_30px_100px_rgba(0,0,0,0.8)] overflow-hidden"
           >
             {/* Fake Nav */}
             <div className="w-full h-12 border-b border-white/5 flex items-center px-4 gap-2">

@@ -8,6 +8,7 @@ import { getLocalDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Flame,
@@ -412,10 +413,10 @@ function RecipeCarousel({ dateStr }) {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { profile, isProfileComplete } = useProfile();
-  const { totalCalories, totalProtein, totalCarbs, totalFat } = useMeals();
-  const { stats, addXP } = useUserStats();
-  const { checkins } = useWorkouts();
+  const { profile, isProfileComplete, isLoading: profileLoading } = useProfile();
+  const { totalCalories, totalProtein, totalCarbs, totalFat, isLoading: mealsLoading } = useMeals();
+  const { stats, addXP, isLoading: statsLoading } = useUserStats();
+  const { checkins, isLoading: workoutsLoading } = useWorkouts();
 
   const today = getLocalDate();
   const challenges = getDailyChallenges(today, {
@@ -449,6 +450,8 @@ export default function DashboardPage() {
   const level = stats?.level || 1;
   const xpInLevel = xp % 500;
   const xpToNext = 500 - xpInLevel;
+  const isDashboardLoading =
+    profileLoading || mealsLoading || statsLoading || workoutsLoading;
 
   const completeChallenge = (id, xpVal) => {
     if (completedChallenges.includes(id)) return;
@@ -461,6 +464,24 @@ export default function DashboardPage() {
     initial: { opacity: 0, y: 15 },
     animate: { opacity: 1, y: 0 },
   };
+
+  if (isDashboardLoading) {
+    return (
+      <div className="space-y-6 pb-24 max-w-6xl mx-auto px-4 lg:px-0 pt-4 overflow-x-hidden">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-44" />
+        </div>
+        <Skeleton className="h-24 rounded-[2rem]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <Skeleton className="h-[360px] rounded-[2rem]" />
+          <Skeleton className="h-[360px] rounded-[2rem]" />
+          <Skeleton className="h-[360px] rounded-[2rem]" />
+        </div>
+        <Skeleton className="h-[280px] rounded-[2rem]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-24 max-w-6xl mx-auto px-4 lg:px-0 pt-4 overflow-x-hidden">
@@ -481,7 +502,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-bold text-accent uppercase tracking-widest mb-1">
                   Complete Setup
                 </p>
-                <p className="text-sm text-white font-medium">
+                <p className="text-sm text-foreground font-medium">
                   Set up your physical details for personalized goals.
                 </p>
               </div>
@@ -511,7 +532,7 @@ export default function DashboardPage() {
             <div className="bg-surface-low border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full flex flex-col relative overflow-hidden transition-all group-hover:border-primary/40 group-hover:shadow-[0_0_30px_rgba(34,197,94,0.05)]">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none group-hover:bg-primary/20 transition-colors" />
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-border/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <span className="text-[10px] uppercase tracking-widest font-bold text-foreground bg-muted px-3 py-1 rounded-full border border-border/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   Nutrition
                 </span>
                 <UtensilsCrossed className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -535,7 +556,7 @@ export default function DashboardPage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-10 text-right">
                       {m.label}
                     </span>
-                    <div className="flex-1 bg-black rounded-full h-1.5 overflow-hidden border border-border/30 relative">
+                    <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden border border-border/30 relative">
                       <motion.div
                         className={`absolute inset-y-0 left-0 rounded-full ${m.color}`}
                         initial={{ width: 0 }}
@@ -543,7 +564,7 @@ export default function DashboardPage() {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                       />
                     </div>
-                    <span className="text-[10px] font-bold text-white w-12 text-right">
+                    <span className="text-[10px] font-bold text-foreground w-12 text-right">
                       {Math.round(m.value)}<span className="text-muted-foreground">/{m.goal}</span>
                     </span>
                   </div>
@@ -578,7 +599,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-black text-white">{stats?.current_streak || 0}</span>
+                    <span className="text-3xl font-black text-foreground">{stats?.current_streak || 0}</span>
                   </div>
                   <span className="text-[10px] text-accent/80 tracking-widest font-bold uppercase mt-0.5 block">Active Streak (Days)</span>
                 </div>
@@ -587,14 +608,14 @@ export default function DashboardPage() {
               {/* Level Card */}
               <div className="bg-surface border border-border/30 p-5 rounded-[1.5rem]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-black text-white uppercase tracking-widest border border-border/40 px-2.5 py-0.5 rounded-md bg-surface-low">
+                  <span className="text-[11px] font-black text-foreground uppercase tracking-widest border border-border/40 px-2.5 py-0.5 rounded-md bg-surface-low">
                     Lvl {level}
                   </span>
                   <span className="text-[10px] font-bold text-primary tracking-widest uppercase">
                     {xp} Total XP
                   </span>
                 </div>
-                <div className="h-2 w-full bg-black rounded-full overflow-hidden border border-border/30 relative">
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-border/30 relative">
                    <motion.div 
                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary shadow-[0_0_15px_rgba(34,197,94,0.5)]"
                      initial={{ width: 0 }}
@@ -603,7 +624,7 @@ export default function DashboardPage() {
                    />
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-3 text-right font-medium uppercase tracking-wider">
-                  <span className="text-white">{xpToNext} XP</span> to Level {level + 1}
+                  <span className="text-foreground">{xpToNext} XP</span> to Level {level + 1}
                 </p>
               </div>
             </div>
@@ -615,7 +636,7 @@ export default function DashboardPage() {
       <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="mb-6 h-full">
         <div className="bg-surface-low border border-border/30 rounded-[2rem] p-6 lg:p-8 h-full">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/40">
-            <h2 className="text-sm uppercase tracking-widest font-bold text-white flex items-center gap-3">
+            <h2 className="text-sm uppercase tracking-widest font-bold text-foreground flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                 <CheckCircle2 className="h-4 w-4 text-primary" /> 
               </span>
@@ -634,15 +655,15 @@ export default function DashboardPage() {
                   className={`flex flex-col sm:flex-row items-start gap-4 p-5 rounded-2xl transition-all border group relative overflow-hidden ${
                     done 
                       ? "bg-primary/5 border-primary/20" 
-                      : "bg-surface border-border/30 hover:border-white/20 hover:bg-[#1f1f1f] shadow-sm"
+                      : "bg-surface border-border/30 hover:border-primary/20 hover:bg-surface-high shadow-sm"
                   }`}
                 >
                   {done && <div className="absolute inset-0 bg-primary/5 mix-blend-overlay pointer-events-none" />}
-                  <div className={`text-2xl shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border ${done ? 'bg-primary/20 border-primary/30 grayscale' : 'bg-black border-border/30'}`}>
+                  <div className={`text-2xl shrink-0 w-12 h-12 rounded-xl flex items-center justify-center border ${done ? 'bg-primary/20 border-primary/30 grayscale' : 'bg-surface-lowest border-border/30'}`}>
                     {ch.icon}
                   </div>
                   <div className="flex-1 min-w-0 w-full">
-                    <p className={`text-sm font-bold leading-snug mb-1 truncate ${done ? "line-through text-primary/50" : "text-white group-hover:text-primary transition-colors"}`}>
+                    <p className={`text-sm font-bold leading-snug mb-1 truncate ${done ? "line-through text-primary/50" : "text-foreground group-hover:text-primary transition-colors"}`}>
                       {ch.title}
                     </p>
                     <p className={`text-[11px] leading-relaxed line-clamp-2 ${done ? "text-primary/40 font-medium" : "text-muted-foreground font-medium"}`}>
@@ -705,7 +726,7 @@ export default function DashboardPage() {
                   <p className="text-[15px] font-bold text-white leading-snug line-clamp-2 group-hover:text-primary transition-colors flex-1 mb-4">
                     {article.title}
                   </p>
-                  <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground group-hover:text-white transition-colors uppercase tracking-widest pt-4 border-t border-border/30 mt-auto">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest pt-4 border-t border-border/30 mt-auto">
                     <ExternalLink className="h-3.5 w-3.5" /> Read Full Guide
                   </div>
                 </div>

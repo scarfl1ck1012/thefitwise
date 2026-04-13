@@ -8,7 +8,7 @@ import FooterCTA from "../components/Landing/FooterCTA";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground font-sans overflow-x-hidden relative selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground font-sans overflow-x-hidden relative selection:bg-primary/30">
       <LandingNavbar />
       <HeroSection />
       <BentoGrid />

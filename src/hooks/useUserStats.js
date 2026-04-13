@@ -6,7 +6,7 @@ import { getLocalDate } from "@/lib/utils";
 export function useUserStats() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ["user_stats", user?.id],
     queryFn: async () => {
       try {
@@ -67,5 +67,5 @@ export function useUserStats() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user_stats"] }),
   });
-  return { stats, addXP, addBadge };
+  return { stats, addXP, addBadge, isLoading };
 }

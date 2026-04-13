@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SplineEmbed } from "@/components/ui/SplineEmbed";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +51,7 @@ export default function MealsPage() {
     totalFat,
     totalSodium,
     totalPotassium,
+    isLoading,
     addMeal,
     deleteMeal,
   } = useMeals(selectedDate);
@@ -250,6 +253,27 @@ REFERENCE VALUES (per standard serving):
   ];
   const hasData = macroData.some((d) => d.value > 0);
   const emptyData = [{ name: "Empty", value: 1, color: "hsl(var(--muted))" }];
+  const emptyMealsSpline =
+    "https://community.spline.design/file/a1f156f7-ef01-42d1-bf7b-5be1b7967b0a";
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4 overflow-x-hidden">
+        <div className="flex items-end justify-between mb-2">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-56" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <Skeleton className="h-10 w-36 rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="md:col-span-2 h-[330px] rounded-[2rem]" />
+          <Skeleton className="h-[330px] rounded-[2rem]" />
+        </div>
+        <Skeleton className="h-[400px] rounded-[2rem]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4 overflow-x-hidden">
@@ -262,13 +286,13 @@ REFERENCE VALUES (per standard serving):
         </div>
         
         <div className="flex items-center gap-1 bg-surface-low rounded-full border border-border/30 p-1 px-3">
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-muted-foreground hover:text-white" onClick={() => shiftDate(-1)}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground" onClick={() => shiftDate(-1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-xs font-bold text-white min-w-[80px] text-center uppercase tracking-widest">
+          <span className="text-xs font-bold text-foreground min-w-[80px] text-center uppercase tracking-widest">
             {isToday ? "TODAY" : new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </span>
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-muted-foreground hover:text-white" onClick={() => shiftDate(1)} disabled={isToday}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-muted-foreground hover:text-foreground" onClick={() => shiftDate(1)} disabled={isToday}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -308,7 +332,7 @@ REFERENCE VALUES (per standard serving):
                {/* Center Metric */}
                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-[10px] uppercase tracking-widest text-primary font-bold mb-1">INTAKE</span>
-                  <span className="text-4xl font-black text-white">{totalCalories}</span>
+                  <span className="text-4xl font-black text-foreground">{totalCalories}</span>
                   <span className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full border border-border/40">/{calorieGoal} KCAL</span>
                </div>
             </div>
@@ -341,7 +365,7 @@ REFERENCE VALUES (per standard serving):
                 <div>
                    <div className="flex items-center justify-between mb-4">
                        <Badge variant="outline" className="border-info/50 text-info bg-info/10 ml-0 mr-auto text-[10px] tracking-widest">WATER</Badge>
-                       <span className="text-xl font-black text-white">{waterLiters}L</span>
+                       <span className="text-xl font-black text-foreground">{waterLiters}L</span>
                    </div>
                    
                    <div className="flex flex-wrap gap-2 mb-4">
@@ -376,10 +400,10 @@ REFERENCE VALUES (per standard serving):
                 <div>
                    <div className="flex items-center justify-between mb-4">
                        <Badge variant="outline" className="border-warning/50 text-warning bg-warning/10 ml-0 mr-auto text-[10px] tracking-widest">CAFFEINE</Badge>
-                       <span className={`text-xl font-black ${totalCaffeineMg > caffeineLimit ? "text-destructive" : "text-white"}`}>{totalCaffeineMg}mg</span>
+                       <span className={`text-xl font-black ${totalCaffeineMg > caffeineLimit ? "text-destructive" : "text-foreground"}`}>{totalCaffeineMg}mg</span>
                    </div>
                    
-                   <div className="w-full bg-black/40 rounded-full h-1.5 mb-4 border border-border/30">
+                   <div className="w-full bg-muted rounded-full h-1.5 mb-4 border border-border/30">
                      <div
                        className={`h-1.5 rounded-full transition-all ${totalCaffeineMg > caffeineLimit ? "bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-warning shadow-[0_0_10px_rgba(245,158,11,0.5)]"}`}
                        style={{ width: `${Math.min((totalCaffeineMg / caffeineLimit) * 100, 100)}%` }}
@@ -434,7 +458,7 @@ REFERENCE VALUES (per standard serving):
           </Dialog>
 
           {/* AI Analyzer Toggle */}
-          <Button variant="outline" className={`flex-1 h-12 rounded-xl font-bold gap-2 border-border/40 ${showAI ? 'bg-primary/20 text-primary border-primary/30' : 'bg-surface-low hover:bg-surface-highest hover:text-white'}`} onClick={() => setShowAI(!showAI)}>
+          <Button variant="outline" className={`flex-1 h-12 rounded-xl font-bold gap-2 border-border/40 ${showAI ? 'bg-primary/20 text-primary border-primary/30' : 'bg-surface-low hover:bg-surface-highest hover:text-foreground'}`} onClick={() => setShowAI(!showAI)}>
             <Sparkles className={`h-4 w-4 ${showAI ? 'animate-pulse' : ''}`} /> {showAI ? 'Hide Analyzer' : 'AI Analyzer'}
           </Button>
         </motion.div>
@@ -456,7 +480,7 @@ REFERENCE VALUES (per standard serving):
                  Describe your meal in natural language. We'll extract the macros, calories, and micronutrients automatically.
                </p>
                
-               <Textarea placeholder="E.g., I had 3 boiled eggs, 2 slices of whole wheat toast, and a medium banana." value={aiInput} onChange={(e) => setAiInput(e.target.value)} rows={3} className="bg-black/50 border-border/40 rounded-xl resize-none focus-visible:ring-primary/40 text-sm font-medium mb-4 shadow-inner" />
+               <Textarea placeholder="E.g., I had 3 boiled eggs, 2 slices of whole wheat toast, and a medium banana." value={aiInput} onChange={(e) => setAiInput(e.target.value)} rows={3} className="bg-surface border-border/40 rounded-xl resize-none focus-visible:ring-primary/40 text-sm font-medium mb-4 shadow-inner" />
                
                <Button onClick={analyzeWithAI} disabled={aiLoading || !aiInput.trim()} className="w-full sm:w-auto h-10 px-8 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90">
                  {aiLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deep Analysis...</> : "Analyze & Extract"}
@@ -474,7 +498,7 @@ REFERENCE VALUES (per standard serving):
           {isToday && (
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="rounded-[2rem] bg-surface-low border border-border/30 p-6 flex flex-col h-[400px]">
                <div className="flex items-center justify-between mb-4 shrink-0">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-white">Food Database</h2>
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-foreground">Food Database</h2>
                </div>
 
                <div className="relative mb-4 shrink-0">
@@ -488,13 +512,13 @@ REFERENCE VALUES (per standard serving):
                </div>
 
                {search.length > 1 && (
-                 <div className="flex items-center justify-between bg-black/30 p-3 rounded-xl border border-border/30 mb-3 shrink-0">
+                 <div className="flex items-center justify-between bg-surface p-3 rounded-xl border border-border/30 mb-3 shrink-0">
                    <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Portion</span>
                    <div className="flex items-center gap-3">
                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm bg-surface-lowest hover:bg-muted" onClick={() => setServings(Math.max(0.5, servings - 0.5))}>
                        <Minus className="h-3 w-3" />
                      </Button>
-                     <span className="text-sm font-black text-white w-6 text-center">{servings}</span>
+                    <span className="text-sm font-black text-foreground w-6 text-center">{servings}</span>
                      <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm bg-surface-lowest hover:bg-muted" onClick={() => setServings(Math.min(10, servings + 0.5))}>
                        <Plus className="h-3 w-3" />
                      </Button>
@@ -506,7 +530,7 @@ REFERENCE VALUES (per standard serving):
                  {results.length > 0 ? results.map((food) => (
                    <div key={food.name} className="w-full text-left p-3 rounded-xl bg-surface-low hover:bg-surface transition-colors border border-border/30 focus-within:border-primary/50 group flex flex-col cursor-pointer" onClick={() => logFood(food)}>
                      <div className="flex justify-between items-start mb-2">
-                       <p className="text-sm font-bold text-white group-hover:text-primary transition-colors line-clamp-1">{food.name}</p>
+                      <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">{food.name}</p>
                        <span className="text-xs font-black text-primary shrink-0 bg-primary/10 px-2 py-0.5 rounded-sm">{Math.round(food.calories * servings)} KCAL</span>
                      </div>
                      <div className="flex gap-1.5 flex-wrap">
@@ -535,7 +559,7 @@ REFERENCE VALUES (per standard serving):
           {/* Right Column: Logged Timeline */}
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }} className={`rounded-[2rem] bg-surface-low border border-border/30 p-6 flex flex-col ${isToday ? 'h-[400px]' : 'h-auto min-h-[400px] col-span-1 lg:col-span-2'}`}>
               <div className="flex items-center justify-between mb-6 shrink-0">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-white">
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-foreground">
                     {isToday ? "Today's Consumption Timeline" : `Logs for ${new Date(selectedDate + "T12:00:00").toLocaleDateString()}`}
                   </h2>
                   <Badge variant="outline" className="text-[10px] tracking-widest border-white/20 bg-white/5">{meals.length} ENTRIES</Badge>
@@ -543,8 +567,14 @@ REFERENCE VALUES (per standard serving):
 
               <div className="flex-1 overflow-y-auto pr-2 space-y-3 scrollbar-hide relative">
                   {meals.length === 0 ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center opacity-30">
-                       <span className="text-[4rem] mb-4 grayscale">🍽️</span>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center opacity-70">
+                       <SplineEmbed
+                         src={emptyMealsSpline}
+                         title="Empty meal timeline spline"
+                         className="h-28 w-28 mb-4 rounded-2xl"
+                         minWidth={1024}
+                         fallback={<span className="text-[4rem] mb-4 grayscale">🍽️</span>}
+                       />
                        <p className="text-xs font-bold uppercase tracking-widest">Clean Slate</p>
                     </div>
                   ) : (
@@ -559,8 +589,8 @@ REFERENCE VALUES (per standard serving):
                            <div className="bg-surface border border-border/30 p-4 rounded-2xl hover:border-border/40 transition-colors relative overflow-hidden group/card mt-0">
                                
                                <div className="flex justify-between items-start mb-2">
-                                  <h4 className="text-sm font-bold text-white leading-tight pr-8">{meal.recipe_title}</h4>
-                                  <span className="text-xs font-black text-white bg-white/10 px-2 py-0.5 rounded-md absolute right-4 top-4">
+                                  <h4 className="text-sm font-bold text-foreground leading-tight pr-8">{meal.recipe_title}</h4>
+                                  <span className="text-xs font-black text-foreground bg-muted px-2 py-0.5 rounded-md absolute right-4 top-4">
                                      {Math.round(meal.calories * meal.servings)} Cal
                                   </span>
                                </div>
@@ -596,7 +626,7 @@ REFERENCE VALUES (per standard serving):
 // ──────────────────────────────────────────────
 function MacroPill({ label, val, color, unit }) {
     return (
-        <div className={`flex flex-col items-center justify-center rounded-2xl border bg-black/40 ${color} p-3 backdrop-blur-md relative overflow-hidden`}>
+        <div className={`flex flex-col items-center justify-center rounded-2xl border bg-surface ${color} p-3 backdrop-blur-md relative overflow-hidden`}>
             <span className="text-[10px] uppercase tracking-widest opacity-80 font-bold mb-1">{label}</span>
             <div className="flex items-baseline gap-0.5">
                <span className="text-xl font-black">{val}</span>
@@ -614,7 +644,7 @@ function MicroBar({ label, val, limit, unit, isWarning }) {
                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{label}</p>
                  <p className={`text-xs font-black mt-0.5 ${isWarning ? 'text-destructive' : 'text-primary'}`}>{Math.round(val)} <span className="text-[10px] opacity-70">/ {limit}{unit}</span></p>
              </div>
-             <div className="flex-1 bg-black rounded-full h-1.5 overflow-hidden">
+             <div className="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
                 <div 
                   className={`h-full transition-all ${isWarning ? 'bg-destructive shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-primary/50'}`} 
                   style={{ width: `${percentage}%` }}

@@ -6,7 +6,7 @@ import { getLocalDate } from "@/lib/utils";
 export function useWorkouts() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const { data: checkins = [] } = useQuery({
+  const { data: checkins = [], isLoading } = useQuery({
     queryKey: ["workout_checkins", user?.id],
     queryFn: async () => {
       try {
@@ -42,5 +42,5 @@ export function useWorkouts() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["workout_checkins"] }),
   });
-  return { checkins, addCheckin };
+  return { checkins, addCheckin, isLoading };
 }
