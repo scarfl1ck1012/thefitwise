@@ -2,7 +2,8 @@ import React, { useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Crown, Medal } from "lucide-react";
+import { Crown, Medal, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function LeaderboardView({ users, friendships, currentUser }) {
   const [friendsOnly, setFriendsOnly] = React.useState(false);
@@ -29,6 +30,20 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
   const rest = rankedUsers.slice(3);
 
   const currentUserRanked = rankedUsers.find((u) => u.id === currentUser.id);
+
+  const handleShareRank = async () => {
+    if (!currentUserRanked) return;
+    const text = `I am ranked #${currentUserRanked.rank} on FitWise with ${currentUserRanked.xp.toLocaleString()} XP.`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+      } else {
+        await navigator.clipboard.writeText(text);
+      }
+    } catch {
+      // no-op
+    }
+  };
 
   // Podium arrangement: 2nd, 1st, 3rd
   const getPodiumOrder = (users) => {
@@ -203,6 +218,16 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
             <div className="text-base font-bold text-primary">
               {currentUserRanked.xp.toLocaleString()} XP
             </div>
+          </div>
+          <div className="mt-3 bg-surface-low border border-border/30 rounded-[1.5rem] px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Showcase your ranking</p>
+              <p className="text-xs text-muted-foreground">Share your current leaderboard position with friends.</p>
+            </div>
+            <Button onClick={handleShareRank} variant="outline" className="rounded-xl">
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
           </div>
         </div>
       )}

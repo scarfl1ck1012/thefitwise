@@ -1,10 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, CalendarDays, Clock3 } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock3, Camera, Image as ImageIcon, Route } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useWorkouts } from "@/hooks/useWorkouts";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 function formatDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
@@ -26,11 +29,36 @@ function addMinutesToTime(dateLike, mins) {
 }
 
 export default function GymCalendarPage() {
+  const { user } = useAuth();
   const { checkins } = useWorkouts();
   const [cursorMonth, setCursorMonth] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
+  const [photos, setPhotos] = useState([]);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
+  const fileInputRef = useRef(null);
 
   const monthDays = useMemo(() => getMonthDays(cursorMonth), [cursorMonth]);
+
+  useEffect(() => {
+    const loadPhotos = async () => {
+      if (!user?.id) return;
+      const basePath = `workout-progress/${user.id}/${selectedDate}`;
+      const { data, error } = await supabase.storage.from("avatars").list(basePath, {
+        limit: 10,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+      if (error || !data) {
+        setPhotos([]);
+        return;
+      }
+      const urls = data.map((file) => ({
+        name: file.name,
+        url: supabase.storage.from("avatars").getPublicUrl(`${basePath}/${file.name}`).data.publicUrl,
+      }));
+      setPhotos(urls);
+    };
+    loadPhotos();
+  }, [selectedDate, user?.id]);
 
   const selectedEntries = useMemo(() => {
     return checkins
@@ -51,10 +79,33 @@ export default function GymCalendarPage() {
           kind,
           range: `${startStr} - ${endStr}`,
           detail: entry.notes || `${kind} session`,
+          routeKm: (() => {
+            const match = (entry.notes || "").match(/(\d+(\.\d+)?)\s?km/i);
+            return match ? match[1] : null;
+          })(),
         };
       })
       .sort((a, b) => a.range.localeCompare(b.range));
   }, [checkins, selectedDate]);
+
+  const selectedCardio = selectedEntries.find((entry) => entry.kind === "Cardio");
+
+  const handleUploadClick = () => fileInputRef.current?.click();
+
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.id) return;
+    if (photos.length >= 2) return;
+    const path = `workout-progress/${user.id}/${selectedDate}/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, {
+      upsert: false,
+    });
+    if (!error) {
+      const url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+      setPhotos((prev) => [...prev, { name: file.name, url }].slice(0, 2));
+    }
+    event.target.value = "";
+  };
 
   return (
     <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4">
@@ -147,7 +198,8 @@ export default function GymCalendarPage() {
         transition={{ delay: 0.05 }}
         className="rounded-[2rem] bg-card p-5 lg:p-6 border border-border/30 shadow-card"
       >
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-primary" />
           <p className="text-sm font-bold text-foreground">
             {new Date(`${selectedDate}T12:00:00`).toLocaleDateString("en-US", {
@@ -156,7 +208,66 @@ export default function GymCalendarPage() {
               month: "long",
             })}
           </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+            <Button
+              onClick={handleUploadClick}
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
+              disabled={photos.length >= 2}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Add Photo
+            </Button>
+          </div>
         </div>
+
+        {selectedCardio && (
+          <div className="mb-4 rounded-[1.5rem] bg-gradient-to-br from-info/15 to-primary/10 border border-info/20 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-info font-bold">Cardio Summary</p>
+                <p className="text-lg font-bold text-foreground mt-1">{selectedCardio.detail}</p>
+              </div>
+              <Badge variant="outline" className="border-info/40 text-info">
+                {selectedCardio.range}
+              </Badge>
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-sm">
+              <div className="rounded-xl bg-background/70 px-3 py-2 border border-border/30">
+                <span className="text-muted-foreground">Route</span>
+                <p className="font-bold text-foreground flex items-center gap-2 mt-1">
+                  <Route className="h-4 w-4 text-info" />
+                  {selectedCardio.routeKm ? `${selectedCardio.routeKm} km tracked` : "GPS cardio session"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!!photos.length && (
+          <div className="mb-4 flex items-center gap-2">
+            {photos.map((photo) => (
+              <button
+                key={photo.url}
+                onClick={() => setPreviewPhoto(photo.url)}
+                className="h-10 w-10 rounded-xl border border-border/30 bg-surface flex items-center justify-center"
+                title="Open progress photo"
+              >
+                <ImageIcon className="h-4 w-4 text-primary" />
+              </button>
+            ))}
+            <p className="text-xs text-muted-foreground">Up to 2 progress photos per day</p>
+          </div>
+        )}
 
         <div className="space-y-3">
           {selectedEntries.length === 0 ? (
@@ -177,6 +288,21 @@ export default function GymCalendarPage() {
           )}
         </div>
       </motion.div>
+
+      <Dialog open={!!previewPhoto} onOpenChange={(open) => !open && setPreviewPhoto(null)}>
+        <DialogContent className="sm:max-w-xl rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle>Progress Photo</DialogTitle>
+          </DialogHeader>
+          {previewPhoto && (
+            <img
+              src={previewPhoto}
+              alt="Progress"
+              className="w-full max-h-[70vh] object-contain rounded-xl"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -95,16 +95,29 @@ export default function AppLayout() {
           <img src="/logo.png" alt="FitWise" className="h-7 w-auto" />
           <span className="font-bold text-foreground">The Fit Wise</span>
         </div>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-foreground"
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="h-10 w-16 rounded-full border border-border/50 bg-surface px-1 relative"
+          >
+            <span
+              className={`absolute top-1 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center transition-transform duration-300 ${isDark ? "translate-x-0" : "translate-x-6"}`}
+            >
+              {isDark ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+            </span>
+          </button>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="text-foreground"
+          >
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -158,7 +171,7 @@ export default function AppLayout() {
       <button
         onClick={toggleTheme}
         aria-label="Toggle theme"
-        className="fixed top-4 right-4 lg:top-6 lg:right-6 z-[70] h-11 w-20 rounded-full border border-border/50 bg-surface-low/85 backdrop-blur-xl shadow-card transition-all hover:scale-[1.02] active:scale-95"
+        className="hidden lg:block fixed top-6 right-6 z-[70] h-11 w-20 rounded-full border border-border/50 bg-surface-low/85 backdrop-blur-xl shadow-card transition-all hover:scale-[1.02] active:scale-95"
       >
         <span
           className={`absolute top-1 h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center transition-transform duration-300 ${isDark ? "translate-x-1" : "translate-x-10"}`}

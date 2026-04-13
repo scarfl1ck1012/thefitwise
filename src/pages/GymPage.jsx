@@ -19,10 +19,8 @@ import {
   Dumbbell,
   Activity,
   Flame,
-  Clock3,
   Play,
   Square,
-  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -190,7 +188,6 @@ export default function GymPage() {
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSec, setElapsedSec] = useState(0);
   const [liveRoute, setLiveRoute] = useState([]);
-  const [historyFilter, setHistoryFilter] = useState("all");
 
   // Cardio Form State
   const [cardioType, setCardioType] = useState("incline_walk");
@@ -204,7 +201,6 @@ export default function GymPage() {
       return [];
     }
   });
-  const [historyLimit, setHistoryLimit] = useState(14);
   const timerRef = useRef(null);
   const gpsRef = useRef(null);
 
@@ -247,31 +243,6 @@ export default function GymPage() {
   };
 
   const dayExercises = weeklyPlan[selectedDay] || [];
-  const groupedHistory = useMemo(() => {
-    const relevant = checkins
-      .filter((entry) => historyFilter === "all" || entry.workout_type === historyFilter)
-      .slice(0, 200);
-    const map = {};
-    relevant.forEach((entry) => {
-      if (!map[entry.logged_at]) map[entry.logged_at] = [];
-      const dayKey = weekdayKey(entry.logged_at);
-      const dayPlan = weeklyPlan[dayKey] || [];
-      const focus = [...new Set(dayPlan.map((ex) => ex.muscle || ex.type).filter(Boolean))]
-        .slice(0, 2)
-        .join(" + ");
-      map[entry.logged_at].push({
-        ...entry,
-        focus,
-        time: new Date(entry.created_at || `${entry.logged_at}T18:00:00`).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      });
-    });
-    return Object.entries(map)
-      .sort(([a], [b]) => b.localeCompare(a))
-      .slice(0, historyLimit);
-  }, [checkins, historyFilter, historyLimit, weeklyPlan]);
 
   const filteredExercises = useMemo(() => {
     if (!searchEx) return [];
