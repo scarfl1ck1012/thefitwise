@@ -151,39 +151,46 @@ export default function WorkoutsPage() {
   const overloadData = useMemo(() => {
     if (!selectedExercise) return [];
     
-    let baselineWeight = null;
+    // We will extract the exact programmed weights from the Workout Builder for the different days of the week!
+    const daysOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    const plannedData = [];
+    
     try {
       const plan = JSON.parse(localStorage.getItem("fitwise_weekly_plan_gym") || "{}");
-      for (const day of Object.values(plan)) {
-         for (const ex of day) {
-            if (ex.name === selectedExercise && ex.weight) {
-               baselineWeight = Number(ex.weight.toString().replace(/[^0-9.]/g, ""));
-               break;
-            }
+      daysOrder.forEach(day => {
+         const dayPlan = plan[day];
+         if (dayPlan) {
+            dayPlan.forEach(ex => {
+               if (ex.name === selectedExercise && ex.weight) {
+                  const val = Number(ex.weight.toString().replace(/[^0-9.]/g, ""));
+                  plannedData.push({
+                     date: day.charAt(0).toUpperCase() + day.slice(1, 3), // e.g. Mon, Tue, Wed
+                     weight: val
+                  });
+               }
+            });
          }
-         if (baselineWeight !== null) break;
-      }
+      });
     } catch {}
 
     const existing = exerciseProgressMap[selectedExercise] || [];
-    
-    if (!existing.length) {
-       if (baselineWeight) {
-          return [{ date: "Current Baseline", weight: baselineWeight }];
-       }
-       return [];
-    }
-
-    const data = existing.slice(-12).map((row) => ({
+    const historicalData = existing.slice(-12).map((row) => ({
       date: (row.date || "").slice(5),
       weight: Number(row.weight || 0),
     }));
 
-    if (baselineWeight && data.length < 2) {
-       data.unshift({ date: "Start", weight: baselineWeight });
+    // If they have historical check-in data, append the planned data, or substitute it.
+    // The user strictly wants the graph to show the builder weights across days.
+    if (plannedData.length > 0) {
+       // Just plotting the planned data points so they can see Wed vs Thurs vs Sun natively!
+       return plannedData;
     }
 
-    return data;
+    if (!historicalData.length) {
+       return [];
+    }
+
+    return historicalData;
   }, [exerciseProgressMap, selectedExercise]);
 
   const overloadTrend = useMemo(() => {

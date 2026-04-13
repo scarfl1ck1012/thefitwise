@@ -47,7 +47,7 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
     if (!currentUserRanked) return;
     try {
       if (cardRef.current) {
-        const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2, useCORS: true, allowTaint: true });
+        const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2, useCORS: true });
         const blobObj = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         if (blobObj) {
           const msg = `I just hit Rank #${currentUserRanked.rank} on the Global FitWise Leaderboard! 🚀🔥\n\nCome train with me and level up your stats. Join the squad here:\n👉 https://thefitwise.app`;
@@ -265,8 +265,8 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
         <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none text-white overflow-visible px-4 lg:px-0">
           <div ref={cardRef} className="relative mx-auto w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-[#1c1b1b] to-[#131313] border border-white/10 p-8 shadow-[0_20px_40px_rgba(0,0,0,0.5)] overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-[60px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none transform -translate-x-1/3 translate-y-1/3" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/30 to-transparent pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-primary/20 to-transparent pointer-events-none transform -translate-x-1/4 translate-y-1/4" />
             
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="relative">
