@@ -5,6 +5,7 @@ import { useWaterLogs } from "@/hooks/useWaterLogs";
 import { useMeals } from "@/hooks/useMeals";
 import { useYearActivity } from "@/hooks/useYearActivity";
 import { getLocalDate } from "@/lib/utils";
+import { gymExercises } from "@/lib/gymExercises";
 import { motion } from "framer-motion";
 import { Percent, Dumbbell, Droplets, Flame, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -128,7 +129,7 @@ export default function WorkoutsPage() {
     const fromProgress = Object.keys(exerciseProgressMap);
     let fromPlan = [];
     try {
-      const plan = JSON.parse(localStorage.getItem("fitwise_weekly_plan") || "{}");
+      const plan = JSON.parse(localStorage.getItem("fitwise_weekly_plan_gym") || "{}");
       fromPlan = Object.values(plan)
         .flat()
         .map((ex) => ex.name)
@@ -136,7 +137,11 @@ export default function WorkoutsPage() {
     } catch {
       // ignore
     }
-    return [...new Set([...fromProgress, ...fromPlan])];
+    const combinedSet = [...new Set([...fromProgress, ...fromPlan])];
+    return combinedSet.filter(name => {
+       const dbEx = gymExercises.find(g => g.name === name);
+       return !dbEx || dbEx.type !== "home";
+    });
   }, [exerciseProgressMap]);
 
   const [selectedExercise, setSelectedExercise] = useState(
@@ -312,21 +317,6 @@ export default function WorkoutsPage() {
                 </SelectContent>
               </Select>
             </div>
-            {exerciseNames.slice(0, 6).map((name) => (
-              <button
-                key={name}
-                onClick={() => setSelectedExercise(name)}
-                onMouseEnter={() => setSelectedExercise(name)}
-                title={`View ${name} progression`}
-                className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
-                  selectedExercise === name
-                    ? "bg-primary/10 border-primary/30 text-primary"
-                    : "bg-surface border-border/30 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {name}
-              </button>
-            ))}
             <Badge
               variant="outline"
               className={

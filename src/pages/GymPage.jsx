@@ -158,14 +158,33 @@ export default function GymPage() {
     localStorage.setItem("fitwise_gym_mode", mode);
   }, [mode]);
 
-  const [weeklyPlan, setWeeklyPlan] = useState(() => {
+  const [weeklyPlanGym, setWeeklyPlanGym] = useState(() => {
     try {
-      const saved = localStorage.getItem("fitwise_weekly_plan");
+      const saved = localStorage.getItem("fitwise_weekly_plan_gym");
+      if (!saved) {
+         const old = localStorage.getItem("fitwise_weekly_plan");
+         if (old) {
+            localStorage.setItem("fitwise_weekly_plan_gym", old);
+            return JSON.parse(old);
+         }
+      }
       return saved ? JSON.parse(saved) : emptyWeek();
     } catch {
       return emptyWeek();
     }
   });
+
+  const [weeklyPlanHome, setWeeklyPlanHome] = useState(() => {
+    try {
+      const saved = localStorage.getItem("fitwise_weekly_plan_home");
+      return saved ? JSON.parse(saved) : emptyWeek();
+    } catch {
+      return emptyWeek();
+    }
+  });
+
+  const weeklyPlan = mode === "gym" ? weeklyPlanGym : mode === "home" ? weeklyPlanHome : {};
+  const setWeeklyPlan = mode === "gym" ? setWeeklyPlanGym : setWeeklyPlanHome;
 
   const [restDays, setRestDays] = useState(() => {
     try {
@@ -177,9 +196,10 @@ export default function GymPage() {
   });
 
   useEffect(() => {
-    localStorage.setItem("fitwise_weekly_plan", JSON.stringify(weeklyPlan));
+    localStorage.setItem("fitwise_weekly_plan_gym", JSON.stringify(weeklyPlanGym));
+    localStorage.setItem("fitwise_weekly_plan_home", JSON.stringify(weeklyPlanHome));
     localStorage.setItem("fitwise_weekly_rest", JSON.stringify(restDays));
-  }, [weeklyPlan, restDays]);
+  }, [weeklyPlanGym, weeklyPlanHome, restDays]);
 
   const [selectedDay, setSelectedDay] = useState("monday");
   const [builderOpen, setBuilderOpen] = useState(false);
