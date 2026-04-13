@@ -53,6 +53,34 @@ export function useMeals(date) {
     },
     enabled: !!user,
   });
+  const { data: historyMeals = [] } = useQuery({
+    queryKey: ["meals_history", user?.id],
+    queryFn: async () => {
+      const end = new Date();
+      const start = new Date();
+      start.setMonth(start.getMonth() - 6);
+      const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`;
+      const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, "0")}-${String(end.getDate()).padStart(2, "0")}`;
+      try {
+        const { data, error } = await supabase
+          .from("meal_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("logged_at", startStr)
+          .lte("logged_at", endStr)
+          .order("logged_at", { ascending: true });
+        if (error) {
+          console.error("Supabase meals_history fetch error:", error);
+          return [];
+        }
+        return data || [];
+      } catch (err) {
+        console.error("Unexpected error fetching meals history:", err);
+        return [];
+      }
+    },
+    enabled: !!user,
+  });
   const addMeal = useMutation({
     mutationFn: async (meal) => {
       const { error } = await supabase
@@ -63,6 +91,7 @@ export function useMeals(date) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["meals"] });
       qc.invalidateQueries({ queryKey: ["meals_monthly"] });
+      qc.invalidateQueries({ queryKey: ["meals_history"] });
     },
   });
   const deleteMeal = useMutation({
@@ -73,6 +102,7 @@ export function useMeals(date) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["meals"] });
       qc.invalidateQueries({ queryKey: ["meals_monthly"] });
+      qc.invalidateQueries({ queryKey: ["meals_history"] });
     },
   });
   const totalCalories = meals.reduce((s, m) => s + m.calories * m.servings, 0);
@@ -96,6 +126,7 @@ export function useMeals(date) {
   return {
     meals,
     monthlyMeals,
+    historyMeals,
     isLoading,
     addMeal,
     deleteMeal,

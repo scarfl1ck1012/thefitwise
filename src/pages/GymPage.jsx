@@ -20,6 +20,9 @@ import {
   Activity,
   Flame,
   Clock3,
+  Play,
+  Square,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -39,6 +42,8 @@ const emptyWeek = () => ({
 
 const CARDIO_TYPES = [
   { id: "incline_walk", label: "Incline Walk", calPerMin: 5, icon: "⛰️" },
+  { id: "outdoor_walk", label: "Outdoor Walk", calPerMin: 4.5, icon: "🚶" },
+  { id: "jog", label: "Jogging", calPerMin: 8, icon: "🏃" },
   { id: "run", label: "Running", calPerMin: 11, icon: "🏃" },
   { id: "swim", label: "Swimming", calPerMin: 10, icon: "🏊" },
   { id: "cycle", label: "Cycling", calPerMin: 8, icon: "🚴" },
@@ -69,6 +74,74 @@ function getDateForWeekday(dayKey) {
 
 function toDateStr(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function weekdayKey(dateStr) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const d = new Date(year, month - 1, day);
+  const dayMap = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  return dayMap[d.getDay()];
+}
+
+function calcDistanceKm(points) {
+  if (!points || points.length < 2) return 0;
+  const rad = (v) => (v * Math.PI) / 180;
+  let sum = 0;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+    const dLat = rad(b.lat - a.lat);
+    const dLng = rad(b.lng - a.lng);
+    const lat1 = rad(a.lat);
+    const lat2 = rad(b.lat);
+    const h =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+    sum += 6371 * (2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)));
+  }
+  return Number(sum.toFixed(2));
+}
+
+function MiniRouteMap({ points }) {
+  if (!points || points.length < 2) {
+    return (
+      <div className="h-40 rounded-xl bg-surface-lowest border border-border/30 flex items-center justify-center text-xs text-muted-foreground">
+        Route map will appear once movement is detected.
+      </div>
+    );
+  }
+
+  const lats = points.map((p) => p.lat);
+  const lngs = points.map((p) => p.lng);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const latSpan = Math.max(maxLat - minLat, 0.0001);
+  const lngSpan = Math.max(maxLng - minLng, 0.0001);
+
+  const polyline = points
+    .map((p) => {
+      const x = ((p.lng - minLng) / lngSpan) * 280 + 20;
+      const y = 180 - ((p.lat - minLat) / latSpan) * 140;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  return (
+    <div className="h-40 rounded-xl bg-surface-lowest border border-border/30 overflow-hidden">
+      <svg viewBox="0 0 320 180" className="h-full w-full">
+        <polyline
+          points={polyline}
+          fill="none"
+          stroke="hsl(var(--info))"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
 }
 
 export default function GymPage() {
@@ -113,12 +186,26 @@ export default function GymPage() {
   const [builderOpen, setBuilderOpen] = useState(false);
   const [restModalOpen, setRestModalOpen] = useState(false);
   const [searchEx, setSearchEx] = useState("");
-  const [timelineDay, setTimelineDay] = useState("monday");
+  const [isTracking, setIsTracking] = useState(false);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [liveRoute, setLiveRoute] = useState([]);
+  const [historyFilter, setHistoryFilter] = useState("all");
 
   // Cardio Form State
   const [cardioType, setCardioType] = useState("incline_walk");
-  const [cardioDuration, setCardioDuration] = useState("30");
+  const [cardioDuration, setCardioDuration] = useState("0");
   const [cardioIncline, setCardioIncline] = useState("12");
+  const [cardioSpeed, setCardioSpeed] = useState("5.5");
+  const [savedRoutes, setSavedRoutes] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("fitwise_route_history") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [historyLimit, setHistoryLimit] = useState(14);
+  const timerRef = useRef(null);
+  const gpsRef = useRef(null);
 
   const toggleRestDay = (day) => {
     setRestDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -146,39 +233,31 @@ export default function GymPage() {
   };
 
   const dayExercises = weeklyPlan[selectedDay] || [];
-  const selectedTimelineDate = toDateStr(getDateForWeekday(timelineDay));
-
-  const timelineEntries = useMemo(() => {
-    const logs = checkins
-      .filter((item) => item.logged_at === selectedTimelineDate)
-      .map((item) => ({
-        id: item.id,
-        kind: item.workout_type === "cardio" ? "cardio" : "gym",
-        time: new Date(item.created_at || `${item.logged_at}T18:00:00`).toLocaleTimeString([], {
+  const groupedHistory = useMemo(() => {
+    const relevant = checkins
+      .filter((entry) => historyFilter === "all" || entry.workout_type === historyFilter)
+      .slice(0, 200);
+    const map = {};
+    relevant.forEach((entry) => {
+      if (!map[entry.logged_at]) map[entry.logged_at] = [];
+      const dayKey = weekdayKey(entry.logged_at);
+      const dayPlan = weeklyPlan[dayKey] || [];
+      const focus = [...new Set(dayPlan.map((ex) => ex.muscle || ex.type).filter(Boolean))]
+        .slice(0, 2)
+        .join(" + ");
+      map[entry.logged_at].push({
+        ...entry,
+        focus,
+        time: new Date(entry.created_at || `${entry.logged_at}T18:00:00`).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        title:
-          item.workout_type === "cardio"
-            ? "Cardio Session"
-            : item.workout_type === "home"
-              ? "Home Workout"
-              : "Gym Workout",
-        detail: item.notes || `${item.duration_min || 0} min session`,
-        meta: `${item.duration_min || 0} min`,
-      }));
-
-    const planned = (weeklyPlan[timelineDay] || []).map((ex, idx) => ({
-      id: `plan-${idx}-${ex.instanceId || ex.name}`,
-      kind: "gym",
-      time: `${String(7 + idx).padStart(2, "0")}:00`,
-      title: ex.name,
-      detail: `${ex.sets || 3} sets · ${ex.reps || "10-12"} reps`,
-      meta: "Planned",
-    }));
-
-    return [...planned, ...logs].sort((a, b) => a.time.localeCompare(b.time));
-  }, [checkins, selectedTimelineDate, timelineDay, weeklyPlan]);
+      });
+    });
+    return Object.entries(map)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .slice(0, historyLimit);
+  }, [checkins, historyFilter, historyLimit, weeklyPlan]);
 
   const filteredExercises = useMemo(() => {
     if (!searchEx) return [];
@@ -217,22 +296,38 @@ export default function GymPage() {
       duration_min: 60,
       notes: `${mode === "home" ? "Home" : "Gym"} session`,
     });
+
+    const todayKey = weekdayKey(today);
+    const todayPlan = weeklyPlan[todayKey] || [];
+    const progressStore = JSON.parse(localStorage.getItem("fitwise_exercise_progress") || "{}");
+    todayPlan.forEach((ex, idx) => {
+      const baseline =
+        ex.muscle === "Legs" ? 40 : ex.muscle === "Back" ? 35 : ex.muscle === "Chest" ? 30 : 20;
+      const prev = progressStore[ex.name]?.[progressStore[ex.name].length - 1]?.weight || baseline;
+      const nextWeight = Number((prev + (idx % 2 === 0 ? 1.25 : 0.5)).toFixed(2));
+      if (!progressStore[ex.name]) progressStore[ex.name] = [];
+      progressStore[ex.name].push({ date: today, weight: nextWeight });
+    });
+    localStorage.setItem("fitwise_exercise_progress", JSON.stringify(progressStore));
+
     addXP.mutate(25);
     toast.success("Session Started! +25 XP");
   };
 
   const calculateCardioCalories = () => {
-    const mins = parseInt(cardioDuration) || 0;
+    const mins = (isTracking ? elapsedSec : parseInt(cardioDuration) * 60) / 60;
+    if (mins <= 0) return 0;
     if (cardioType === "incline_walk") {
       const inc = parseFloat(cardioIncline) || 0;
-      return Math.round(mins * (5 + (inc * 0.3)));
+      const speed = parseFloat(cardioSpeed) || 5.5;
+      return Math.round(mins * (4.5 + speed * 0.6 + inc * 0.35));
     }
     const typeObj = CARDIO_TYPES.find(t => t.id === cardioType);
     return typeObj ? Math.round(mins * typeObj.calPerMin) : 0;
   };
 
   const handleLogCardio = () => {
-    const mins = parseInt(cardioDuration) || 0;
+    const mins = isTracking ? Math.max(1, Math.round(elapsedSec / 60)) : parseInt(cardioDuration) || 0;
     if (mins <= 0) return toast.error("Enter a valid duration (minutes)");
     
     const calories = calculateCardioCalories();
@@ -244,16 +339,70 @@ export default function GymPage() {
       notes += ` at ${cardioIncline}% incline`;
     }
 
+    const distanceKm = calcDistanceKm(liveRoute);
     addCheckin.mutate({
       workout_type: "cardio",
       duration_min: mins,
-      notes: notes,
+      notes: `${notes}${distanceKm ? ` | ${distanceKm} km` : ""}`,
     });
     
     addXP.mutate(15);
     toast.success(`Cardio logged! Burned ~${calories} calories.`);
-    setCardioDuration("");
-    setCardioIncline("");
+    const route = {
+      id: String(Date.now()),
+      date: today,
+      type: cardioType,
+      points: liveRoute,
+      distanceKm,
+      duration: mins,
+    };
+    if (liveRoute.length > 1) {
+      const next = [route, ...savedRoutes].slice(0, 20);
+      setSavedRoutes(next);
+      localStorage.setItem("fitwise_route_history", JSON.stringify(next));
+    }
+    setCardioDuration("0");
+    setCardioIncline("12");
+    setLiveRoute([]);
+  };
+
+  const startLiveCardio = () => {
+    if (isTracking) return;
+    setElapsedSec(0);
+    setLiveRoute([]);
+    setIsTracking(true);
+    timerRef.current = setInterval(() => {
+      setElapsedSec((prev) => prev + 1);
+    }, 1000);
+    if ("geolocation" in navigator) {
+      gpsRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          setLiveRoute((prev) => [
+            ...prev,
+            {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              t: Date.now(),
+            },
+          ]);
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 2000 },
+      );
+    }
+  };
+
+  const stopLiveCardio = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (gpsRef.current !== null) {
+      navigator.geolocation.clearWatch(gpsRef.current);
+      gpsRef.current = null;
+    }
+    setIsTracking(false);
+    setCardioDuration(String(Math.max(1, Math.round(elapsedSec / 60))));
   };
 
   return (
@@ -267,24 +416,28 @@ export default function GymPage() {
           <p className="text-sm text-muted-foreground mt-1 font-medium">
             {mode === "home"
               ? "Bodyweight & minimal equipment"
-              : "Phase 2: Volume Accumulation"}
+              : mode === "gym"
+                ? "Phase 2: Volume Accumulation"
+                : "Live cardio tracking with GPS"}
           </p>
         </div>
         <div className="flex gap-3">
-          <Button
-            onClick={handleStartSession}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-6 h-12 shadow-[0_0_20px_rgba(34,197,94,0.3)] border-none text-xs"
-          >
-            {checkedIn ? "Session Completed" : "Start Session"}
-          </Button>
+          {mode !== "cardio" && (
+            <Button
+              onClick={handleStartSession}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-6 h-12 shadow-[0_0_20px_rgba(34,197,94,0.3)] border-none text-xs"
+            >
+              {checkedIn ? "Session Completed" : "Start Session"}
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Home / Gym Toggle */}
+      {/* Home / Gym / Cardio Toggle */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex bg-card dark:bg-surface-low border border-border/30 p-1.5 rounded-full max-w-xs relative overflow-hidden"
+        className="flex bg-card dark:bg-surface-low border border-border/30 p-1.5 rounded-full max-w-md relative overflow-hidden"
       >
         <button
           onClick={() => setMode("home")}
@@ -308,19 +461,36 @@ export default function GymPage() {
           <Dumbbell className="w-4 h-4" />
           Gym
         </button>
+        <button
+          onClick={() => setMode("cardio")}
+          className={`flex-1 flex justify-center items-center gap-2 py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 relative z-10 ${
+            mode === "cardio"
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          Cardio
+        </button>
 
         {/* Animated Background Pill */}
         <div
-          className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-full transition-all duration-300 ease-out z-0 bg-primary/10 dark:bg-primary/15 border border-primary/20 dark:border-primary/30"
+          className="absolute top-1.5 bottom-1.5 w-[calc(33.333%-6px)] rounded-full transition-all duration-300 ease-out z-0 bg-primary/10 dark:bg-primary/15 border border-primary/20 dark:border-primary/30"
           style={{
-            transform: mode === "gym" ? "translateX(100%)" : "translateX(0)",
+            transform:
+              mode === "home"
+                ? "translateX(0)"
+                : mode === "gym"
+                  ? "translateX(100%)"
+                  : "translateX(200%)",
             boxShadow: "0 0 15px rgba(34,197,94,0.2)",
           }}
         />
       </motion.div>
 
       {/* Top Banner Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {mode !== "cardio" && (
+      <div className="grid grid-cols-1 gap-4">
         {/* Rest Day Focus */}
         <motion.div
           onClick={() => setRestModalOpen(true)}
@@ -358,99 +528,101 @@ export default function GymPage() {
           </div>
         </motion.div>
 
-        {/* Cardio Tracker */}
+      </div>
+      )}
+
+      {mode === "cardio" && (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-[2rem] bg-card dark:bg-surface-low p-6 lg:p-8 border border-border/30 flex flex-col relative overflow-hidden shadow-card"
+          className="rounded-[2rem] bg-card dark:bg-surface-low/80 p-6 lg:p-8 border border-border/30 shadow-card space-y-5"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-[40px] pointer-events-none"></div>
+          <div className="flex flex-wrap items-center gap-2">
+            {CARDIO_TYPES.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setCardioType(type.id)}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border ${
+                  cardioType === type.id
+                    ? "bg-info/10 border-info/40 text-info"
+                    : "bg-surface-lowest border-border/30 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {type.icon} {type.label}
+              </button>
+            ))}
+          </div>
 
-          <div className="relative z-10 mb-4 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center border border-accent/20">
-              <Activity className="h-4 w-4 text-accent" />
-            </div>
-            <div>
-              <h3 className="font-bold text-foreground text-sm">Log Cardio</h3>
-              <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
-                Activity Box
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-surface-lowest border border-border/30">
+              <p className="text-[10px] uppercase text-muted-foreground font-bold">Time</p>
+              <p className="text-lg font-black text-foreground">
+                {String(Math.floor(elapsedSec / 60)).padStart(2, "0")}:
+                {String(elapsedSec % 60).padStart(2, "0")}
               </p>
             </div>
+            <div className="p-3 rounded-xl bg-surface-lowest border border-border/30">
+              <p className="text-[10px] uppercase text-muted-foreground font-bold">Calories</p>
+              <p className="text-lg font-black text-info">{calculateCardioCalories()}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-surface-lowest border border-border/30">
+              <p className="text-[10px] uppercase text-muted-foreground font-bold">Distance</p>
+              <p className="text-lg font-black text-foreground">{calcDistanceKm(liveRoute)} km</p>
+            </div>
+            <div className="p-3 rounded-xl bg-surface-lowest border border-border/30">
+              <p className="text-[10px] uppercase text-muted-foreground font-bold">GPS</p>
+              <p className="text-lg font-black text-foreground">{liveRoute.length} pts</p>
+            </div>
           </div>
 
-          <div className="flex-1 relative z-10 flex flex-col gap-4 justify-center">
-            {/* Type Selector */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
-              {CARDIO_TYPES.map((type) => (
-                <button
-                  key={type.id}
-                  onClick={() => setCardioType(type.id)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors border ${
-                    cardioType === type.id
-                      ? "bg-accent/10 border-accent/40 text-accent"
-                      : "bg-surface-lowest dark:bg-surface border-border/30 text-muted-foreground hover:bg-surface-high/50"
-                  }`}
-                >
-                  <span className="text-sm">{type.icon}</span>
-                  {type.label}
-                </button>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">
+                Incline (%)
+              </p>
+              <Input
+                type="number"
+                value={cardioIncline}
+                onChange={(e) => setCardioIncline(e.target.value)}
+                className="bg-surface-lowest border-border/40"
+                disabled={cardioType !== "incline_walk"}
+              />
             </div>
-
-            {/* Inputs */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Duration (min)</p>
-                <div className="relative">
-                  <Input 
-                    type="number" 
-                    value={cardioDuration} 
-                    onChange={(e) => setCardioDuration(e.target.value)}
-                    className="bg-surface-lowest dark:bg-surface border-border/40 font-bold"
-                    placeholder="e.g. 30"
-                  />
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">
-                  {cardioType === "incline_walk" ? "Incline (%)" : "Est. Burn"}
-                </p>
-                {cardioType === "incline_walk" ? (
-                  <Input 
-                    type="number" 
-                    value={cardioIncline} 
-                    onChange={(e) => setCardioIncline(e.target.value)}
-                    className="bg-surface-lowest dark:bg-surface border-border/40 font-bold"
-                    placeholder="e.g. 12"
-                  />
-                ) : (
-                  <div className="h-10 w-full rounded-md border border-transparent bg-transparent px-3 py-2 text-sm font-bold flex items-center gap-1.5 text-accent">
-                    <Flame className="h-4 w-4" /> {calculateCardioCalories()} cal
-                  </div>
-                )}
-              </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">
+                Speed (km/h)
+              </p>
+              <Input
+                type="number"
+                value={cardioSpeed}
+                onChange={(e) => setCardioSpeed(e.target.value)}
+                className="bg-surface-lowest border-border/40"
+                disabled={cardioType !== "incline_walk"}
+              />
             </div>
+          </div>
 
-            {/* Incline Walk specialized calorie display & Submit */}
-            <div className="flex items-center justify-between mt-2">
-              {cardioType === "incline_walk" && (
-                <div className="flex items-center gap-1.5 text-accent font-bold text-sm">
-                  <Flame className="h-4 w-4" /> {calculateCardioCalories()} cal
-                </div>
-              )}
-              <Button 
-                onClick={handleLogCardio} 
-                className="ml-auto w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground font-bold shadow-[0_0_15px_rgba(59,130,246,0.3)] border-none"
-              >
-                Log Activity
+          <MiniRouteMap points={liveRoute} />
+
+          <div className="flex flex-wrap gap-3">
+            {isTracking ? (
+              <Button onClick={stopLiveCardio} variant="destructive" className="rounded-xl">
+                <Square className="h-4 w-4 mr-2" /> Stop Live Session
               </Button>
-            </div>
+            ) : (
+              <Button onClick={startLiveCardio} className="rounded-xl bg-info hover:bg-info/90 text-info-foreground">
+                <Play className="h-4 w-4 mr-2" /> Start Live Session
+              </Button>
+            )}
+            <Button onClick={handleLogCardio} variant="outline" className="rounded-xl">
+              Save Cardio Log
+            </Button>
           </div>
         </motion.div>
-      </div>
+      )}
 
       {/* Workout Builder Main Section */}
+      {mode !== "cardio" && (
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -543,8 +715,9 @@ export default function GymPage() {
           )}
         </div>
       </motion.div>
+      )}
 
-      {/* Daily Timeline */}
+      {/* Workout Calendar Log */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -553,71 +726,80 @@ export default function GymPage() {
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h3 className="text-lg font-bold text-foreground">Daily Activity Timeline</h3>
+            <h3 className="text-lg font-bold text-foreground">Workout Calendar Log</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Planned workouts and logged gym/cardio sessions by time.
+              Browse past sessions by date and time blocks.
             </p>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {DAYS_OF_WEEK.map((day) => (
-              <button
-                key={day}
-                onClick={() => setTimelineDay(day)}
-                className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-colors ${
-                  timelineDay === day
-                    ? "bg-primary/10 text-primary border-primary/30"
-                    : "bg-surface text-muted-foreground border-border/30 hover:text-foreground"
-                }`}
-              >
-                {DAY_LABELS[day].slice(0, 3)}
-              </button>
-            ))}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={historyFilter === "all" ? "default" : "outline"}
+              onClick={() => setHistoryFilter("all")}
+            >
+              All
+            </Button>
+            <Button
+              size="sm"
+              variant={historyFilter === "cardio" ? "default" : "outline"}
+              onClick={() => setHistoryFilter("cardio")}
+            >
+              Cardio
+            </Button>
+            <Button
+              size="sm"
+              variant={historyFilter === "gym" ? "default" : "outline"}
+              onClick={() => setHistoryFilter("gym")}
+            >
+              Gym
+            </Button>
           </div>
         </div>
 
         <div className="max-h-[360px] overflow-y-auto pr-2 space-y-4">
-          {timelineEntries.length === 0 ? (
+          {groupedHistory.length === 0 ? (
             <div className="py-10 text-center">
               <p className="text-sm font-semibold text-foreground">No entries for this day</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Add workouts in the builder or log cardio to populate the timeline.
+                Add workouts or cardio logs to populate history.
               </p>
             </div>
           ) : (
-            timelineEntries.map((entry) => (
-              <div key={entry.id} className="flex gap-4">
-                <div className="w-20 shrink-0 text-xs text-muted-foreground font-semibold flex items-center gap-1">
-                  <Clock3 className="h-3 w-3" />
-                  {entry.time}
+            groupedHistory.map(([date, entries]) => (
+              <div key={date} className="rounded-xl border border-border/30 bg-surface-low p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-bold text-foreground">
+                    {new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      day: "2-digit",
+                      month: "long",
+                    })}
+                  </p>
+                  <Badge variant="outline">{entries.length} entries</Badge>
                 </div>
-                <div className="relative flex-1 pb-2">
-                  <span className="absolute -left-[18px] top-2 h-2.5 w-2.5 rounded-full bg-primary" />
-                  <div
-                    className={`rounded-xl border p-4 ${
-                      entry.kind === "cardio"
-                        ? "bg-info/10 border-info/30"
-                        : "bg-primary/5 border-primary/20"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-foreground">{entry.title}</p>
-                      <Badge
-                        variant="outline"
-                        className={
-                          entry.kind === "cardio"
-                            ? "border-info/40 text-info"
-                            : "border-primary/40 text-primary"
-                        }
-                      >
-                        {entry.meta}
-                      </Badge>
+                <div className="space-y-2">
+                  {entries.map((entry) => (
+                    <div key={entry.id} className="rounded-lg border border-border/30 bg-surface p-3">
+                      <p className="text-xs text-muted-foreground">{entry.time}</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">
+                        {entry.workout_type === "cardio"
+                          ? "Cardio Session"
+                          : entry.workout_type === "home"
+                            ? "Home Workout"
+                            : `Gym (${entry.focus || "General"})`}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{entry.notes}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{entry.detail}</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             ))
           )}
+        </div>
+        <div className="pt-4">
+          <Button variant="outline" onClick={() => setHistoryLimit((p) => p + 14)}>
+            Load older logs
+          </Button>
         </div>
       </motion.div>
 
