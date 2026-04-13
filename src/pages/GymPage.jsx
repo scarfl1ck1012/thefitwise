@@ -19,6 +19,7 @@ import {
   Dumbbell,
   Activity,
   Flame,
+  Clock3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,32 @@ const CARDIO_TYPES = [
   { id: "cycle", label: "Cycling", calPerMin: 8, icon: "🚴" },
   { id: "row", label: "Rowing", calPerMin: 9, icon: "🚣" },
 ];
+
+const DAY_INDEX = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+function getDateForWeekday(dayKey) {
+  const now = new Date();
+  const day = now.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + mondayOffset);
+  const result = new Date(monday);
+  const targetOffset = (DAY_INDEX[dayKey] + 6) % 7;
+  result.setDate(monday.getDate() + targetOffset);
+  return result;
+}
+
+function toDateStr(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
 
 export default function GymPage() {
   const { checkins, addCheckin } = useWorkouts();
@@ -86,6 +113,7 @@ export default function GymPage() {
   const [builderOpen, setBuilderOpen] = useState(false);
   const [restModalOpen, setRestModalOpen] = useState(false);
   const [searchEx, setSearchEx] = useState("");
+  const [timelineDay, setTimelineDay] = useState("monday");
 
   // Cardio Form State
   const [cardioType, setCardioType] = useState("incline_walk");
@@ -118,6 +146,39 @@ export default function GymPage() {
   };
 
   const dayExercises = weeklyPlan[selectedDay] || [];
+  const selectedTimelineDate = toDateStr(getDateForWeekday(timelineDay));
+
+  const timelineEntries = useMemo(() => {
+    const logs = checkins
+      .filter((item) => item.logged_at === selectedTimelineDate)
+      .map((item) => ({
+        id: item.id,
+        kind: item.workout_type === "cardio" ? "cardio" : "gym",
+        time: new Date(item.created_at || `${item.logged_at}T18:00:00`).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        title:
+          item.workout_type === "cardio"
+            ? "Cardio Session"
+            : item.workout_type === "home"
+              ? "Home Workout"
+              : "Gym Workout",
+        detail: item.notes || `${item.duration_min || 0} min session`,
+        meta: `${item.duration_min || 0} min`,
+      }));
+
+    const planned = (weeklyPlan[timelineDay] || []).map((ex, idx) => ({
+      id: `plan-${idx}-${ex.instanceId || ex.name}`,
+      kind: "gym",
+      time: `${String(7 + idx).padStart(2, "0")}:00`,
+      title: ex.name,
+      detail: `${ex.sets || 3} sets · ${ex.reps || "10-12"} reps`,
+      meta: "Planned",
+    }));
+
+    return [...planned, ...logs].sort((a, b) => a.time.localeCompare(b.time));
+  }, [checkins, selectedTimelineDate, timelineDay, weeklyPlan]);
 
   const filteredExercises = useMemo(() => {
     if (!searchEx) return [];
@@ -479,6 +540,83 @@ export default function GymPage() {
                 <Plus className="h-4 w-4 mr-2" /> Add Exercise
               </Button>
             </>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Daily Timeline */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+        className="rounded-[2rem] bg-card dark:bg-surface-low/80 p-6 lg:p-8 border border-border/30 shadow-card"
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">Daily Activity Timeline</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Planned workouts and logged gym/cardio sessions by time.
+            </p>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {DAYS_OF_WEEK.map((day) => (
+              <button
+                key={day}
+                onClick={() => setTimelineDay(day)}
+                className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-colors ${
+                  timelineDay === day
+                    ? "bg-primary/10 text-primary border-primary/30"
+                    : "bg-surface text-muted-foreground border-border/30 hover:text-foreground"
+                }`}
+              >
+                {DAY_LABELS[day].slice(0, 3)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-h-[360px] overflow-y-auto pr-2 space-y-4">
+          {timelineEntries.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-sm font-semibold text-foreground">No entries for this day</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add workouts in the builder or log cardio to populate the timeline.
+              </p>
+            </div>
+          ) : (
+            timelineEntries.map((entry) => (
+              <div key={entry.id} className="flex gap-4">
+                <div className="w-20 shrink-0 text-xs text-muted-foreground font-semibold flex items-center gap-1">
+                  <Clock3 className="h-3 w-3" />
+                  {entry.time}
+                </div>
+                <div className="relative flex-1 pb-2">
+                  <span className="absolute -left-[18px] top-2 h-2.5 w-2.5 rounded-full bg-primary" />
+                  <div
+                    className={`rounded-xl border p-4 ${
+                      entry.kind === "cardio"
+                        ? "bg-info/10 border-info/30"
+                        : "bg-primary/5 border-primary/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-bold text-foreground">{entry.title}</p>
+                      <Badge
+                        variant="outline"
+                        className={
+                          entry.kind === "cardio"
+                            ? "border-info/40 text-info"
+                            : "border-primary/40 text-primary"
+                        }
+                      >
+                        {entry.meta}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{entry.detail}</p>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </motion.div>

@@ -1,7 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
 import { useTranslation, LANGUAGES } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +39,6 @@ import {
   TrendingUp,
   Trophy,
   Shield,
-  Moon,
   Globe,
   Bell,
   UserCog,
@@ -152,7 +150,6 @@ function SelectableCards({ options, value, onChange, label }) {
 export default function SettingsPage() {
   const { profile, updateProfile } = useProfile();
   const { user } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const { lang, setLang, t } = useTranslation();
 
   const [name, setName] = useState(profile?.full_name || "");
@@ -222,14 +219,7 @@ export default function SettingsPage() {
     }
   }, [profile]);
 
-  // Fetch login history
-  useEffect(() => {
-    if (user?.id) {
-      fetchLoginHistory();
-    }
-  }, [user?.id]);
-
-  const fetchLoginHistory = async () => {
+  const fetchLoginHistory = useCallback(async () => {
     setLoadingHistory(true);
     try {
       const { data, error } = await supabase
@@ -245,7 +235,14 @@ export default function SettingsPage() {
       // Table might not exist yet — silently fail
     }
     setLoadingHistory(false);
-  };
+  }, [user?.id]);
+
+  // Fetch login history
+  useEffect(() => {
+    if (user?.id) {
+      fetchLoginHistory();
+    }
+  }, [user?.id, fetchLoginHistory]);
 
   // Calculate recommended calories based on goal weight + timeline
   const recommendedCalories = useMemo(() => {
@@ -708,23 +705,6 @@ export default function SettingsPage() {
         </h3>
 
         <div className="w-full rounded-2xl bg-surface-low/80 overflow-hidden">
-          {/* Dark Mode */}
-          <div className="px-4 py-5 lg:py-6 flex justify-between items-center border-b border-border/30">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-surface flex flex-col items-center justify-center border border-border/30 shadow-sm">
-                <Moon className="h-5 w-5 text-primary" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">
-                  {t("darkMode")}
-                </p>
-              </div>
-            </div>
-            <div className="mr-2">
-              <Switch checked={isDark} onCheckedChange={toggleTheme} />
-            </div>
-          </div>
-
           {/* Language */}
           <div className="px-4 py-5 lg:py-6 flex justify-between items-center">
             <div className="flex items-center gap-4">

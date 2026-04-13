@@ -155,6 +155,18 @@ export default function AppLayout() {
         </div>
       </main>
 
+      <button
+        onClick={toggleTheme}
+        aria-label="Toggle theme"
+        className="fixed top-4 right-4 lg:top-6 lg:right-6 z-[70] h-11 w-20 rounded-full border border-border/50 bg-surface-low/85 backdrop-blur-xl shadow-card transition-all hover:scale-[1.02] active:scale-95"
+      >
+        <span
+          className={`absolute top-1 h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center transition-transform duration-300 ${isDark ? "translate-x-1" : "translate-x-10"}`}
+        >
+          {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+        </span>
+      </button>
+
       <FitwiseChat />
       <OnboardingTutorial />
     </div>
