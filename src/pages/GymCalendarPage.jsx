@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, CalendarDays, Clock3, Camera, Image as ImageIcon, Route } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock3, Camera, Image as ImageIcon, Route, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,8 @@ import { useWorkouts } from "@/hooks/useWorkouts";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MiniRouteMap } from "@/pages/GymPage";
+import { toast } from "sonner";
 
 function formatDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
@@ -106,6 +108,33 @@ export default function GymCalendarPage() {
     }
     event.target.value = "";
   };
+
+  const handleDeletePhoto = async () => {
+    if (!previewPhoto || !user?.id) return;
+    const fileName = previewPhoto.split("/").pop();
+    const path = `workout-progress/${user.id}/${selectedDate}/${fileName}`;
+    
+    // Removing the file from Supabase storage
+    const { error } = await supabase.storage.from("avatars").remove([path]);
+    
+    if (error) {
+      toast.error("Failed to delete photo.");
+    } else {
+      setPhotos((prev) => prev.filter((p) => p.url !== previewPhoto));
+      setPreviewPhoto(null);
+      toast.success("Photo deleted.");
+    }
+  };
+
+  const routeHistory = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("fitwise_route_history") || "[]");
+    } catch {
+      return [];
+    }
+  }, []);
+
+  const cardioRoute = selectedCardio ? routeHistory.find(r => r.date === selectedDate) : null;
 
   return (
     <div className="space-y-6 pb-24 max-w-5xl mx-auto pl-4 lg:pl-0 pr-4 pt-4">
@@ -250,6 +279,11 @@ export default function GymCalendarPage() {
                 </p>
               </div>
             </div>
+            {cardioRoute && cardioRoute.points?.length > 1 && (
+              <div className="mt-3">
+                <MiniRouteMap points={cardioRoute.points} />
+              </div>
+            )}
           </div>
         )}
 
@@ -300,6 +334,14 @@ export default function GymCalendarPage() {
               alt="Progress"
               className="w-full max-h-[70vh] object-contain rounded-xl"
             />
+          )}
+          {previewPhoto && (
+            <div className="flex justify-end pt-2">
+              <Button onClick={handleDeletePhoto} variant="destructive" className="rounded-xl">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Photo
+              </Button>
+            </div>
           )}
         </DialogContent>
       </Dialog>

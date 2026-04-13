@@ -101,7 +101,7 @@ function calcDistanceKm(points) {
   return Number(sum.toFixed(2));
 }
 
-function MiniRouteMap({ points }) {
+export function MiniRouteMap({ points }) {
   if (!points || points.length < 2) {
     return (
       <div className="h-40 rounded-xl bg-surface-lowest border border-border/30 flex items-center justify-center text-xs text-muted-foreground">

@@ -1,12 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Crown, Medal, Share2 } from "lucide-react";
+import { Crown, Medal, Share2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 export default function LeaderboardView({ users, friendships, currentUser }) {
-  const [friendsOnly, setFriendsOnly] = React.useState(false);
+  const [friendsOnly, setFriendsOnly] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const rankedUsers = useMemo(() => {
     let pool = users;
@@ -31,18 +35,23 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
 
   const currentUserRanked = rankedUsers.find((u) => u.id === currentUser.id);
 
-  const handleShareRank = async () => {
+  const handleShareRank = () => {
     if (!currentUserRanked) return;
-    const text = `I am ranked #${currentUserRanked.rank} on FitWise with ${currentUserRanked.xp.toLocaleString()} XP.`;
+    setIsShareModalOpen(true);
+  };
+
+  const copyShareText = async () => {
+    if (!currentUserRanked) return;
+    const text = `I'm ranked #${currentUserRanked.rank} on FitWise with ${currentUserRanked.xp.toLocaleString()} XP. Join me and level up!`;
     try {
       if (navigator.share) {
         await navigator.share({ text });
       } else {
         await navigator.clipboard.writeText(text);
       }
-    } catch {
-      // no-op
-    }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
   };
 
   // Podium arrangement: 2nd, 1st, 3rd
@@ -231,6 +240,67 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
           </div>
         </div>
       )}
+
+      {/* ─── SHARE MODAL ─── */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none text-white overflow-visible">
+          <div className="relative mx-auto w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-[#1c1b1b] to-[#131313] border border-white/10 p-8 shadow-[0_20px_40px_rgba(0,0,0,0.5)] overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-[60px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none transform -translate-x-1/3 translate-y-1/3" />
+            
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="relative">
+                {currentUserRanked?.rank === 1 && (
+                  <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-8 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)] z-20" />
+                )}
+                <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-primary to-primary/30 mb-4 inline-block">
+                  <img src={currentUserRanked?.avatar} alt={currentUserRanked?.name} className="w-full h-full rounded-full object-cover border-2 border-[#131313]" />
+                </div>
+              </div>
+
+              <Badge className="bg-primary/20 text-primary hover:bg-primary/30 outline-none border-primary/20 mb-2 font-bold tracking-widest text-[10px] uppercase">
+                Global Ranking
+              </Badge>
+
+              <h2 className="text-xl font-bold font-sans">
+                {currentUserRanked?.id === currentUser.id ? "You are" : currentUserRanked?.name + " is"} officially Rank <span className="text-primary text-3xl font-black">#{currentUserRanked?.rank}</span>
+              </h2>
+              <p className="text-sm text-muted-foreground font-medium mt-2 max-w-[200px] leading-relaxed">
+                Dominating the leaderboards with {currentUserRanked?.xp.toLocaleString()} total XP.
+              </p>
+              
+              <div className="w-full mt-8 bg-black/40 border border-white/5 rounded-2xl p-4 flex justify-between items-center backdrop-blur-md">
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Level</span>
+                  <span className="text-lg font-black text-white">{currentUserRanked?.level}</span>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div className="flex flex-col text-right">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Next Rank</span>
+                  <span className="text-sm font-bold text-white mt-0.5">{currentUserRanked?.rank === 1 ? 'MAX' : `#${currentUserRanked?.rank - 1}`}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 w-full max-w-sm mx-auto mt-4 px-2">
+             <Button
+                variant="outline"
+                className="flex-1 rounded-[1.5rem] bg-surface-low/80 backdrop-blur border border-white/10 text-white hover:bg-white/10 py-6"
+                onClick={() => setIsShareModalOpen(false)}
+              >
+                Close
+              </Button>
+              <Button
+                className="flex-1 rounded-[1.5rem] bg-gradient-to-r from-primary to-green-500 hover:opacity-90 text-black border-none shadow-[0_0_15px_rgba(34,197,94,0.3)] font-bold py-6"
+                onClick={copyShareText}
+              >
+                {copied ? <Check className="h-4 w-4 mr-2" /> : <Share2 className="h-4 w-4 mr-2" />}
+                {copied ? "Copied Link" : "Share Stats"}
+              </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

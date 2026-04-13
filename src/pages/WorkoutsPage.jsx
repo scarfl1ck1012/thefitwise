@@ -152,9 +152,15 @@ export default function WorkoutsPage() {
       }));
     }
     const gymCheckins = checkins.filter((c) => c.workout_type !== "cardio").slice(-8);
+    // Hash function to generate variant mock baseline
+    let hash = 0;
+    for (let i = 0; i < selectedExercise.length; i++) {
+        hash = selectedExercise.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const baseWeight = Math.abs(hash % 50) + 15;
     return gymCheckins.map((c, idx) => ({
       date: (c.logged_at || "").slice(5),
-      weight: 20 + idx * 2.5,
+      weight: parseFloat((baseWeight + (idx * 2.5)).toFixed(1)),
     }));
   }, [checkins, exerciseProgressMap, selectedExercise]);
 
@@ -345,20 +351,23 @@ export default function WorkoutsPage() {
             </Badge>
           </div>
         </div>
-          <div className="h-56">
+          <div className="h-[250px] min-h-[250px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={overloadData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+              <LineChart data={overloadData} margin={{ top: 10, right: 10, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(var(--card))",
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "12px",
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
                   }}
+                  itemStyle={{ color: "hsl(var(--foreground))", fontWeight: "bold" }}
+                  labelStyle={{ color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}
                 />
-                <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))" }} activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))" }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
