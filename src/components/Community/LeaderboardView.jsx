@@ -50,13 +50,12 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
         const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2 });
         const blobObj = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         if (blobObj) {
-          const msg = `I'm ranked #${currentUserRanked.rank} on FitWise! Join me and level up 🚀`;
+          const msg = `I just hit Rank #${currentUserRanked.rank} on the Global FitWise Leaderboard! 🚀🔥\n\nCome train with me and level up your stats. Join the squad here:\n👉 https://thefitwise.app`;
           const file = new File([blobObj], "fitwise-rank.png", { type: "image/png" });
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
               title: "FitWise Rank",
               text: msg,
-              url: window.location.origin,
               files: [file]
             });
             return; // Successfully shared file natively!
@@ -279,12 +278,12 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
                 </div>
               </div>
 
-              <Badge className="bg-primary/20 text-primary hover:bg-primary/30 outline-none border-primary/20 mb-2 font-bold tracking-widest text-[10px] uppercase">
-                Global Ranking
+              <Badge className="bg-primary/20 text-primary hover:bg-primary/30 outline-none border-primary/20 mb-3 font-black tracking-widest text-[11px] uppercase shadow-[0_0_10px_rgba(34,197,94,0.3)]">
+                🔥 FITWISE GLOBAL LEADERBOARD 🔥
               </Badge>
 
-              <h2 className="text-xl font-bold font-sans">
-                {currentUserRanked?.id === currentUser.id ? "You are" : currentUserRanked?.name + " is"} officially Rank <span className="text-primary text-3xl font-black">#{currentUserRanked?.rank}</span>
+              <h2 className="text-xl font-bold font-sans mt-1">
+                <span className="text-white">{currentUserRanked?.name}</span> is officially Rank <span className="text-primary text-4xl font-black block mt-2 drop-shadow-[0_0_15px_rgba(34,197,94,0.6)]">#{currentUserRanked?.rank}</span>
               </h2>
               <p className="text-sm text-muted-foreground font-medium mt-2 max-w-[200px] leading-relaxed">
                 Dominating the leaderboards with {currentUserRanked?.xp.toLocaleString()} total XP.

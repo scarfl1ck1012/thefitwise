@@ -223,7 +223,74 @@ export default function WorkoutsPage() {
         ))}
       </div>
 
-      {/* Calories Graph */}
+      {/* Full Year Calendar */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <div className="flex items-center justify-between mb-4 px-2">
+          <div>
+            <h3 className="text-lg font-bold text-foreground">{year} Progress Calendar</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Your daily activity across the entire year.</p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <div className={`w-3 h-3 rounded-full ${intensityClasses[0]}`}></div>
+              <span className="text-[10px] text-muted-foreground font-semibold">None</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <div className={`w-3 h-3 rounded-full ${intensityClasses[1]}`}></div>
+              <span className="text-[10px] text-muted-foreground font-semibold">Meal</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <div className={`w-3 h-3 rounded-full ${intensityClasses[2]}`}></div>
+              <span className="text-[10px] text-muted-foreground font-semibold">Workout</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <div className={`w-3 h-3 rounded-full ${intensityClasses[3]}`}></div>
+              <span className="text-[10px] text-muted-foreground font-semibold">Both</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] bg-card dark:bg-surface-low/80 p-4 lg:p-6 border border-border/30 shadow-card">
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 lg:gap-5">
+            {Array.from({ length: 12 }, (_, month) => {
+              const days = getMonthDays(year, month);
+              return (
+                <div key={month} className="min-w-0">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 text-center">
+                    {MONTH_NAMES_SHORT[month]}
+                  </p>
+                  <div className="grid grid-cols-7 gap-[2px]">
+                    {days.map((day, idx) => {
+                      if (day === null) return <div key={`e-${idx}`} className="w-full aspect-square" />;
+                      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                      const intensity = getDayIntensity(dateStr, mealDates, workoutDates);
+                      const isToday = dateStr === todayStr;
+                      const isFuture = dateStr > todayStr;
+
+                      return (
+                        <div
+                          key={dateStr}
+                          className={`w-full aspect-square rounded-full transition-colors ${
+                            isFuture
+                              ? "bg-transparent border border-border/10"
+                              : intensityClasses[intensity]
+                          } ${isToday ? "ring-[1.5px] ring-primary ring-offset-1 ring-offset-background" : ""}`}
+                          title={`${dateStr}${intensity === 3 ? " — Meal + Workout" : intensity === 2 ? " — Workout" : intensity === 1 ? " — Meal" : ""}`}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </motion.div>
+    {/* Calories Graph */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -365,73 +432,6 @@ export default function WorkoutsPage() {
           </div>
       </motion.div>
 
-      {/* Full Year Calendar */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <div className="flex items-center justify-between mb-4 px-2">
-          <div>
-            <h3 className="text-lg font-bold text-foreground">{year} Progress Calendar</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Your daily activity across the entire year.</p>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="flex items-center gap-1.5">
-              <div className={`w-3 h-3 rounded-full ${intensityClasses[0]}`}></div>
-              <span className="text-[10px] text-muted-foreground font-semibold">None</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <div className={`w-3 h-3 rounded-full ${intensityClasses[1]}`}></div>
-              <span className="text-[10px] text-muted-foreground font-semibold">Meal</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <div className={`w-3 h-3 rounded-full ${intensityClasses[2]}`}></div>
-              <span className="text-[10px] text-muted-foreground font-semibold">Workout</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <div className={`w-3 h-3 rounded-full ${intensityClasses[3]}`}></div>
-              <span className="text-[10px] text-muted-foreground font-semibold">Both</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] bg-card dark:bg-surface-low/80 p-4 lg:p-6 border border-border/30 shadow-card">
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 lg:gap-5">
-            {Array.from({ length: 12 }, (_, month) => {
-              const days = getMonthDays(year, month);
-              return (
-                <div key={month} className="min-w-0">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 text-center">
-                    {MONTH_NAMES_SHORT[month]}
-                  </p>
-                  <div className="grid grid-cols-7 gap-[2px]">
-                    {days.map((day, idx) => {
-                      if (day === null) return <div key={`e-${idx}`} className="w-full aspect-square" />;
-                      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                      const intensity = getDayIntensity(dateStr, mealDates, workoutDates);
-                      const isToday = dateStr === todayStr;
-                      const isFuture = dateStr > todayStr;
-
-                      return (
-                        <div
-                          key={dateStr}
-                          className={`w-full aspect-square rounded-full transition-colors ${
-                            isFuture
-                              ? "bg-transparent border border-border/10"
-                              : intensityClasses[intensity]
-                          } ${isToday ? "ring-[1.5px] ring-primary ring-offset-1 ring-offset-background" : ""}`}
-                          title={`${dateStr}${intensity === 3 ? " — Meal + Workout" : intensity === 2 ? " — Workout" : intensity === 1 ? " — Meal" : ""}`}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </motion.div>
-    </div>
+      </div>
   );
 }
