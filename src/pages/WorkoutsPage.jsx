@@ -136,33 +136,22 @@ export default function WorkoutsPage() {
     } catch {
       // ignore
     }
-    return [...new Set([...fromProgress, ...fromPlan, "Bench Press", "Squat", "Deadlift", "Pull-up", "Overhead Press"])];
+    return [...new Set([...fromProgress, ...fromPlan])];
   }, [exerciseProgressMap]);
 
   const [selectedExercise, setSelectedExercise] = useState(
-    exerciseNames[0] || "Bench Press",
+    exerciseNames[0] || "",
   );
 
   const overloadData = useMemo(() => {
+    if (!selectedExercise) return [];
     const existing = exerciseProgressMap[selectedExercise] || [];
-    if (existing.length) {
-      return existing.slice(-12).map((row) => ({
-        date: (row.date || "").slice(5),
-        weight: Number(row.weight || 0),
-      }));
-    }
-    const gymCheckins = checkins.filter((c) => c.workout_type !== "cardio").slice(-8);
-    // Hash function to generate variant mock baseline
-    let hash = 0;
-    for (let i = 0; i < selectedExercise.length; i++) {
-        hash = selectedExercise.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const baseWeight = Math.abs(hash % 50) + 15;
-    return gymCheckins.map((c, idx) => ({
-      date: (c.logged_at || "").slice(5),
-      weight: parseFloat((baseWeight + (idx * 2.5)).toFixed(1)),
+    if (!existing.length) return [];
+    return existing.slice(-12).map((row) => ({
+      date: (row.date || "").slice(5),
+      weight: Number(row.weight || 0),
     }));
-  }, [checkins, exerciseProgressMap, selectedExercise]);
+  }, [exerciseProgressMap, selectedExercise]);
 
   const overloadTrend = useMemo(() => {
     if (overloadData.length < 2) return "neutral";
@@ -274,7 +263,12 @@ export default function WorkoutsPage() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+              <XAxis 
+                dataKey="label" 
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} 
+                interval={range === "30d" ? 0 : "preserveStartEnd"}
+                minTickGap={15}
+              />
               <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
               <Tooltip
                 contentStyle={{
@@ -352,24 +346,32 @@ export default function WorkoutsPage() {
           </div>
         </div>
           <div className="h-[250px] min-h-[250px] w-full mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={overloadData} margin={{ top: 10, right: 10, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
-                <Tooltip
-                  contentStyle={{
-                    background: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "12px",
-                    boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
-                  }}
-                  itemStyle={{ color: "hsl(var(--foreground))", fontWeight: "bold" }}
-                  labelStyle={{ color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}
-                />
-                <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))" }} activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))" }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {overloadData.length === 0 ? (
+              <div className="w-full h-full flex flex-col items-center justify-center border border-dashed border-border/30 rounded-xl bg-surface-lowest opacity-50 text-center">
+                 <Dumbbell className="w-6 h-6 mb-2 text-muted-foreground" />
+                 <p className="text-sm font-bold text-foreground">No Data Logged Yet</p>
+                 <p className="text-xs text-muted-foreground mt-1 px-4">Complete an active session with this exercise to begin compiling its kinetic curve.</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={overloadData} margin={{ top: 10, right: 10, bottom: 5, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+                    }}
+                    itemStyle={{ color: "hsl(var(--foreground))", fontWeight: "bold" }}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}
+                  />
+                  <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))" }} activeDot={{ r: 6, fill: "hsl(var(--primary))", stroke: "hsl(var(--card))" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
       </motion.div>
 

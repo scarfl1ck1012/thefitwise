@@ -282,7 +282,8 @@ export default function GymCalendarPage() {
             {cardioRoute && cardioRoute.points?.length > 1 && (
               <Dialog>
                 <DialogTrigger asChild>
-                  <div className="mt-3 cursor-pointer hover:bg-background/80 transition-colors p-2 rounded-2xl border border-transparent hover:border-info/30">
+                  <div className="mt-3 cursor-pointer hover:bg-background/80 transition-colors p-2 rounded-2xl border border-transparent hover:border-info/30 relative">
+                    <div className="absolute inset-0 z-10" />
                     <MiniRouteMap points={cardioRoute.points} />
                     <p className="text-center text-xs text-muted-foreground mt-2 font-medium flex items-center justify-center gap-1">
                       <Route className="w-3 h-3" /> Click to map full route

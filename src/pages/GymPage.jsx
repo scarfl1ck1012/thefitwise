@@ -684,18 +684,12 @@ export default function GymPage() {
           ) : (
             <>
               {dayExercises.length === 0 ? (
-                <>
-                  {defaultExercises.map((ex, idx) => (
-                    <ExerciseRow
-                      key={idx}
-                      name={ex.name}
-                      sets={ex.sets}
-                      repRange={ex.repRange}
-                      weight={ex.weight}
-                      type={ex.type}
-                    />
-                  ))}
-                </>
+                <div className="py-8 flex flex-col items-center justify-center text-center opacity-50 border border-dashed border-border/30 rounded-xl bg-surface-lowest">
+                  <p className="font-bold text-foreground">No Exercises Added</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Click below to start building your routine for this day.
+                  </p>
+                </div>
               ) : (
                 dayExercises.map((ex) => (
                   <ExerciseRow
