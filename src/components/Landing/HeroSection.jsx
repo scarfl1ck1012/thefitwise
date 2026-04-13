@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Flame, Droplets, Activity, PieChart, Sparkles } from "lucide-react";
-import { SplineEmbed } from "@/components/ui/SplineEmbed";
 
 export default function HeroSection() {
   const containerRef = useRef(null);
@@ -33,22 +32,10 @@ export default function HeroSection() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
   };
 
-  const heroSpline =
-    "https://prod.spline.design/c2QP5Rc1uemtikt7/scene.splinecode";
-
   return (
     <section ref={containerRef} className="relative pt-36 pb-32 lg:pt-52 lg:pb-40 overflow-hidden perspective-1000">
       {/* Background Deep Space Glow */}
       <motion.div style={{ y: yBg }} className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 blur-[150px] rounded-full pointer-events-none" />
-      <motion.div style={{ y: yBg }} className="absolute inset-x-0 top-20 mx-auto h-[520px] max-w-6xl pointer-events-none opacity-70 hidden md:block">
-        <SplineEmbed
-          url={heroSpline}
-          title="Fitwise hero ambient spline"
-          className="h-full w-full"
-          fallback={<div className="h-full w-full bg-gradient-to-b from-primary/10 via-transparent to-transparent" />}
-          minWidth={1024}
-        />
-      </motion.div>
 
       <div className="relative max-w-7xl mx-auto px-6 z-10 flex flex-col items-center">
         {/* Kinetic Header */}

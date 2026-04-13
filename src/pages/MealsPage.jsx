@@ -12,7 +12,6 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SplineEmbed } from "@/components/ui/SplineEmbed";
 import {
   Dialog,
   DialogContent,
@@ -253,8 +252,6 @@ REFERENCE VALUES (per standard serving):
   ];
   const hasData = macroData.some((d) => d.value > 0);
   const emptyData = [{ name: "Empty", value: 1, color: "hsl(var(--muted))" }];
-  const emptyMealsSpline =
-    "https://prod.spline.design/TWJPqiE0rtBQKCtA/scene.splinecode";
 
   if (isLoading) {
     return (
@@ -568,13 +565,7 @@ REFERENCE VALUES (per standard serving):
               <div className="flex-1 overflow-y-auto pr-2 space-y-3 scrollbar-hide relative">
                   {meals.length === 0 ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center opacity-70">
-                       <SplineEmbed
-                         url={emptyMealsSpline}
-                         title="Empty meal timeline spline"
-                         className="h-28 w-28 mb-4 rounded-2xl"
-                         minWidth={1024}
-                         fallback={<span className="text-[4rem] mb-4 grayscale">🍽️</span>}
-                       />
+                       <span className="text-[4rem] mb-4 grayscale">🍽️</span>
                        <p className="text-xs font-bold uppercase tracking-widest">Clean Slate</p>
                     </div>
                   ) : (
