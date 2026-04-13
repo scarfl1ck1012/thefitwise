@@ -134,9 +134,9 @@ export default function WorkoutsPage() {
         .map((ex) => ex.name)
         .filter(Boolean);
     } catch {
-      fromPlan = [];
+      // ignore
     }
-    return [...new Set([...fromProgress, ...fromPlan])];
+    return [...new Set([...fromProgress, ...fromPlan, "Bench Press", "Squat", "Deadlift", "Pull-up", "Overhead Press"])];
   }, [exerciseProgressMap]);
 
   const [selectedExercise, setSelectedExercise] = useState(

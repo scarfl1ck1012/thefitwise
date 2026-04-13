@@ -242,6 +242,18 @@ export default function GymPage() {
     }));
   };
 
+  const handleUpdateExercise = (instanceId, updates) => {
+    setWeeklyPlan((prev) => {
+      const dayPlan = prev[selectedDay] || [];
+      return {
+        ...prev,
+        [selectedDay]: dayPlan.map((ex) =>
+          ex.instanceId === instanceId ? { ...ex, ...updates } : ex
+        ),
+      };
+    });
+  };
+
   const dayExercises = weeklyPlan[selectedDay] || [];
 
   const filteredExercises = useMemo(() => {
@@ -286,9 +298,13 @@ export default function GymPage() {
     const todayPlan = weeklyPlan[todayKey] || [];
     const progressStore = JSON.parse(localStorage.getItem("fitwise_exercise_progress") || "{}");
     todayPlan.forEach((ex, idx) => {
-      const baseline =
-        ex.muscle === "Legs" ? 40 : ex.muscle === "Back" ? 35 : ex.muscle === "Chest" ? 30 : 20;
-      const prev = progressStore[ex.name]?.[progressStore[ex.name].length - 1]?.weight || baseline;
+      let baselineWeight = 20;
+      if (ex.weight && !isNaN(parseFloat(ex.weight))) {
+        baselineWeight = parseFloat(ex.weight);
+      } else {
+        baselineWeight = ex.muscle === "Legs" ? 40 : ex.muscle === "Back" ? 35 : ex.muscle === "Chest" ? 30 : 20;
+      }
+      const prev = progressStore[ex.name]?.[progressStore[ex.name].length - 1]?.weight || baselineWeight;
       const nextWeight = Number((prev + (idx % 2 === 0 ? 1.25 : 0.5)).toFixed(2));
       if (!progressStore[ex.name]) progressStore[ex.name] = [];
       progressStore[ex.name].push({ date: today, weight: nextWeight });
@@ -685,11 +701,12 @@ export default function GymPage() {
                   <ExerciseRow
                     key={ex.instanceId}
                     name={ex.name}
-                    sets={String(ex.sets || "3")}
-                    repRange={String(ex.reps || "10-12")}
-                    weight={mode === "home" ? "BW" : "-"}
+                    sets={ex.sets || "3"}
+                    repRange={ex.repRange || ex.reps || "10-12"}
+                    weight={ex.weight || ""}
                     type={ex.muscle}
                     onRemove={() => handleRemoveExercise(ex.instanceId)}
+                    onUpdate={(updates) => handleUpdateExercise(ex.instanceId, updates)}
                   />
                 ))
               )}
@@ -802,7 +819,7 @@ export default function GymPage() {
 // ──────────────────────────────────────────────
 // STYLED EXERCISE ROW
 // ──────────────────────────────────────────────
-function ExerciseRow({ name, sets, repRange, weight, type, onRemove }) {
+function ExerciseRow({ name, sets, repRange, weight, type, onRemove, onUpdate }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-low dark:bg-surface hover:bg-surface-high dark:hover:bg-surface-high transition-colors border border-border/30 dark:border-transparent group">
       <div className="flex items-center gap-4 mb-3 sm:mb-0">
@@ -825,25 +842,41 @@ function ExerciseRow({ name, sets, repRange, weight, type, onRemove }) {
       </div>
 
       <div className="flex items-center gap-2 pl-8 sm:pl-0">
-        <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
-          <span className="text-xs font-bold text-foreground dark:text-white">
-            {sets}{" "}
-            <span className="text-foreground/50 dark:text-white/50 font-medium">Sets</span>
-          </span>
+        <div className="px-2 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center min-w-[70px]">
+          <input 
+            type="number" 
+            value={sets} 
+            onChange={(e) => onUpdate?.({ sets: e.target.value })} 
+            className="w-8 bg-transparent outline-none text-xs font-bold text-foreground dark:text-white text-right font-sans" 
+            readOnly={!onUpdate}
+          />
+          <span className="text-foreground/50 dark:text-white/50 font-medium text-xs ml-1">Sets</span>
         </div>
-        <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
-          <span className="text-xs font-bold text-foreground dark:text-white">
-            {repRange}{" "}
-            <span className="text-foreground/50 dark:text-white/50 font-medium">Reps</span>
-          </span>
+        <div className="px-2 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center min-w-[80px]">
+          <input 
+            type="text" 
+            value={repRange} 
+            onChange={(e) => onUpdate?.({ repRange: e.target.value })} 
+            className="w-10 bg-transparent outline-none text-xs font-bold text-foreground dark:text-white text-right font-sans" 
+            readOnly={!onUpdate}
+          />
+          <span className="text-foreground/50 dark:text-white/50 font-medium text-xs ml-1">Reps</span>
         </div>
-        <div className="px-3 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center">
-          <span className="text-xs font-bold text-primary">{weight}</span>
+        <div className="px-2 py-1.5 rounded-lg border border-border/30 bg-surface-lowest flex items-center justify-center min-w-[60px]">
+          <input 
+            type="text" 
+            value={weight} 
+            placeholder="-"
+            onChange={(e) => onUpdate?.({ weight: e.target.value })} 
+            className="w-8 bg-transparent outline-none text-xs font-bold text-primary text-right uppercase" 
+            readOnly={!onUpdate}
+          />
+          <span className="text-foreground/50 dark:text-white/50 font-medium text-[10px] ml-1">KG</span>
         </div>
         {onRemove && (
           <button
             onClick={onRemove}
-            className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+            className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 text-muted-foreground hover:text-destructive shrink-0"
           >
             <X className="h-3.5 w-3.5" />
           </button>

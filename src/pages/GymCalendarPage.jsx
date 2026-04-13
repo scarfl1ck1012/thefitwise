@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { MiniRouteMap } from "@/pages/GymPage";
 import { toast } from "sonner";
 
@@ -111,7 +111,7 @@ export default function GymCalendarPage() {
 
   const handleDeletePhoto = async () => {
     if (!previewPhoto || !user?.id) return;
-    const fileName = previewPhoto.split("/").pop();
+    const fileName = decodeURIComponent(previewPhoto.split("/").pop().split("?")[0]);
     const path = `workout-progress/${user.id}/${selectedDate}/${fileName}`;
     
     // Removing the file from Supabase storage
@@ -280,9 +280,21 @@ export default function GymCalendarPage() {
               </div>
             </div>
             {cardioRoute && cardioRoute.points?.length > 1 && (
-              <div className="mt-3">
-                <MiniRouteMap points={cardioRoute.points} />
-              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="mt-3 cursor-pointer hover:bg-background/80 transition-colors p-2 rounded-2xl border border-transparent hover:border-info/30">
+                    <MiniRouteMap points={cardioRoute.points} />
+                    <p className="text-center text-xs text-muted-foreground mt-2 font-medium flex items-center justify-center gap-1">
+                      <Route className="w-3 h-3" /> Click to map full route
+                    </p>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-[90vw] lg:max-w-4xl bg-card border-none rounded-3xl overflow-hidden p-0 h-[80vh]">
+                  <div className="h-full w-full bg-surface-lowest">
+                     <MiniRouteMap points={cardioRoute.points} />
+                  </div>
+                </DialogContent>
+              </Dialog>
             )}
           </div>
         )}

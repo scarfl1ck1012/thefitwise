@@ -6,11 +6,14 @@ import { Crown, Medal, Share2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import html2canvas from "html2canvas";
+import { useRef } from "react";
 
 export default function LeaderboardView({ users, friendships, currentUser }) {
   const [friendsOnly, setFriendsOnly] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const cardRef = useRef(null);
 
   const rankedUsers = useMemo(() => {
     let pool = users;
@@ -42,12 +45,30 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
 
   const copyShareText = async () => {
     if (!currentUserRanked) return;
-    const text = `I'm ranked #${currentUserRanked.rank} on FitWise with ${currentUserRanked.xp.toLocaleString()} XP. Join me and level up!`;
     try {
+      if (cardRef.current) {
+        const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2 });
+        const blobObj = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (blobObj) {
+          const msg = `I'm ranked #${currentUserRanked.rank} on FitWise! Join me and level up 🚀`;
+          const file = new File([blobObj], "fitwise-rank.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "FitWise Rank",
+              text: msg,
+              url: window.location.origin,
+              files: [file]
+            });
+            return; // Successfully shared file natively!
+          }
+        }
+      }
+      
+      const text = `I'm ranked #${currentUserRanked.rank} on FitWise with ${currentUserRanked.xp.toLocaleString()} XP. Join me and level up!`;
       if (navigator.share) {
-        await navigator.share({ text });
+        await navigator.share({ text, url: window.location.origin });
       } else {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(text + " " + window.location.origin);
       }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -243,8 +264,8 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
 
       {/* ─── SHARE MODAL ─── */}
       <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-        <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none text-white overflow-visible">
-          <div className="relative mx-auto w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-[#1c1b1b] to-[#131313] border border-white/10 p-8 shadow-[0_20px_40px_rgba(0,0,0,0.5)] overflow-hidden">
+        <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none text-white overflow-visible px-4 lg:px-0">
+          <div ref={cardRef} className="relative mx-auto w-full max-w-sm rounded-[2rem] bg-gradient-to-b from-[#1c1b1b] to-[#131313] border border-white/10 p-8 shadow-[0_20px_40px_rgba(0,0,0,0.5)] overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-[60px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none transform -translate-x-1/3 translate-y-1/3" />
             
