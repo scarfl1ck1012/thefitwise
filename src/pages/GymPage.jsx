@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useUserStats } from "@/hooks/useUserStats";
 import {
@@ -206,6 +206,19 @@ export default function GymPage() {
   const [historyLimit, setHistoryLimit] = useState(14);
   const timerRef = useRef(null);
   const gpsRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (gpsRef.current !== null) {
+        navigator.geolocation.clearWatch(gpsRef.current);
+        gpsRef.current = null;
+      }
+    };
+  }, []);
 
   const toggleRestDay = (day) => {
     setRestDays((prev) => ({ ...prev, [day]: !prev[day] }));

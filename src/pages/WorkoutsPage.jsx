@@ -9,6 +9,13 @@ import { motion } from "framer-motion";
 import { Percent, Dumbbell, Droplets, Flame, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AreaChart,
   Area,
   XAxis,
@@ -290,11 +297,27 @@ export default function WorkoutsPage() {
               Exercise Weight Progression
             </h3>
           </div>
-          <div className="flex gap-2 overflow-x-auto">
-            {exerciseNames.slice(0, 8).map((name) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="min-w-[220px]">
+              <Select value={selectedExercise} onValueChange={setSelectedExercise}>
+                <SelectTrigger className="h-9 bg-surface border-border/40">
+                  <SelectValue placeholder="Select exercise" />
+                </SelectTrigger>
+                <SelectContent>
+                  {exerciseNames.map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {exerciseNames.slice(0, 6).map((name) => (
               <button
                 key={name}
                 onClick={() => setSelectedExercise(name)}
+                onMouseEnter={() => setSelectedExercise(name)}
+                title={`View ${name} progression`}
                 className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
                   selectedExercise === name
                     ? "bg-primary/10 border-primary/30 text-primary"
