@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function SplineEmbed({
-  src,
+  url,
   title = "Spline scene",
   className,
   fallback = null,
@@ -27,6 +27,20 @@ export function SplineEmbed({
   }, [minWidth]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const existing = document.querySelector(
+      'script[data-spline-viewer="true"]',
+    );
+    if (existing) return;
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src =
+      "https://unpkg.com/@splinetool/viewer@1.12.81/build/spline-viewer.js";
+    script.dataset.splineViewer = "true";
+    document.head.appendChild(script);
+  }, []);
+
+  useEffect(() => {
     if (!canRender || !containerRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -44,12 +58,11 @@ export function SplineEmbed({
   return (
     <div ref={containerRef} className={cn("relative overflow-hidden", className)}>
       {canRender && inView ? (
-        <iframe
-          src={src}
-          title={title}
-          loading="lazy"
-          className="h-full w-full border-0"
-          allow="autoplay; fullscreen"
+        <spline-viewer
+          url={url}
+          loading-anim-type="none"
+          style={{ width: "100%", height: "100%" }}
+          aria-label={title}
         />
       ) : (
         fallback

@@ -34,7 +34,7 @@ export default function HeroSection() {
   };
 
   const heroSpline =
-    "https://community.spline.design/file/3e7deb37-d9b5-4b1b-ba96-602f48048c0d";
+    "https://prod.spline.design/c2QP5Rc1uemtikt7/scene.splinecode";
 
   return (
     <section ref={containerRef} className="relative pt-36 pb-32 lg:pt-52 lg:pb-40 overflow-hidden perspective-1000">
@@ -42,7 +42,7 @@ export default function HeroSection() {
       <motion.div style={{ y: yBg }} className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 blur-[150px] rounded-full pointer-events-none" />
       <motion.div style={{ y: yBg }} className="absolute inset-x-0 top-20 mx-auto h-[520px] max-w-6xl pointer-events-none opacity-70 hidden md:block">
         <SplineEmbed
-          src={heroSpline}
+          url={heroSpline}
           title="Fitwise hero ambient spline"
           className="h-full w-full"
           fallback={<div className="h-full w-full bg-gradient-to-b from-primary/10 via-transparent to-transparent" />}

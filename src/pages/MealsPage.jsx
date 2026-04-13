@@ -254,7 +254,7 @@ REFERENCE VALUES (per standard serving):
   const hasData = macroData.some((d) => d.value > 0);
   const emptyData = [{ name: "Empty", value: 1, color: "hsl(var(--muted))" }];
   const emptyMealsSpline =
-    "https://community.spline.design/file/a1f156f7-ef01-42d1-bf7b-5be1b7967b0a";
+    "https://prod.spline.design/TWJPqiE0rtBQKCtA/scene.splinecode";
 
   if (isLoading) {
     return (
@@ -569,7 +569,7 @@ REFERENCE VALUES (per standard serving):
                   {meals.length === 0 ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center opacity-70">
                        <SplineEmbed
-                         src={emptyMealsSpline}
+                         url={emptyMealsSpline}
                          title="Empty meal timeline spline"
                          className="h-28 w-28 mb-4 rounded-2xl"
                          minWidth={1024}
