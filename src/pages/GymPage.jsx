@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 
 const emptyWeek = () => ({
   monday: [],
@@ -435,6 +436,11 @@ export default function GymPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <Link to="/gym/calendar">
+            <Button variant="outline" className="rounded-full h-12 px-5 text-xs font-bold">
+              Workout Calendar Log
+            </Button>
+          </Link>
           {mode !== "cardio" && (
             <Button
               onClick={handleStartSession}
@@ -729,92 +735,6 @@ export default function GymPage() {
         </div>
       </motion.div>
       )}
-
-      {/* Workout Calendar Log */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
-        className="rounded-[2rem] bg-card dark:bg-surface-low/80 p-6 lg:p-8 border border-border/30 shadow-card"
-      >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-bold text-foreground">Workout Calendar Log</h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              Browse past sessions by date and time blocks.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant={historyFilter === "all" ? "default" : "outline"}
-              onClick={() => setHistoryFilter("all")}
-            >
-              All
-            </Button>
-            <Button
-              size="sm"
-              variant={historyFilter === "cardio" ? "default" : "outline"}
-              onClick={() => setHistoryFilter("cardio")}
-            >
-              Cardio
-            </Button>
-            <Button
-              size="sm"
-              variant={historyFilter === "gym" ? "default" : "outline"}
-              onClick={() => setHistoryFilter("gym")}
-            >
-              Gym
-            </Button>
-          </div>
-        </div>
-
-        <div className="max-h-[360px] overflow-y-auto pr-2 space-y-4">
-          {groupedHistory.length === 0 ? (
-            <div className="py-10 text-center">
-              <p className="text-sm font-semibold text-foreground">No entries for this day</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Add workouts or cardio logs to populate history.
-              </p>
-            </div>
-          ) : (
-            groupedHistory.map(([date, entries]) => (
-              <div key={date} className="rounded-xl border border-border/30 bg-surface-low p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-bold text-foreground">
-                    {new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      day: "2-digit",
-                      month: "long",
-                    })}
-                  </p>
-                  <Badge variant="outline">{entries.length} entries</Badge>
-                </div>
-                <div className="space-y-2">
-                  {entries.map((entry) => (
-                    <div key={entry.id} className="rounded-lg border border-border/30 bg-surface p-3">
-                      <p className="text-xs text-muted-foreground">{entry.time}</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">
-                        {entry.workout_type === "cardio"
-                          ? "Cardio Session"
-                          : entry.workout_type === "home"
-                            ? "Home Workout"
-                            : `Gym (${entry.focus || "General"})`}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">{entry.notes}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-        <div className="pt-4">
-          <Button variant="outline" onClick={() => setHistoryLimit((p) => p + 14)}>
-            Load older logs
-          </Button>
-        </div>
-      </motion.div>
 
       {/* Modals */}
       <Dialog open={builderOpen} onOpenChange={setBuilderOpen}>
