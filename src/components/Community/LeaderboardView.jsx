@@ -47,7 +47,7 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
     if (!currentUserRanked) return;
     try {
       if (cardRef.current) {
-        const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2 });
+        const canvas = await html2canvas(cardRef.current, { backgroundColor: null, scale: 2, useCORS: true, allowTaint: true });
         const blobObj = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
         if (blobObj) {
           const msg = `I just hit Rank #${currentUserRanked.rank} on the Global FitWise Leaderboard! 🚀🔥\n\nCome train with me and level up your stats. Join the squad here:\n👉 https://thefitwise.app`;
@@ -274,7 +274,7 @@ export default function LeaderboardView({ users, friendships, currentUser }) {
                   <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-8 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)] z-20" />
                 )}
                 <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-primary to-primary/30 mb-4 inline-block">
-                  <img src={currentUserRanked?.avatar} alt={currentUserRanked?.name} className="w-full h-full rounded-full object-cover border-2 border-[#131313]" />
+                  <img src={currentUserRanked?.avatar} alt={currentUserRanked?.name} crossOrigin="anonymous" className="w-full h-full rounded-full object-cover border-2 border-[#131313]" />
                 </div>
               </div>
 

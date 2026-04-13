@@ -150,12 +150,40 @@ export default function WorkoutsPage() {
 
   const overloadData = useMemo(() => {
     if (!selectedExercise) return [];
+    
+    let baselineWeight = null;
+    try {
+      const plan = JSON.parse(localStorage.getItem("fitwise_weekly_plan_gym") || "{}");
+      for (const day of Object.values(plan)) {
+         for (const ex of day) {
+            if (ex.name === selectedExercise && ex.weight) {
+               baselineWeight = Number(ex.weight.toString().replace(/[^0-9.]/g, ""));
+               break;
+            }
+         }
+         if (baselineWeight !== null) break;
+      }
+    } catch {}
+
     const existing = exerciseProgressMap[selectedExercise] || [];
-    if (!existing.length) return [];
-    return existing.slice(-12).map((row) => ({
+    
+    if (!existing.length) {
+       if (baselineWeight) {
+          return [{ date: "Current Baseline", weight: baselineWeight }];
+       }
+       return [];
+    }
+
+    const data = existing.slice(-12).map((row) => ({
       date: (row.date || "").slice(5),
       weight: Number(row.weight || 0),
     }));
+
+    if (baselineWeight && data.length < 2) {
+       data.unshift({ date: "Start", weight: baselineWeight });
+    }
+
+    return data;
   }, [exerciseProgressMap, selectedExercise]);
 
   const overloadTrend = useMemo(() => {
